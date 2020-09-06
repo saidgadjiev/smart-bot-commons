@@ -7,7 +7,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 
-@Repository("inMemory")
+@Repository
+@Qualifier("inMemory")
 public class InMemoryCommandState implements CommandStateDao {
 
     private Map<Long, Object> states = new ConcurrentHashMap<>();

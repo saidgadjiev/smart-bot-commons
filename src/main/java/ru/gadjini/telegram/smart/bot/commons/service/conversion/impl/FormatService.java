@@ -9,6 +9,20 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MimeTypeUtils;
 @Service
 public class FormatService {
 
+    public Format getAssociatedFormat(String format) {
+        if ("jpeg".equals(format)) {
+            return Format.JPG;
+        }
+        format = format.toUpperCase();
+        for (Format f : Format.values()) {
+            if (f.name().equals(format)) {
+                return f;
+            }
+        }
+
+        return null;
+    }
+
     public String getExt(String fileName, String mimeType) {
         String extension = MimeTypeUtils.getExtension(mimeType);
 

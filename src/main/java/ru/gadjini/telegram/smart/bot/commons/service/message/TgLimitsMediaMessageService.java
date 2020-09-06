@@ -21,7 +21,8 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 import java.io.File;
 import java.util.Arrays;
 
-@Component("mediaLimits")
+@Component
+@Qualifier("mediaLimits")
 public class TgLimitsMediaMessageService implements MediaMessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TgLimitsMediaMessageService.class);

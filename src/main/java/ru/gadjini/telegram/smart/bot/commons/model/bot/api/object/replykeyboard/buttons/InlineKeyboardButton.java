@@ -2,7 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import java.util.Objects;
 
 public class InlineKeyboardButton {
 
@@ -22,7 +22,7 @@ public class InlineKeyboardButton {
     }
 
     public InlineKeyboardButton(String text) {
-        this.text = checkNotNull(text);
+        this.text = Objects.requireNonNull(text);
     }
 
     public String getText() {

@@ -4,8 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.Objects;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 public class DeleteMessage {
     public static final String METHOD = "deletemessage";
 
@@ -22,13 +20,13 @@ public class DeleteMessage {
     }
 
     public DeleteMessage(String chatId, Integer messageId) {
-        this.chatId = checkNotNull(chatId);
-        this.messageId = checkNotNull(messageId);
+        this.chatId = Objects.requireNonNull(chatId);
+        this.messageId = Objects.requireNonNull(messageId);
     }
 
     public DeleteMessage(Long chatId, Integer messageId) {
-        this.chatId = checkNotNull(chatId).toString();
-        this.messageId = checkNotNull(messageId);
+        this.chatId = Objects.requireNonNull(chatId).toString();
+        this.messageId = Objects.requireNonNull(messageId);
     }
 
     public String getChatId() {

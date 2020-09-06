@@ -7,6 +7,20 @@ public class MessagesProperties {
 
     public static final String MESSAGE_ERROR = "message.error";
 
+    public static final String MESSAGE_CHOOSE_LANGUAGE = "message.choose.language";
+
+    public static final String LANGUAGE_COMMAND_NAME = "language.command.name";
+
+    public static final String GO_BACK_COMMAND_NAME = "go.back.command.name";
+
+    public static final String CANCEL_COMMAND_DESCRIPTION = "cancel.command.description";
+
+    public static final String MESSAGE_HELP = "message.help";
+
+    public static final String HELP_COMMAND_NAME = "help.command.name";
+
+    public static final String MESSAGE_LANGUAGE_SELECTED = "message.language.selected";
+
     public static final String MESSAGE_WELCOME = "message.welcome";
 
     public static final String MESSAGE_EMPTY_FILE_NAME = "message.empty.file.name";

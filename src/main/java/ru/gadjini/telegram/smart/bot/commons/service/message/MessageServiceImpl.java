@@ -26,7 +26,8 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-@Service("message")
+@Service
+@Qualifier("message")
 public class MessageServiceImpl implements MessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageServiceImpl.class);

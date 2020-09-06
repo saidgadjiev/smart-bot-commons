@@ -10,7 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.navigator.keyboard.CommandNavigatorDao;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboardMarkup;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 
 import java.util.Collection;
@@ -135,12 +135,12 @@ public class CommandNavigator {
 
     public class SilentPop {
 
-        private ReplyKeyboardMarkup replyKeyboardMarkup;
+        private ReplyKeyboard replyKeyboardMarkup;
 
         private String message;
 
-        public SilentPop(ReplyKeyboardMarkup replyKeyboardMarkup, String message) {
-            this.replyKeyboardMarkup = replyKeyboardMarkup;
+        public SilentPop(ReplyKeyboard replyKeyboard, String message) {
+            this.replyKeyboardMarkup = replyKeyboard;
             this.message = message;
         }
 
@@ -148,7 +148,7 @@ public class CommandNavigator {
             return message;
         }
 
-        public ReplyKeyboardMarkup getReplyKeyboardMarkup() {
+        public ReplyKeyboard getReplyKeyboardMarkup() {
             return replyKeyboardMarkup;
         }
     }

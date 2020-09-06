@@ -17,7 +17,8 @@ import ru.gadjini.telegram.smart.bot.commons.job.TgMethodExecutor;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-@Service("asyncMessage")
+@Service
+@Qualifier("asyncMessage")
 public class AsyncMessageService implements MessageService {
 
     private LocalisationService localisationService;

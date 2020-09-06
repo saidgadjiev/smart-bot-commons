@@ -16,7 +16,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-@Service("messageLimits")
+@Service
+@Qualifier("messageLimits")
 public class TgLimitsMessageService implements MessageService {
 
     public static final int TEXT_LENGTH_LIMIT = 4000;

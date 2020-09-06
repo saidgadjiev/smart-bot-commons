@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Locale;
 
@@ -22,11 +21,19 @@ public class LocalisationService {
         this.messageSource = messageSource;
     }
 
-    public String getMessage(String messageCode, @Nonnull Locale locale) {
+    public String getMessage(String messageCode, Locale locale) {
         return getMessage(messageCode, null, locale);
     }
 
-    public String getMessage(String messageCode, Object[] args, @Nonnull Locale locale) {
+    public String getMessage(String messageCode, Locale locale, String defaultMsg) {
+        try {
+            return getMessage(messageCode, null, locale);
+        } catch (Exception e) {
+            return defaultMsg;
+        }
+    }
+
+    public String getMessage(String messageCode, Object[] args, Locale locale) {
         return messageSource.getMessage(messageCode, args, locale);
     }
 

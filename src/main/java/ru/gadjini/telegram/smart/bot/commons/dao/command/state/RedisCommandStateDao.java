@@ -10,7 +10,8 @@ import org.springframework.stereotype.Repository;
 
 import java.util.concurrent.TimeUnit;
 
-@Repository("redis")
+@Repository
+@Qualifier("redis")
 public class RedisCommandStateDao implements CommandStateDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisCommandStateDao.class);

@@ -14,7 +14,8 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
 import ru.gadjini.telegram.smart.bot.commons.service.FileService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
 
-@Service("media")
+@Service
+@Qualifier("media")
 public class MediaMessageServiceImpl implements MediaMessageService {
 
     private FileService fileService;

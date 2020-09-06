@@ -1,12 +1,14 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboardMarkup;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Repository("inMemory")
+@Repository
+@Qualifier("inMemory")
 public class InMemoryReplyKeyboardDao implements ReplyKeyboardDao {
 
     private Map<Long, ReplyKeyboardMarkup> cache = new ConcurrentHashMap<>();
