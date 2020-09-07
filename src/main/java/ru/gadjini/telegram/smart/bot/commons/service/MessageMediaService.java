@@ -3,26 +3,26 @@ package ru.gadjini.telegram.smart.bot.commons.service;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.model.Any2AnyFile;
+import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.PhotoSize;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Sticker;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.conversion.api.Format;
-import ru.gadjini.telegram.smart.bot.commons.service.conversion.impl.FormatService;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
+import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
 
 import java.util.Comparator;
 import java.util.Locale;
 
 @Service
-public class FileService {
+public class MessageMediaService {
 
     private LocalisationService localisationService;
 
     private FormatService formatService;
 
     @Autowired
-    public FileService(LocalisationService localisationService, FormatService formatService) {
+    public MessageMediaService(LocalisationService localisationService, FormatService formatService) {
         this.localisationService = localisationService;
         this.formatService = formatService;
     }
@@ -47,27 +47,27 @@ public class FileService {
         return null;
     }
 
-    public Any2AnyFile getFile(Message message, Locale locale) {
-        Any2AnyFile any2AnyFile = new Any2AnyFile();
+    public MessageMedia getMedia(Message message, Locale locale) {
+        MessageMedia messageMedia = new MessageMedia();
 
         if (message.hasDocument()) {
-            any2AnyFile.setFileName(message.getDocument().getFileName());
-            any2AnyFile.setFileId(message.getDocument().getFileId());
-            any2AnyFile.setMimeType(message.getDocument().getMimeType());
-            any2AnyFile.setFileSize(message.getDocument().getFileSize());
-            any2AnyFile.setThumb(message.getDocument().hasThumb() ? message.getDocument().getThumb().getFileId() : null);
-            any2AnyFile.setFormat(formatService.getFormat(any2AnyFile.getFileName(), any2AnyFile.getMimeType()));
+            messageMedia.setFileName(message.getDocument().getFileName());
+            messageMedia.setFileId(message.getDocument().getFileId());
+            messageMedia.setMimeType(message.getDocument().getMimeType());
+            messageMedia.setFileSize(message.getDocument().getFileSize());
+            messageMedia.setThumb(message.getDocument().hasThumb() ? message.getDocument().getThumb().getFileId() : null);
+            messageMedia.setFormat(formatService.getFormat(messageMedia.getFileName(), messageMedia.getMimeType()));
 
-            return any2AnyFile;
+            return messageMedia;
         } else if (message.hasPhoto()) {
-            any2AnyFile.setFileName(localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".jpg");
+            messageMedia.setFileName(localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".jpg");
             PhotoSize photoSize = message.getPhoto().stream().max(Comparator.comparing(PhotoSize::getWidth)).orElseThrow();
-            any2AnyFile.setFileId(photoSize.getFileId());
-            any2AnyFile.setMimeType("image/jpeg");
-            any2AnyFile.setFileSize(photoSize.getFileSize());
-            any2AnyFile.setFormat(Format.JPG);
+            messageMedia.setFileId(photoSize.getFileId());
+            messageMedia.setMimeType("image/jpeg");
+            messageMedia.setFileSize(photoSize.getFileSize());
+            messageMedia.setFormat(Format.JPG);
 
-            return any2AnyFile;
+            return messageMedia;
         } else if (message.hasVideo()) {
             String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
             Format format = formatService.getFormat(message.getVideo().getFileName(), message.getVideo().getMimeType());
@@ -76,15 +76,15 @@ public class FileService {
             } else {
                 fileName += "mp4";
             }
-            any2AnyFile.setFileName(fileName);
-            any2AnyFile.setFileId(message.getVideo().getFileId());
-            any2AnyFile.setFileSize(message.getVideo().getFileSize());
-            any2AnyFile.setFileName(message.getVideo().getFileName());
-            any2AnyFile.setThumb(message.getVideo().hasThumb() ? message.getVideo().getThumb().getFileId() : null);
-            any2AnyFile.setMimeType(message.getVideo().getMimeType());
-            any2AnyFile.setFormat(format);
+            messageMedia.setFileName(fileName);
+            messageMedia.setFileId(message.getVideo().getFileId());
+            messageMedia.setFileSize(message.getVideo().getFileSize());
+            messageMedia.setFileName(message.getVideo().getFileName());
+            messageMedia.setThumb(message.getVideo().hasThumb() ? message.getVideo().getThumb().getFileId() : null);
+            messageMedia.setMimeType(message.getVideo().getMimeType());
+            messageMedia.setFormat(format);
 
-            return any2AnyFile;
+            return messageMedia;
         } else if (message.hasAudio()) {
             String fileName = message.getAudio().getFileName();
             Format format = formatService.getFormat(message.getAudio().getFileName(), message.getAudio().getMimeType());
@@ -93,26 +93,26 @@ public class FileService {
                 fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
                 fileName += format.getExt();
             }
-            any2AnyFile.setFileName(fileName);
-            any2AnyFile.setFileId(message.getAudio().getFileId());
-            any2AnyFile.setMimeType(message.getAudio().getMimeType());
-            any2AnyFile.setFileSize(message.getAudio().getFileSize());
-            any2AnyFile.setFileName(message.getAudio().getFileName());
-            any2AnyFile.setThumb(message.getAudio().hasThumb() ? message.getAudio().getThumb().getFileId() : null);
-            any2AnyFile.setFormat(format);
+            messageMedia.setFileName(fileName);
+            messageMedia.setFileId(message.getAudio().getFileId());
+            messageMedia.setMimeType(message.getAudio().getMimeType());
+            messageMedia.setFileSize(message.getAudio().getFileSize());
+            messageMedia.setFileName(message.getAudio().getFileName());
+            messageMedia.setThumb(message.getAudio().hasThumb() ? message.getAudio().getThumb().getFileId() : null);
+            messageMedia.setFormat(format);
 
-            return any2AnyFile;
+            return messageMedia;
         } else if (message.hasSticker()) {
             Sticker sticker = message.getSticker();
-            any2AnyFile.setFileId(sticker.getFileId());
+            messageMedia.setFileId(sticker.getFileId());
             String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
             fileName += sticker.getAnimated() ? "tgs" : "webp";
-            any2AnyFile.setFileName(fileName);
-            any2AnyFile.setMimeType(sticker.getAnimated() ? null : "image/webp");
-            any2AnyFile.setFileSize(message.getSticker().getFileSize());
-            any2AnyFile.setFormat(sticker.getAnimated() ? Format.TGS : Format.WEBP);
+            messageMedia.setFileName(fileName);
+            messageMedia.setMimeType(sticker.getAnimated() ? null : "image/webp");
+            messageMedia.setFileSize(message.getSticker().getFileSize());
+            messageMedia.setFormat(sticker.getAnimated() ? Format.TGS : Format.WEBP);
 
-            return any2AnyFile;
+            return messageMedia;
         }
 
         return null;

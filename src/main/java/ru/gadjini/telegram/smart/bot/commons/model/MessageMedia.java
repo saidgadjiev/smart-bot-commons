@@ -1,9 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.model;
 
-import ru.gadjini.telegram.smart.bot.commons.service.conversion.api.Format;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
-public class Any2AnyFile {
+public class MessageMedia {
 
     private String fileId;
 
@@ -77,7 +77,7 @@ public class Any2AnyFile {
 
     @Override
     public String toString() {
-        return "Any2AnyFile{" +
+        return "MessageMedia{" +
                 "fileId='" + fileId + '\'' +
                 ", fileName='" + fileName + '\'' +
                 ", mimeType='" + mimeType + '\'' +

@@ -11,21 +11,21 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
-import ru.gadjini.telegram.smart.bot.commons.service.FileService;
+import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
 
 @Service
 @Qualifier("media")
 public class MediaMessageServiceImpl implements MediaMessageService {
 
-    private FileService fileService;
+    private MessageMediaService fileService;
 
     private TelegramMTProtoService telegramService;
 
     private TelegramMediaServiceProvider mediaServiceProvider;
 
     @Autowired
-    public MediaMessageServiceImpl(FileService fileService,
+    public MediaMessageServiceImpl(MessageMediaService fileService,
                                    TelegramMTProtoService telegramService, TelegramMediaServiceProvider mediaServiceProvider) {
         this.fileService = fileService;
         this.telegramService = telegramService;

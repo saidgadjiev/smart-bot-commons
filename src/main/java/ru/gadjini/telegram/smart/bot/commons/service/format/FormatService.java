@@ -1,10 +1,13 @@
-package ru.gadjini.telegram.smart.bot.commons.service.conversion.impl;
+package ru.gadjini.telegram.smart.bot.commons.service.format;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.service.conversion.api.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.MimeTypeUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.UrlUtils;
+
+import static ru.gadjini.telegram.smart.bot.commons.service.format.Format.TEXT;
+import static ru.gadjini.telegram.smart.bot.commons.service.format.Format.URL;
 
 @Service
 public class FormatService {
@@ -55,5 +58,13 @@ public class FormatService {
         }
 
         return null;
+    }
+
+    public Format getFormat(String text) {
+        if (UrlUtils.isUrl(text)) {
+            return URL;
+        }
+
+        return TEXT;
     }
 }

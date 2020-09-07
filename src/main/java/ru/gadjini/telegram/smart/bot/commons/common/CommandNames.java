@@ -8,11 +8,13 @@ public class CommandNames {
 
     public static final String HELP_COMMAND = "help";
 
-    public static final String CALLBACK_DELEGATE_COMMAND_NAME = "n";
+    public static final String CALLBACK_DELEGATE_COMMAND_NAME = "cdcn";
 
-    public static final String CANCEL_COMMAND_NAME = "o";
+    public static final String CANCEL_COMMAND_NAME = "cncl";
 
     public static final String LANGUAGE_COMMAND_NAME = "language";
+
+    public static final String GO_BACK_CALLBACK_COMMAND_NAME = "gbcc";
 
     public static final String GO_BACK = "goback";
 

@@ -1,4 +1,4 @@
-package ru.gadjini.telegram.smart.bot.commons.service.conversion.api;
+package ru.gadjini.telegram.smart.bot.commons.service.format;
 
 public enum FormatCategory {
 

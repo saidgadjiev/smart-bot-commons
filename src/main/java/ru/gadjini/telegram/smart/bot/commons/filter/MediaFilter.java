@@ -6,10 +6,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
-import ru.gadjini.telegram.smart.bot.commons.model.Any2AnyFile;
+import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.service.FileService;
+import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
@@ -28,12 +28,12 @@ public class MediaFilter extends BaseBotFilter {
 
     private LocalisationService localisationService;
 
-    private FileService fileService;
+    private MessageMediaService fileService;
 
     private FileManager fileManager;
 
     @Autowired
-    public MediaFilter(UserService userService, LocalisationService localisationService, FileService fileService, FileManager fileManager) {
+    public MediaFilter(UserService userService, LocalisationService localisationService, MessageMediaService fileService, FileManager fileManager) {
         this.userService = userService;
         this.localisationService = localisationService;
         this.fileService = fileService;
@@ -43,7 +43,7 @@ public class MediaFilter extends BaseBotFilter {
     @Override
     public void doFilter(Update update) {
         if (update.hasMessage()) {
-            Any2AnyFile file = fileService.getFile(update.getMessage(), Locale.getDefault());
+            MessageMedia file = fileService.getMedia(update.getMessage(), Locale.getDefault());
             if (file != null) {
                 checkInMediaSize(update.getMessage(), file);
                 fileManager.inputFile(update.getMessage().getChatId(), file.getFileId(), file.getFileSize());
@@ -53,7 +53,7 @@ public class MediaFilter extends BaseBotFilter {
         super.doFilter(update);
     }
 
-    private void checkInMediaSize(Message message, Any2AnyFile file) {
+    private void checkInMediaSize(Message message, MessageMedia file) {
         if (file.getFileSize() > LARGE_FILE_SIZE) {
             LOGGER.warn("Large in file({}, {})", message.getFrom().getId(), file);
             throw new UserException(localisationService.getMessage(
