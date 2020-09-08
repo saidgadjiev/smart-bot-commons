@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
+import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -267,53 +268,60 @@ public class TelegramMTProtoService implements TelegramMediaService {
     @Override
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         downloading.put(fileId, outputFile);
-        try {
-            Future<?> submit = mediaWorkers.submit(() -> {
-                try {
-                    StopWatch stopWatch = new StopWatch();
-                    stopWatch.start();
-                    LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
 
-                    GetFile getFile = new GetFile();
-                    getFile.setFileId(fileId);
-                    getFile.setFileSize(fileSize);
-                    getFile.setPath(outputFile.getAbsolutePath());
-                    getFile.setRemoveParentDirOnCancel(false);
-                    getFile.setProgress(progress);
-                    HttpEntity<GetFile> request = new HttpEntity<>(getFile);
-                    String result = restTemplate.postForObject(getUrl(GetFile.METHOD), request, String.class);
-                    try {
-                        ApiResponse<Void> apiResponse = objectMapper.readValue(result, new TypeReference<>() {
-                        });
-
-                        if (!apiResponse.getOk()) {
-                            throw new DownloadCanceledException("Download canceled " + fileId);
-                        }
-                    } catch (IOException e) {
-                        throw new TelegramApiException("Unable to deserialize response(" + result + ", " + fileId + ")\n" + e.getMessage(), e);
-                    }
-
-                    stopWatch.stop();
-                    LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-                } catch (DownloadCanceledException e) {
-                    LOGGER.error("Download canceled({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
-                    throw e;
-                } catch (Exception e) {
-                    LOGGER.error("Error download({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
-                    throw new TelegramApiException(e);
-                }
-            });
-
+        Future<?> submit = mediaWorkers.submit(() -> {
             try {
-                downloadingFuture.put(fileId, submit);
-                submit.get();
+                StopWatch stopWatch = new StopWatch();
+                stopWatch.start();
+                LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+
+                GetFile getFile = new GetFile();
+                getFile.setFileId(fileId);
+                getFile.setFileSize(fileSize);
+                getFile.setPath(outputFile.getAbsolutePath());
+                getFile.setRemoveParentDirOnCancel(false);
+                getFile.setProgress(progress);
+                HttpEntity<GetFile> request = new HttpEntity<>(getFile);
+                String result = restTemplate.postForObject(getUrl(GetFile.METHOD), request, String.class);
+                try {
+                    ApiResponse<Void> apiResponse = objectMapper.readValue(result, new TypeReference<>() {
+                    });
+
+                    if (!apiResponse.getOk()) {
+                        throw new DownloadCanceledException("Download canceled " + fileId);
+                    }
+                } catch (IOException e) {
+                    throw new TelegramApiException("Unable to deserialize response(" + result + ", " + fileId + ")\n" + e.getMessage(), e);
+                }
+
+                stopWatch.stop();
+                LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
+            } catch (DownloadCanceledException e) {
+                LOGGER.error("Download canceled({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+                throw e;
             } catch (Exception e) {
-                LOGGER.error(e.getMessage());
-                throw new DownloadCanceledException("Download canceled " + fileId);
+                LOGGER.error("Error download({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+                throw new TelegramApiException(e);
             }
-        } finally {
+        });
+
+        try {
+            downloadingFuture.put(fileId, submit);
+            submit.get();
+
             downloadingFuture.remove(fileId);
             downloading.remove(fileId);
+        } catch (InterruptedException e) {
+            LOGGER.error(e.getMessage());
+
+            throw new DownloadCanceledException("Download canceled " + fileId);
+        } catch (Exception e) {
+            LOGGER.error(e.getMessage(), e);
+
+            downloadingFuture.remove(fileId);
+            downloading.remove(fileId);
+
+            throw new DownloadingException("Downloading failed for " + fileId);
         }
     }
 

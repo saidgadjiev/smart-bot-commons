@@ -108,7 +108,10 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
         File file = new File(document.getFilePath());
         if (file.length() == 0) {
             LOGGER.error("Zero file\n{}", Arrays.toString(Thread.currentThread().getStackTrace()));
-            messageService.sendMessage(new SendMessage(sendDocument.getChatId(), localisationService.getMessage(MessagesProperties.MESSAGE_ZERO_LENGTH_FILE, userService.getLocaleOrDefault((int) sendDocument.getOrigChatId())))
+            messageService.sendMessage(new SendMessage(sendDocument.getChatId(),
+                    localisationService.getMessage(MessagesProperties.MESSAGE_ZERO_LENGTH_FILE,
+                            new Object[]{StringUtils.defaultIfBlank(sendDocument.getDocument().getFileName(), "")},
+                            userService.getLocaleOrDefault((int) sendDocument.getOrigChatId())))
                     .setReplyMarkup(sendDocument.getReplyMarkup())
                     .setReplyToMessageId(sendDocument.getReplyToMessageId()));
 
