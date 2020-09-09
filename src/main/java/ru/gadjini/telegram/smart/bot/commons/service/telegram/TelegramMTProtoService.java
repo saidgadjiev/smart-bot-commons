@@ -15,6 +15,7 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -33,6 +34,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.*;
 
 @Service
@@ -288,6 +290,9 @@ public class TelegramMTProtoService implements TelegramMediaService {
                     });
 
                     if (!apiResponse.getOk()) {
+                        if (Objects.equals(apiResponse.getErrorCode(), 420)) {
+                            throw new FloodWaitException("Flood wait", (int) Double.parseDouble(apiResponse.getErrorDescription()));
+                        }
                         throw new DownloadCanceledException("Download canceled " + fileId);
                     }
                 } catch (IOException e) {
@@ -296,8 +301,8 @@ public class TelegramMTProtoService implements TelegramMediaService {
 
                 stopWatch.stop();
                 LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-            } catch (DownloadCanceledException e) {
-                LOGGER.error("Download canceled({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+            } catch (DownloadCanceledException | FloodWaitException | TelegramApiException e) {
+                LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
                 throw e;
             } catch (Exception e) {
                 LOGGER.error("Error download({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
@@ -312,15 +317,11 @@ public class TelegramMTProtoService implements TelegramMediaService {
             downloadingFuture.remove(fileId);
             downloading.remove(fileId);
         } catch (InterruptedException e) {
-            LOGGER.error(e.getMessage());
-
             throw new DownloadCanceledException("Download canceled " + fileId);
         } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-
             cancelDownloading(fileId);
 
-            throw new DownloadingException("Downloading failed for " + fileId);
+            throw new DownloadingException(e.getMessage(), e);
         }
     }
 

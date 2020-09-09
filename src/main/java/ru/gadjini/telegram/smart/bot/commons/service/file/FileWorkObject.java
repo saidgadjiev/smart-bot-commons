@@ -31,14 +31,18 @@ public class FileWorkObject {
         if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
             return;
         }
-        fileLimitsDao.setState(chatId, InputFileState.State.PROCESSING);
+        if (fileLimitsDao.hasInputFile(chatId)) {
+            fileLimitsDao.setState(chatId, InputFileState.State.PROCESSING);
+        }
     }
 
     public void stop() {
         if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
             return;
         }
-        fileLimitsDao.setState(chatId, InputFileState.State.COMPLETED);
-        fileLimitsDao.setInputFileTtl(chatId, TTL, TimeUnit.SECONDS);
+        if (fileLimitsDao.hasInputFile(chatId)) {
+            fileLimitsDao.setState(chatId, InputFileState.State.COMPLETED);
+            fileLimitsDao.setInputFileTtl(chatId, TTL, TimeUnit.SECONDS);
+        }
     }
 }
