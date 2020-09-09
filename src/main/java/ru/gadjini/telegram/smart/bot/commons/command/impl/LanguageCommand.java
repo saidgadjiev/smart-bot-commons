@@ -43,7 +43,7 @@ public class LanguageCommand implements KeyboardBotCommand, NavigableBotCommand,
         this.userService = userService;
         this.replyKeyboardService = replyKeyboardService;
         for (Locale locale : localisationService.getSupportedLocales()) {
-            String message = localisationService.getMessage(MessagesProperties.HELP_COMMAND_NAME, locale, null);
+            String message = localisationService.getMessage(MessagesProperties.LANGUAGE_COMMAND_NAME, locale, null);
             if (message != null) {
                 this.names.add(message);
             }
