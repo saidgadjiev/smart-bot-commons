@@ -318,8 +318,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
 
-            downloadingFuture.remove(fileId);
-            downloading.remove(fileId);
+            cancelDownloading(fileId);
 
             throw new DownloadingException("Downloading failed for " + fileId);
         }
