@@ -40,4 +40,6 @@ public class MessagesProperties {
     public static final String MESSAGE_INPUT_FILE_WAIT = "message.input.file.wait";
 
     public static final String MESSAGE_INPUT_FILE_WAIT_TTL = "message.input.file.wait.ttl";
+
+    public static final String MESSAGE_BOT_IS_SLEEPING = "message.bot.is.sleeping";
 }

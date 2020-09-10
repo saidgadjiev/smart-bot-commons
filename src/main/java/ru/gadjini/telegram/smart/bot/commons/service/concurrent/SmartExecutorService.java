@@ -2,6 +2,10 @@ package ru.gadjini.telegram.smart.bot.commons.service.concurrent;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
+import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -14,11 +18,26 @@ public class SmartExecutorService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartExecutorService.class);
 
+    private MessageService messageService;
+
+    private LocalisationService localisationService;
+
+    private FileManager fileManager;
+
+    private UserService userService;
+
     private Map<JobWeight, ThreadPoolExecutor> executors;
 
     private final Map<Integer, Future<?>> processing = new ConcurrentHashMap<>();
 
     private final Map<Integer, Job> activeTasks = new ConcurrentHashMap<>();
+
+    public SmartExecutorService(MessageService messageService, LocalisationService localisationService, FileManager fileManager, UserService userService) {
+        this.messageService = messageService;
+        this.localisationService = localisationService;
+        this.fileManager = fileManager;
+        this.userService = userService;
+    }
 
     public SmartExecutorService setExecutors(Map<JobWeight, ThreadPoolExecutor> executors) {
         this.executors = executors;
@@ -31,7 +50,7 @@ public class SmartExecutorService {
     }
 
     public void execute(Job job) {
-        Future<?> submit = executors.get(job.getWeight()).submit(job);
+        Future<?> submit = executors.get(job.getWeight()).submit(new ExceptionHandlerJob(messageService, userService, localisationService, fileManager, job));
         job.setCancelChecker(submit::isCancelled);
         processing.put(job.getId(), submit);
         activeTasks.put(job.getId(), job);
@@ -105,11 +124,21 @@ public class SmartExecutorService {
         }
     }
 
-    public interface Job extends Runnable {
+    public interface Job {
+
+        void execute() throws Exception;
 
         int getId();
 
         JobWeight getWeight();
+
+        long getChatId();
+
+        int getProgressMessageId();
+
+        default String getErrorCode(Exception e) {
+            return null;
+        }
 
         default void cancel() {
 
@@ -119,16 +148,13 @@ public class SmartExecutorService {
 
         }
 
+        default Supplier<Boolean> getCancelChecker() {
+            return () -> false;
+        }
+
         default void setCanceledByUser(boolean canceledByUser) {
 
         }
-    }
-
-    public interface ProgressJob extends Job {
-
-        int getProgressMessageId();
-
-        long getChatId();
     }
 
     public enum JobWeight {
