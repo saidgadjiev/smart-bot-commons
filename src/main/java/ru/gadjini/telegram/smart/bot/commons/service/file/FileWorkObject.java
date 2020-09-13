@@ -6,7 +6,7 @@ import java.util.concurrent.TimeUnit;
 
 public class FileWorkObject {
 
-    private static final int TTL = 3 * 60;
+    private final int fileTimeLimit;
 
     private long chatId;
 
@@ -16,11 +16,13 @@ public class FileWorkObject {
 
     private TelegramMediaServiceProvider mediaServiceProvider;
 
-    public FileWorkObject(long chatId, long fileSize, FileLimitsDao fileLimitsDao, TelegramMediaServiceProvider mediaServiceProvider) {
+    public FileWorkObject(int fileTimeLimit, long chatId, long fileSize, FileLimitsDao fileLimitsDao,
+                          TelegramMediaServiceProvider mediaServiceProvider) {
         this.chatId = chatId;
         this.fileSize = fileSize;
         this.fileLimitsDao = fileLimitsDao;
         this.mediaServiceProvider = mediaServiceProvider;
+        this.fileTimeLimit = fileTimeLimit;
     }
 
     public long getChatId() {
@@ -29,6 +31,9 @@ public class FileWorkObject {
 
     public void start() {
         if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
+            return;
+        }
+        if (fileTimeLimit <= 0) {
             return;
         }
         if (fileLimitsDao.hasInputFile(chatId)) {
@@ -40,9 +45,12 @@ public class FileWorkObject {
         if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
             return;
         }
+        if (fileTimeLimit <= 0) {
+            return;
+        }
         if (fileLimitsDao.hasInputFile(chatId)) {
             fileLimitsDao.setState(chatId, InputFileState.State.COMPLETED);
-            fileLimitsDao.setInputFileTtl(chatId, TTL, TimeUnit.SECONDS);
+            fileLimitsDao.setInputFileTtl(chatId, fileTimeLimit, TimeUnit.SECONDS);
         }
     }
 }

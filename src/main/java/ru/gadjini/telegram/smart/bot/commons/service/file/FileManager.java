@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.file;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -13,6 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 
+import javax.annotation.PostConstruct;
 import java.util.Locale;
 
 @Service
@@ -30,6 +32,9 @@ public class FileManager {
 
     private UserService userService;
 
+    @Value("${file.time.limit:180}")
+    private int fileTimeLimit;
+
     @Autowired
     public FileManager(TelegramMTProtoService telegramService, TelegramMediaServiceProvider mediaServiceProvider,
                        FileLimitsDao fileLimitsDao, LocalisationService localisationService, UserService userService) {
@@ -40,8 +45,16 @@ public class FileManager {
         this.userService = userService;
     }
 
+    @PostConstruct
+    public void init() {
+        LOGGER.debug("File time limit({})", fileTimeLimit);
+    }
+
     public void setInputFilePending(long chatId, Integer replyToMessageId, String fileId, long fileSize, String command) {
         if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
+            return;
+        }
+        if (fileTimeLimit <= 0) {
             return;
         }
         fileLimitsDao.setInputFile(chatId, new InputFileState(replyToMessageId, fileId, command));
@@ -59,7 +72,7 @@ public class FileManager {
             return;
         }
         InputFileState inputFileState = fileLimitsDao.getInputFile(chatId);
-        if (inputFileState != null) {
+        if (inputFileState != null && fileTimeLimit > 0) {
             Long ttl = fileLimitsDao.getInputFileTtl(chatId);
 
             if (ttl == null || ttl == -1) {
@@ -82,7 +95,7 @@ public class FileManager {
     }
 
     public FileWorkObject fileWorkObject(long chatId, long fileSize) {
-        return new FileWorkObject(chatId, fileSize, fileLimitsDao, mediaServiceProvider);
+        return new FileWorkObject(fileTimeLimit, chatId, fileSize, fileLimitsDao, mediaServiceProvider);
     }
 
     public boolean cancelDownloading(String fileId) {
