@@ -17,4 +17,8 @@ public class ProgressManager {
     public boolean isShowingDownloadingProgress(long fileSize) {
         return !mediaServiceProvider.isBotApiDownloadFile(fileSize);
     }
+
+    public boolean isShowingUploadingProgress(long fileSize) {
+        return !mediaServiceProvider.isBotApiUploadFile(fileSize);
+    }
 }

@@ -71,11 +71,10 @@ public class MessageMediaService {
         } else if (message.hasVideo()) {
             String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
             Format format = formatService.getFormat(message.getVideo().getFileName(), message.getVideo().getMimeType());
-            if (format != null) {
-                fileName += format.getExt();
-            } else {
-                fileName += "mp4";
+            if (format == null) {
+                format = Format.MP4;
             }
+            fileName += format.getExt();
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getVideo().getFileId());
             messageMedia.setFileSize(message.getVideo().getFileSize());

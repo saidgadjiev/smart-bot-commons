@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.telegram;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -24,6 +25,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -233,6 +235,10 @@ public class TelegramBotApiService implements TelegramMediaService {
     @Override
     public Message sendDocument(SendDocument sendDocument) {
         try {
+            if (StringUtils.isBlank(sendDocument.getDocument().getFileId())
+                    && !isShowingProgress(new File(sendDocument.getDocument().getFilePath()).length())) {
+                sendDocument.setProgress(null);
+            }
             HttpEntity<SendDocument> request = new HttpEntity<>(sendDocument);
             String response = restTemplate.postForObject(getUrl(SendDocument.METHOD), request, String.class);
             try {
@@ -331,6 +337,9 @@ public class TelegramBotApiService implements TelegramMediaService {
             getFile.setFileSize(fileSize);
             getFile.setPath(outputFile.getAbsolutePath());
             getFile.setRemoveParentDirOnCancel(false);
+            if (isShowingProgress(fileSize)) {
+                getFile.setProgress(progress);
+            }
             HttpEntity<GetFile> request = new HttpEntity<>(getFile);
             String result = restTemplate.postForObject(getUrl(GetFile.METHOD), request, String.class);
             try {
@@ -369,5 +378,9 @@ public class TelegramBotApiService implements TelegramMediaService {
 
     private String getUrl(String method) {
         return botApiProperties.getEndpoint() + method;
+    }
+
+    private boolean isShowingProgress(long fileSize) {
+        return fileSize > 5 * 1024 * 1024;
     }
 }

@@ -66,7 +66,30 @@ public enum Format {
     TCR(FormatCategory.DOCUMENTS),
     TXTZ(FormatCategory.DOCUMENTS),
     OEB(FormatCategory.DOCUMENTS),
-    PMLZ(FormatCategory.DOCUMENTS);
+    PMLZ(FormatCategory.DOCUMENTS),
+    MP4(FormatCategory.VIDEO),
+    _3GP(FormatCategory.VIDEO) {
+        @Override
+        public String getExt() {
+            return "3gp";
+        }
+
+        @Override
+        public String getName() {
+            return "3GP";
+        }
+    },
+    AVI(FormatCategory.VIDEO),
+    FLV(FormatCategory.VIDEO),
+    M4V(FormatCategory.VIDEO),
+    MKV(FormatCategory.VIDEO),
+    MOV(FormatCategory.VIDEO),
+    MPEG(FormatCategory.VIDEO),
+    MPG(FormatCategory.VIDEO),
+    MTS(FormatCategory.VIDEO),
+    VOB(FormatCategory.VIDEO),
+    WEBM(FormatCategory.VIDEO),
+    WMV(FormatCategory.VIDEO);
 
     private FormatCategory category;
 
@@ -76,6 +99,10 @@ public enum Format {
 
     public String getExt() {
         return name().toLowerCase();
+    }
+
+    public String getName() {
+        return name();
     }
 
     public FormatCategory getCategory() {

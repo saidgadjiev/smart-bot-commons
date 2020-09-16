@@ -18,7 +18,7 @@ public class FormatService {
         }
         format = format.toUpperCase();
         for (Format f : Format.values()) {
-            if (f.name().equals(format)) {
+            if (f.getName().equals(format)) {
                 return f;
             }
         }
