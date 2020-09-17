@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.model;
 
+import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
@@ -73,6 +74,18 @@ public class MessageMedia {
 
     public void setCachedFileId(String cachedFileId) {
         this.cachedFileId = cachedFileId;
+    }
+
+    public TgFile toTgFile() {
+        TgFile tgFile = new TgFile();
+        tgFile.setFileId(fileId);
+        tgFile.setFormat(format);
+        tgFile.setFileName(fileName);
+        tgFile.setMimeType(mimeType);
+        tgFile.setSize(fileSize);
+        tgFile.setThumb(thumb);
+
+        return tgFile;
     }
 
     @Override
