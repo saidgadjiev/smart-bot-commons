@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.io;
 
 import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -13,10 +15,19 @@ import java.nio.file.Path;
 
 public class SmartTempFile {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartTempFile.class);
+
     private File file;
+
+    private boolean deleteParentDir;
 
     public SmartTempFile(File file) {
         this.file = file;
+    }
+
+    public SmartTempFile(File file, boolean deleteParentDir) {
+        this.file = file;
+        this.deleteParentDir = deleteParentDir;
     }
 
     public String getName() {
@@ -213,8 +224,16 @@ public class SmartTempFile {
     }
 
     public void smartDelete() {
-        if (file != null && file.exists()) {
-            FileUtils.deleteQuietly(file);
+        if (file != null) {
+            try {
+                FileUtils.deleteQuietly(file);
+                if (deleteParentDir) {
+                    FileUtils.deleteDirectory(file.getParentFile());
+                }
+            } catch (IOException ex) {
+                LOGGER.error(ex.getMessage(), ex);
+                throw new RuntimeException(ex);
+            }
         }
     }
 }

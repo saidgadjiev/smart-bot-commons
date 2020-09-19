@@ -19,6 +19,7 @@ public class Message {
     private static final String STICKER_FIELD = "sticker";
     private static final String VIDEO_FIELD = "video";
     private static final String REPLY_MARKUP_FIELD = "reply_markup";
+    private static final String MEDIA_GROUP_ID = "media_group_id";
 
     @JsonProperty(MESSAGEID_FIELD)
     private Integer messageId;
@@ -43,6 +44,8 @@ public class Message {
     private Sticker sticker;
     @JsonProperty(VIDEO_FIELD)
     private Video video;
+    @JsonProperty(MEDIA_GROUP_ID)
+    private String mediaGroupId;
 
     public Message() {
         super();
@@ -92,6 +95,14 @@ public class Message {
         return chat.getId();
     }
 
+    public InlineKeyboardMarkup getReplyMarkup() {
+        return replyMarkup;
+    }
+
+    public String getMediaGroupId() {
+        return mediaGroupId;
+    }
+
     public boolean hasText() {
         return text != null && !text.isEmpty();
     }
@@ -130,10 +141,6 @@ public class Message {
 
     public boolean hasReplyMarkup() {
         return replyMarkup != null;
-    }
-
-    public InlineKeyboardMarkup getReplyMarkup() {
-        return replyMarkup;
     }
 
     @Override

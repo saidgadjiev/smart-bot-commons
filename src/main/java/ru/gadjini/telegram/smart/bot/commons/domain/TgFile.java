@@ -97,6 +97,8 @@ public class TgFile {
         sql.append(size).append(",");
         if (StringUtils.isNotBlank(thumb)) {
             sql.append("\"").append(thumb).append("\",");
+        } else {
+            sql.append(",");
         }
         if (format != null) {
             sql.append("\"").append(format.getName()).append("\"");

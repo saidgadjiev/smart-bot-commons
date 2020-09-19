@@ -28,12 +28,23 @@ public class TempFileService {
         LOGGER.debug("Temp dir({})", tempDir);
     }
 
-    public String getTempDir() {
+    public String getRootDir() {
         return tempDir;
     }
 
+    public SmartTempFile createTempDir(long chatId, String tag) {
+        try {
+            File dir = new File(tempDir, generateDirName(chatId, tag));
+            Files.createDirectory(dir.toPath());
+
+            return new SmartTempFile(dir);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public SmartTempFile getTempFile(long chatId, String fileId, String tag, String ext) {
-        File file = new File(tempDir, generateName(chatId, fileId, tag, ext));
+        File file = new File(tempDir, generateFileName(chatId, fileId, tag, ext));
 
         LOGGER.debug("Get({})", file.getAbsolutePath());
         return new SmartTempFile(file);
@@ -43,9 +54,33 @@ public class TempFileService {
         return getTempFile(chatId, null, tag, ext);
     }
 
+    public SmartTempFile createTempFile(SmartTempFile parent, long chatId, String fileName) {
+        try {
+            File file = new File(parent.getFile(), fileName);
+            Files.createFile(file.toPath());
+
+            LOGGER.debug("Create({}, {})", chatId, file.getAbsolutePath());
+            return new SmartTempFile(file, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public SmartTempFile createTempFile(SmartTempFile parent, long chatId, String fileId, String tag, String ext) {
+        try {
+            File file = new File(parent.getFile(), generateFileName(chatId, fileId, tag, ext));
+            Files.createFile(file.toPath());
+
+            LOGGER.debug("Create({}, {}, {})", chatId, fileId, file.getAbsolutePath());
+            return new SmartTempFile(file, true);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
     public SmartTempFile createTempFile(long chatId, String fileId, String tag, String ext) {
         try {
-            File file = new File(tempDir, generateName(chatId, fileId, tag, ext));
+            File file = new File(tempDir, generateFileName(chatId, fileId, tag, ext));
             Files.createFile(file.toPath());
 
             LOGGER.debug("Create({}, {}, {})", chatId, fileId, file.getAbsolutePath());
@@ -63,12 +98,19 @@ public class TempFileService {
         return createTempFile(0, null, tag, ext);
     }
 
-    public String generateName(long chatId, String fileId, String tag, String ext) {
+    public String generateFileName(long chatId, String fileId, String tag, String ext) {
         tag = StringUtils.defaultIfBlank(tag, "-");
         ext = StringUtils.defaultIfBlank(ext, "tmp");
         fileId = StringUtils.defaultIfBlank(fileId, "-");
         long n = RANDOM.nextLong();
 
         return "tag_" + tag + "_chatId_" + chatId + "_fileId_" + fileId + "_time_" + System.nanoTime() + "_salt_" + Long.toUnsignedString(n) + "." + ext;
+    }
+
+    public String generateDirName(long chatId, String tag) {
+        tag = StringUtils.defaultIfBlank(tag, "-");
+        long n = RANDOM.nextLong();
+
+        return "tag_" + tag + "_chatId_" + chatId + "_time_" + System.nanoTime() + "_salt_" + Long.toUnsignedString(n);
     }
 }

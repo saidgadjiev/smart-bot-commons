@@ -89,7 +89,8 @@ public enum Format {
     MTS(FormatCategory.VIDEO),
     VOB(FormatCategory.VIDEO),
     WEBM(FormatCategory.VIDEO),
-    WMV(FormatCategory.VIDEO);
+    WMV(FormatCategory.VIDEO),
+    IMAGES(FormatCategory.IMAGES);
 
     private FormatCategory category;
 
