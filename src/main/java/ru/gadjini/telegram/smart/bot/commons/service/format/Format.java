@@ -90,7 +90,13 @@ public enum Format {
     VOB(FormatCategory.VIDEO),
     WEBM(FormatCategory.VIDEO),
     WMV(FormatCategory.VIDEO),
-    IMAGES(FormatCategory.IMAGES);
+    IMAGES(FormatCategory.IMAGES),
+    COMPRESS(FormatCategory.VIDEO) {
+        @Override
+        public String getExt() {
+            return "mp4";
+        }
+    };
 
     private FormatCategory category;
 
