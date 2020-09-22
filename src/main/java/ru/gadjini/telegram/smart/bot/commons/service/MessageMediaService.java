@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
@@ -16,6 +18,8 @@ import java.util.Locale;
 
 @Service
 public class MessageMediaService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageMediaService.class);
 
     private LocalisationService localisationService;
 
@@ -48,6 +52,16 @@ public class MessageMediaService {
     }
 
     public MessageMedia getMedia(Message message, Locale locale) {
+        MessageMedia media0 = getMedia0(message, locale);
+
+        if (media0 != null && media0.getFormat() == null) {
+            LOGGER.debug("Null format({})", message);
+        }
+
+        return media0;
+    }
+
+    private MessageMedia getMedia0(Message message, Locale locale) {
         MessageMedia messageMedia = new MessageMedia();
 
         if (message.hasDocument()) {
