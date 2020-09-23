@@ -15,24 +15,31 @@ public class ProcessExecutor {
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessExecutor.class);
 
     public String executeWithResult(String[] command) {
-        return execute(command, ProcessBuilder.Redirect.PIPE, null);
+        return execute(command, ProcessBuilder.Redirect.PIPE, null, null);
     }
 
     public void executeWithFile(String[] command, String outputFile) {
-        execute(command, null, outputFile);
+        execute(command, null, outputFile, null);
+    }
+
+    public void executeWithRedirectError(String[] command, String errorFile) {
+        execute(command, null, errorFile, errorFile);
     }
 
     public void execute(String[] command) {
-        execute(command, ProcessBuilder.Redirect.DISCARD, null);
+        execute(command, ProcessBuilder.Redirect.DISCARD, null, null);
     }
 
-    public String execute(String[] command, ProcessBuilder.Redirect redirect, String outputFile) {
+    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile,  String errorRedirectFile) {
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command);
-            if (redirect != null) {
-                processBuilder.redirectOutput(redirect);
-            } else if (StringUtils.isNotBlank(outputFile)) {
-                processBuilder.redirectOutput(new File(outputFile));
+            if (redirectOutput != null) {
+                processBuilder.redirectOutput(redirectOutput);
+            } else if (StringUtils.isNotBlank(outputRedirectFile)) {
+                processBuilder.redirectOutput(new File(outputRedirectFile));
+            }
+            if (StringUtils.isNotBlank(errorRedirectFile)) {
+                processBuilder.redirectError(new File(errorRedirectFile));
             }
             Process process = processBuilder.start();
             try {
@@ -45,7 +52,7 @@ public class ProcessExecutor {
                     throw new ProcessException("Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\n" + error);
                 }
 
-                if (redirect == ProcessBuilder.Redirect.PIPE) {
+                if (redirectOutput == ProcessBuilder.Redirect.PIPE) {
                     return IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
                 }
 
