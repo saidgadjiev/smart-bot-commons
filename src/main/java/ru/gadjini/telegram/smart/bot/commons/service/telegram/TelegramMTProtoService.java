@@ -9,6 +9,7 @@ import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
@@ -31,6 +32,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MTProtoProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.util.Map;
@@ -57,6 +59,9 @@ public class TelegramMTProtoService implements TelegramMediaService {
 
     private ThreadPoolExecutor mediaWorkers;
 
+    @Value("${mtproto.concurrency.level:2}")
+    private int concurrencyLevel;
+
     @Autowired
     public TelegramMTProtoService(MTProtoProperties telegramProperties, ObjectMapper objectMapper) {
         this.telegramProperties = telegramProperties;
@@ -65,6 +70,11 @@ public class TelegramMTProtoService implements TelegramMediaService {
         this.mediaWorkers = mediaWorkers();
 
         LOGGER.debug("MTProto: " + telegramProperties.getApi());
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.debug("MTproto concurrency level({})", concurrencyLevel);
     }
 
     @Override
@@ -421,7 +431,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
     }
 
     private ThreadPoolExecutor mediaWorkers() {
-        ThreadPoolExecutor taskExecutor = new ThreadPoolExecutor(2, 2,
+        ThreadPoolExecutor taskExecutor = new ThreadPoolExecutor(concurrencyLevel, concurrencyLevel,
                 0, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>()
         );
