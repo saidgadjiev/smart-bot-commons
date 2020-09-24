@@ -58,8 +58,6 @@ public class ProcessExecutor {
             }
             if (errorFile != null) {
                 processBuilder.redirectError(errorFile);
-            } else {
-                processBuilder.redirectError(ProcessBuilder.Redirect.DISCARD);
             }
             Process process = processBuilder.start();
             try {
