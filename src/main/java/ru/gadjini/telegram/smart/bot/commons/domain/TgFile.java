@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
@@ -20,16 +21,24 @@ public class TgFile {
 
     public static final String THUMB = "thumb";
 
+    public static final String FORMAT = "format";
+
+    @JsonProperty(FILE_ID)
     private String fileId;
 
+    @JsonProperty(FILE_NAME)
     private String fileName;
 
+    @JsonProperty(MIME_TYPE)
     private String mimeType;
 
+    @JsonProperty(FORMAT)
     private Format format;
 
+    @JsonProperty(SIZE)
     private long size;
 
+    @JsonProperty(THUMB)
     private String thumb;
 
     public String getFileId() {

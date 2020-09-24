@@ -7,6 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
+import java.lang.reflect.Field;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
@@ -39,26 +40,37 @@ public class SmartExecutorService {
         this.userService = userService;
     }
 
-    public SmartExecutorService setExecutors(Map<JobWeight, ThreadPoolExecutor> executors) {
+    public void setExecutors(Map<JobWeight, ThreadPoolExecutor> executors) {
         this.executors = executors;
-
-        return this;
     }
 
     public int getCorePoolSize(JobWeight weight) {
         return executors.get(weight).getCorePoolSize();
     }
 
-    public void execute(Job job) {
-        Future<?> submit = executors.get(job.getWeight()).submit(new ExceptionHandlerJob(messageService, userService, localisationService, fileManager, job));
+    public void execute(Job job, JobWeight jobWeight) {
+        Future<?> submit = executors.get(jobWeight).submit(new ExceptionHandlerJob(messageService, userService, localisationService, fileManager, job));
         job.setCancelChecker(submit::isCancelled);
         processing.put(job.getId(), submit);
         activeTasks.put(job.getId(), job);
     }
 
+    public void execute(Job job) {
+        execute(job, job.getWeight());
+    }
+
     public void complete(int jobId) {
         processing.remove(jobId);
         activeTasks.remove(jobId);
+    }
+
+    public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
+        executors.get(weight).setRejectedExecutionHandler((r, executor) -> {
+            Job job = getJob(r);
+            complete(job.getId());
+
+            rejectJobHandler.reject(job);
+        });
     }
 
     public void complete(Collection<Integer> jobIds) {
@@ -105,6 +117,10 @@ public class SmartExecutorService {
         });
     }
 
+    public ThreadPoolExecutor getExecutor(JobWeight jobWeight) {
+        return executors.get(jobWeight);
+    }
+
     public void shutdown() {
         try {
             for (Map.Entry<JobWeight, ThreadPoolExecutor> entry : executors.entrySet()) {
@@ -121,6 +137,20 @@ public class SmartExecutorService {
             }
         } catch (Throwable ex) {
             LOGGER.error(ex.getMessage(), ex);
+        }
+    }
+
+    private SmartExecutorService.Job getJob(Runnable runnable) {
+        try {
+            Field field = runnable.getClass().getDeclaredField("callable");
+            field.setAccessible(true);
+            Object callbable = field.get(runnable);
+            Field task = callbable.getClass().getDeclaredField("task");
+            task.setAccessible(true);
+
+            return (SmartExecutorService.Job) task.get(callbable);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -155,6 +185,11 @@ public class SmartExecutorService {
         default void setCanceledByUser(boolean canceledByUser) {
 
         }
+    }
+
+    public interface RejectJobHandler {
+
+        void reject(Job job);
     }
 
     public enum JobWeight {

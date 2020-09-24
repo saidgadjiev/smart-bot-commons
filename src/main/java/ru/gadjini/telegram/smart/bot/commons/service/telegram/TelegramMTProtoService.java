@@ -67,14 +67,13 @@ public class TelegramMTProtoService implements TelegramMediaService {
         this.telegramProperties = telegramProperties;
         this.objectMapper = objectMapper;
         this.restTemplate = new RestTemplate();
-        this.mediaWorkers = mediaWorkers();
-
         LOGGER.debug("MTProto: " + telegramProperties.getApi());
     }
 
     @PostConstruct
     public void init() {
         LOGGER.debug("MTproto concurrency level({})", concurrencyLevel);
+        this.mediaWorkers = mediaWorkers();
     }
 
     @Override
@@ -260,6 +259,9 @@ public class TelegramMTProtoService implements TelegramMediaService {
                 });
 
                 if (!apiResponse.getOk()) {
+                    if (Objects.equals(apiResponse.getErrorCode(), 420)) {
+                        throw new FloodWaitException("Flood wait", (int) Double.parseDouble(apiResponse.getErrorDescription()));
+                    }
                     throw new DownloadCanceledException("Download canceled " + fileId);
                 }
             } catch (IOException e) {
@@ -268,7 +270,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
 
             stopWatch.stop();
             LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-        } catch (DownloadCanceledException e) {
+        } catch (DownloadCanceledException | FloodWaitException | TelegramApiException e) {
             LOGGER.error("Download canceled({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
             throw e;
         } catch (Exception e) {
@@ -431,10 +433,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
     }
 
     private ThreadPoolExecutor mediaWorkers() {
-        ThreadPoolExecutor taskExecutor = new ThreadPoolExecutor(concurrencyLevel, concurrencyLevel,
-                0, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>()
-        );
+        ThreadPoolExecutor taskExecutor = new ThreadPoolExecutor(concurrencyLevel, concurrencyLevel, 0, TimeUnit.SECONDS, new LinkedBlockingQueue<>());
 
         LOGGER.debug("Media workers thread pool({})", taskExecutor.getCorePoolSize());
 
