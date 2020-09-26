@@ -33,8 +33,8 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
     private SmartExecutorService.Job job;
 
     ExceptionHandlerJob(MessageService messageService, UserService userService,
-                               LocalisationService localisationService,
-                               FileManager fileManager, SmartExecutorService.Job job) {
+                        LocalisationService localisationService,
+                        FileManager fileManager, SmartExecutorService.Job job) {
         this.messageService = messageService;
         this.userService = userService;
         this.localisationService = localisationService;
@@ -68,7 +68,7 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
     }
 
     @Override
-    public String getErrorCode(Exception e) {
+    public String getErrorCode(Throwable e) {
         return job.getErrorCode(e);
     }
 
@@ -91,7 +91,7 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
     public void run() {
         try {
             job.execute();
-        } catch (Exception e) {
+        } catch (Throwable e) {
             if (!job.getCancelChecker().get()) {
                 Locale locale = userService.getLocaleOrDefault((int) job.getChatId());
 

@@ -166,7 +166,7 @@ public class SmartExecutorService {
 
         int getProgressMessageId();
 
-        default String getErrorCode(Exception e) {
+        default String getErrorCode(Throwable e) {
             return null;
         }
 

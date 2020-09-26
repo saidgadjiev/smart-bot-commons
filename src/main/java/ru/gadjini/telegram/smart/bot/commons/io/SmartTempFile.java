@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 public class SmartTempFile {
@@ -226,13 +227,15 @@ public class SmartTempFile {
     public void smartDelete() {
         if (file != null) {
             try {
-                FileUtils.deleteQuietly(file);
+                boolean quietly = Files.deleteIfExists(file.toPath());
+                if (!quietly) {
+                    LOGGER.debug("Temp file not deleted({})", file.getAbsolutePath());
+                }
                 if (deleteParentDir) {
                     FileUtils.deleteDirectory(file.getParentFile());
                 }
             } catch (IOException ex) {
                 LOGGER.error(ex.getMessage(), ex);
-                throw new RuntimeException(ex);
             }
         }
     }
