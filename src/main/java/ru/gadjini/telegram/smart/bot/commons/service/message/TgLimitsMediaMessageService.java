@@ -57,8 +57,8 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public void sendSticker(SendSticker sendSticker) {
-        mediaMessageService.sendSticker(sendSticker);
+    public SendFileResult sendSticker(SendSticker sendSticker) {
+        return mediaMessageService.sendSticker(sendSticker);
     }
 
     @Override

@@ -9,7 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages
 public interface MediaMessageService {
     EditMediaResult editMessageMedia(EditMessageMedia editMediaContext);
 
-    void sendSticker(SendSticker sendSticker);
+    SendFileResult sendSticker(SendSticker sendSticker);
 
     SendFileResult sendDocument(SendDocument sendDocumentContext);
 

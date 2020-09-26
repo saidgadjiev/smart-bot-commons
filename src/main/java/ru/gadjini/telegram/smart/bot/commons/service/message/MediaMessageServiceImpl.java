@@ -109,7 +109,9 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
-    public void sendSticker(SendSticker sendSticker) {
-        mediaServiceProvider.getStickerMediaService().sendSticker(sendSticker);
+    public SendFileResult sendSticker(SendSticker sendSticker) {
+        Message message = mediaServiceProvider.getStickerMediaService().sendSticker(sendSticker);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
 }
