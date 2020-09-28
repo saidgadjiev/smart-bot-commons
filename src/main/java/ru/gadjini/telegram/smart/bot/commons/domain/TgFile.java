@@ -110,7 +110,7 @@ public class TgFile {
             sql.append(",");
         }
         if (format != null) {
-            sql.append("\"").append(format.getName()).append("\"");
+            sql.append("\"").append(format.name()).append("\"");
         }
 
         sql.append(")");
