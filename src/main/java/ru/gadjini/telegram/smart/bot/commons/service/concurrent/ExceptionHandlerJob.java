@@ -8,6 +8,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
+import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -92,6 +93,11 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
         try {
             job.execute();
         } catch (Throwable e) {
+            if (userService.handleBotBlockedByUser(e)) {
+                TelegramApiRequestException exception = (TelegramApiRequestException) e;
+                LOGGER.error("Bot is blocked({})", exception.getChatId());
+                return;
+            }
             if (!job.getCancelChecker().get()) {
                 Locale locale = userService.getLocaleOrDefault((int) job.getChatId());
 

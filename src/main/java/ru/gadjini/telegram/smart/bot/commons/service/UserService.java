@@ -70,7 +70,7 @@ public class UserService {
         userDao.blockUser(userId);
     }
 
-    public boolean deadlock(Throwable ex) {
+    public boolean handleBotBlockedByUser(Throwable ex) {
         if (ex instanceof TelegramApiRequestException) {
             TelegramApiRequestException exception = (TelegramApiRequestException) ex;
             if (exception.getErrorCode() == 403) {
