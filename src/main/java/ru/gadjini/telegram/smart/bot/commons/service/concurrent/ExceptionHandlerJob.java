@@ -9,7 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
@@ -100,32 +100,39 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                     if (((UserException) e).isPrintLog()) {
                         LOGGER.error(e.getMessage(), e);
                     }
-                    messageService.sendMessage(new HtmlMessage(job.getChatId(), ((UserException) e).getHumanMessage()).setReplyToMessageId(((UserException) e).getReplyToMessageId()));
+                    sendUserExceptionMessage(
+                            new HtmlMessage(job.getChatId(), ((UserException) e).getHumanMessage())
+                                    .setReplyToMessageId(((UserException) e).getReplyToMessageId()));
                 } else if (e instanceof ProcessException) {
                     LOGGER.error(e.getMessage(), e);
-                    messageService.sendMessage(new HtmlMessage(job.getChatId(), localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e), MessagesProperties.MESSAGE_ERROR), locale)));
+                    sendUserExceptionMessage(
+                            new HtmlMessage(job.getChatId(),
+                                    localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                            MessagesProperties.MESSAGE_ERROR), locale)).setReplyToMessageId(job.getReplyToMessageId()));
                 } else if (floodWaitExceptionIndexOf != -1) {
                     LOGGER.error(e.getMessage());
                     fileManager.resetLimits(job.getChatId());
                     FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
-                    try {
-                        messageService.editMessage(new EditMessageText(job.getChatId(),
-                                job.getProgressMessageId(),
-                                localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
-                                        new Object[]{floodWaitException.getSleepTime()},
-                                        locale)).setThrowEx(true));
-                    } catch (Exception exp) {
-                        messageService.sendMessage(new HtmlMessage(job.getChatId(),
-                                localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
-                                        new Object[]{floodWaitException.getSleepTime()},
-                                        locale)));
-                    }
+                    sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
+                            localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
+                                    new Object[]{floodWaitException.getSleepTime()},
+                                    locale)
+                    ).setReplyToMessageId(job.getReplyToMessageId()));
                 } else {
                     LOGGER.error(e.getMessage(), e);
-                    messageService.sendMessage(new HtmlMessage(job.getChatId(), localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e), MessagesProperties.MESSAGE_ERROR), locale)));
+                    sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
+                            localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                    MessagesProperties.MESSAGE_ERROR), locale)).setReplyToMessageId(job.getReplyToMessageId()));
                 }
             }
         }
+    }
+
+    private void sendUserExceptionMessage(SendMessage sendMessage) {
+        if (job.isSuppressUserExceptions()) {
+            return;
+        }
+        messageService.sendMessage(sendMessage);
     }
 
     public SmartExecutorService.Job getOriginalJob() {

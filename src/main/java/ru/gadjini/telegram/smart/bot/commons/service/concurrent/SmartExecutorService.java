@@ -166,6 +166,14 @@ public class SmartExecutorService {
 
         int getProgressMessageId();
 
+        default Integer getReplyToMessageId() {
+            return null;
+        }
+
+        default boolean isSuppressUserExceptions() {
+            return false;
+        }
+
         default String getErrorCode(Throwable e) {
             return null;
         }
