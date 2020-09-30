@@ -21,10 +21,17 @@ public class UserDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public int updateActivity(int userId) {
+    public int updateActivity(int userId, String userName) {
         return jdbcTemplate.update(
-                "UPDATE tg_user SET last_activity_at = now() WHERE user_id = ?",
-                ps -> ps.setInt(1, userId)
+                "UPDATE tg_user SET last_activity_at = now(), username = ? WHERE user_id = ?",
+                ps -> {
+                    if (StringUtils.isBlank(userName)) {
+                        ps.setNull(1, Types.NULL);
+                    } else {
+                        ps.setString(1, userName);
+                    }
+                    ps.setInt(2, userId);
+                }
         );
     }
 

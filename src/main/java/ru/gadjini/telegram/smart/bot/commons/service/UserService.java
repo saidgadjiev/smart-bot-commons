@@ -58,7 +58,7 @@ public class UserService {
             LOGGER.error("User is null");
             return;
         }
-        int updated = userDao.updateActivity(user.getId());
+        int updated = userDao.updateActivity(user.getId(), user.getUserName());
 
         if (updated == 0) {
             createOrUpdate(user);
