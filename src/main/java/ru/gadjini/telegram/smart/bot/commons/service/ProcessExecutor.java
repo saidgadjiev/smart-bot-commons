@@ -73,6 +73,8 @@ public class ProcessExecutor {
                 if (!codes.contains(exitValue)) {
                     LOGGER.error("Error({}, {}, {})", process.exitValue(), Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
                     throw new ProcessException("Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\nLogs: " + (errorFile != null ? errorFile.getName() : "404"));
+                } else if (exitValue != 0) {
+                    LOGGER.error("Completed with strange exit code({}, {}, {})", exitValue, Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
                 }
 
                 String result = null;
