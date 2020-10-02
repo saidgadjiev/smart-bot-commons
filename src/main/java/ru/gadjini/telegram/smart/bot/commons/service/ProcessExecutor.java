@@ -14,7 +14,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.*;
 
 @Service
 public class ProcessExecutor {
@@ -38,18 +38,22 @@ public class ProcessExecutor {
     }
 
     public String executeWithResult(String[] command) {
-        return execute(command, ProcessBuilder.Redirect.PIPE, null);
+        return execute(command, ProcessBuilder.Redirect.PIPE, null, Collections.emptySet());
     }
 
     public void executeWithFile(String[] command, String outputFile) {
-        execute(command, null, outputFile);
+        execute(command, null, outputFile, Collections.emptySet());
+    }
+
+    public void execute(String[] command, Collection<Integer> successCodes) {
+        execute(command, ProcessBuilder.Redirect.DISCARD, null, successCodes);
     }
 
     public void execute(String[] command) {
-        execute(command, ProcessBuilder.Redirect.DISCARD, null);
+        execute(command, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
     }
 
-    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile) {
+    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) {
         File errorFile = getErrorLogFile();
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -63,8 +67,10 @@ public class ProcessExecutor {
             }
             Process process = processBuilder.start();
             try {
+                Set<Integer> codes = new HashSet<>(successCodes);
+                codes.add(0);
                 int exitValue = process.waitFor();
-                if (exitValue != 0) {
+                if (!codes.contains(exitValue)) {
                     LOGGER.error("Error({}, {}, {})", process.exitValue(), Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
                     throw new ProcessException("Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\nLogs: " + (errorFile != null ? errorFile.getName() : "404"));
                 }
