@@ -4,6 +4,12 @@ public class MemoryUtils {
 
     public static final long MB_100 = 100 * 1024 * 1024;
 
+    private MemoryUtils() {}
+
+    public static long toKbit(long bytes) {
+        return (long) (bytes * 0.008f);
+    }
+
     public static String humanReadableByteCount(long bytes) {
         int unit = 1024;
         long absBytes = bytes == Long.MIN_VALUE ? Long.MAX_VALUE : Math.abs(bytes);

@@ -99,7 +99,7 @@ public class ProcessExecutor {
     private File getErrorLogFile() {
         try {
             return File.createTempFile("log", ".txt", new File(processLoggingDir));
-        } catch (IOException e) {
+        } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
 
             return null;
