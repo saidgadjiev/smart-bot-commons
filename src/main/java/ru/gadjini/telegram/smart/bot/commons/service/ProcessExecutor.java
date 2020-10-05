@@ -96,7 +96,7 @@ public class ProcessExecutor {
         }
     }
 
-    private File getErrorLogFile() {
+    public File getErrorLogFile() {
         try {
             return File.createTempFile("log", ".txt", new File(processLoggingDir));
         } catch (Throwable e) {
