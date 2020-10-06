@@ -9,8 +9,9 @@ import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
+import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
@@ -32,12 +33,16 @@ public class MediaFilter extends BaseBotFilter {
 
     private FileManager fileManager;
 
+    private FileLimitProperties fileLimitProperties;
+
     @Autowired
-    public MediaFilter(UserService userService, LocalisationService localisationService, MessageMediaService fileService, FileManager fileManager) {
+    public MediaFilter(UserService userService, LocalisationService localisationService,
+                       MessageMediaService fileService, FileManager fileManager, FileLimitProperties fileLimitProperties) {
         this.userService = userService;
         this.localisationService = localisationService;
         this.fileService = fileService;
         this.fileManager = fileManager;
+        this.fileLimitProperties = fileLimitProperties;
     }
 
     @Override
@@ -60,7 +65,7 @@ public class MediaFilter extends BaseBotFilter {
                     MessagesProperties.MESSAGE_TOO_LARGE_IN_FILE,
                     new Object[]{MemoryUtils.humanReadableByteCount(message.getDocument().getFileSize())},
                     userService.getLocaleOrDefault(message.getFrom().getId())));
-        } else if (file.getFileSize() > MemoryUtils.MB_100) {
+        } else if (file.getFileSize() > fileLimitProperties.getLightFileMaxWeight()) {
             LOGGER.warn("Heavy file({}, {})", message.getFrom().getId(), file);
         }
     }

@@ -2,9 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.utils;
 
 public class MemoryUtils {
 
-    public static final long MB_100 = 100 * 1024 * 1024;
-
-    private MemoryUtils() {}
+    private MemoryUtils() {
+    }
 
     public static long toKbit(long bytes) {
         return (long) (bytes * 0.008f);
