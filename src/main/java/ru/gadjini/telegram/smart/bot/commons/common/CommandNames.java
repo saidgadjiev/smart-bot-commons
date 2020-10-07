@@ -18,4 +18,6 @@ public class CommandNames {
 
     public static final String GO_BACK = "goback";
 
+    public static final String RETRY = "rtr";
+
 }

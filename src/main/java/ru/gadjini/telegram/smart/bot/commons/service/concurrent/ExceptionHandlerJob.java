@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
@@ -11,11 +12,17 @@ import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.InlineKeyboardMarkup;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.buttons.InlineKeyboardButton;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Supplier;
 
@@ -123,7 +130,8 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                             localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
                                     new Object[]{floodWaitException.getSleepTime()},
                                     locale)
-                    ).setReplyToMessageId(job.getReplyToMessageId()));
+                    ).setReplyToMessageId(job.getReplyToMessageId())
+                            .setReplyMarkup(floodWaitKeyboard(locale)));
                 } else {
                     LOGGER.error(e.getMessage(), e);
                     sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
@@ -152,5 +160,23 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
 
     public SmartExecutorService.Job getOriginalJob() {
         return job;
+    }
+
+    private InlineKeyboardMarkup floodWaitKeyboard(Locale locale) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        inlineKeyboardMarkup.setKeyboard(new ArrayList<>());
+        inlineKeyboardMarkup.getKeyboard().add(List.of(retryButton(locale)));
+
+        return inlineKeyboardMarkup;
+    }
+
+    private InlineKeyboardButton retryButton(Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.RETRY_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.RETRY + CommandParser.COMMAND_NAME_SEPARATOR +
+                new RequestParams()
+                        .add("a", job.getId())
+                        .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
+
+        return inlineKeyboardButton;
     }
 }

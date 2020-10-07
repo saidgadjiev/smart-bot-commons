@@ -11,6 +11,8 @@ public class MessagesProperties {
 
     public static final String LANGUAGE_COMMAND_NAME = "language.command.name";
 
+    public static final String RETRY_COMMAND_DESCRIPTION = "retry.command.description";
+
     public static final String GO_BACK_COMMAND_NAME = "go.back.command.name";
 
     public static final String CANCEL_COMMAND_DESCRIPTION = "cancel.command.description";
