@@ -8,11 +8,11 @@ public interface MyBotCommand {
     }
 
     default boolean acceptNonCommandMessage(Message message) {
-        return message.hasText();
+        return true;
     }
 
    default boolean accept(Message message) {
-        return message.hasText();
+        return true;
     }
 
     default void cancel(long chatId, String queryId) {}
