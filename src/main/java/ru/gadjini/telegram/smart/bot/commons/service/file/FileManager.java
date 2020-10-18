@@ -1,11 +1,15 @@
 package ru.gadjini.telegram.smart.bot.commons.service.file;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
+import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.TelegramMediaServiceProvider;
@@ -87,11 +91,46 @@ public class FileManager {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        mediaServiceProvider.getDownloadMediaService(fileSize).downloadFileByFileId(fileId, fileSize, outputFile);
+        downloadFileByFileId(fileId, fileSize, null, outputFile);
+    }
+
+    public void forceDownloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
+        forceDownloadFileByFileId(fileId, fileSize, null, outputFile);
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         mediaServiceProvider.getDownloadMediaService(fileSize).downloadFileByFileId(fileId, fileSize, progress, outputFile);
+    }
+
+    public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        boolean downloaded = false;
+        Throwable lastEx = null;
+        int attempts = 0;
+        while (!downloaded && attempts < FileLimitProperties.MAX_ATTEMPTS) {
+            ++attempts;
+            try {
+                downloadFileByFileId(fileId, fileSize, progress, outputFile);
+                downloaded = true;
+            } catch (Throwable ex) {
+                LOGGER.debug("Attemp({}, {})", attempts, ex.getMessage());
+                lastEx = ex;
+                int downloadingExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, DownloadingException.class);
+                int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+                if (downloadingExceptionIndexOf == -1 && floodWaitExceptionIndexOf == -1) {
+                    throw ex;
+                } else {
+                    try {
+                        Thread.sleep(FileLimitProperties.FLOOD_WAIT_SLEEP_TIME);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
+
+        if (!downloaded) {
+            throw new DownloadingException(lastEx);
+        }
     }
 
     public FileWorkObject fileWorkObject(long chatId, long fileSize) {
