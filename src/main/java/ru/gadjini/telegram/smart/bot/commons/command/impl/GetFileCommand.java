@@ -23,7 +23,7 @@ public class GetFileCommand implements BotCommand {
     }
 
     @Override
-    public boolean acceptNonCommandMessage(Message message) {
+    public boolean accept(Message message) {
         return userService.isAdmin(message.getFrom().getId());
     }
 
