@@ -29,6 +29,8 @@ public class EditMessageText {
     private InlineKeyboardMarkup replyMarkup;
     @JsonIgnore
     private boolean throwEx;
+    @JsonIgnore
+    private boolean noLogging;
 
     public EditMessageText() {
     }
@@ -124,6 +126,16 @@ public class EditMessageText {
 
     public EditMessageText setThrowEx(boolean throwEx) {
         this.throwEx = throwEx;
+
+        return this;
+    }
+
+    public boolean isNoLogging() {
+        return noLogging;
+    }
+
+    public EditMessageText setNoLogging(boolean noLogging) {
+        this.noLogging = noLogging;
 
         return this;
     }

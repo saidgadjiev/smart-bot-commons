@@ -95,7 +95,9 @@ public class MessageServiceImpl implements MessageService {
         try {
             telegramService.editMessageText(editMessageText);
         } catch (TelegramApiException ex) {
-            LOGGER.error(ex.getMessage(), ex);
+            if (!editMessageText.isNoLogging()) {
+                LOGGER.error(ex.getMessage(), ex);
+            }
             if (editMessageText.isThrowEx()) {
                 throw ex;
             }
