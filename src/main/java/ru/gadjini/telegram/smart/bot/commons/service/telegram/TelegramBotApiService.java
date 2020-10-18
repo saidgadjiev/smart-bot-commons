@@ -11,6 +11,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -247,6 +248,9 @@ public class TelegramBotApiService implements TelegramMediaService {
                 if (result.getOk()) {
                     return result.getResult();
                 } else {
+                    if (result.errorCode == 429) {
+                        throw new FloodWaitException(result.getErrorDescription(), 30);
+                    }
                     throw new TelegramApiRequestException(sendDocument.getChatId(), "Error sending document", result);
                 }
             } catch (IOException e) {

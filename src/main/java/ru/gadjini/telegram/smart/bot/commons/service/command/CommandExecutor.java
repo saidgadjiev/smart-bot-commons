@@ -97,10 +97,12 @@ public class CommandExecutor {
 
         if (botCommand != null) {
             LOGGER.debug("Bot({}, {})", message.getFrom().getId(), botCommand.getClass().getSimpleName());
-            botCommand.processMessage(message, commandParseResult.getParameters());
+            if (botCommand.accept(message)) {
+                botCommand.processMessage(message, commandParseResult.getParameters());
 
-            if (botCommand instanceof NavigableBotCommand) {
-                commandNavigator.push(message.getChatId(), (NavigableBotCommand) botCommand);
+                if (botCommand instanceof NavigableBotCommand) {
+                    commandNavigator.push(message.getChatId(), (NavigableBotCommand) botCommand);
+                }
             }
 
             return true;

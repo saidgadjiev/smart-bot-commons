@@ -16,6 +16,10 @@ public class CommandNames {
 
     public static final String GO_BACK_CALLBACK_COMMAND_NAME = "gbcc";
 
+    public static final String GET_FILE_COMMAND = "file";
+
+    public static final String GET_FILE_ID_COMMAND = "fileid";
+
     public static final String GO_BACK = "goback";
 
     public static final String RETRY = "rtr";
