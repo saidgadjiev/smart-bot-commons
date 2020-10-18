@@ -7,7 +7,11 @@ public interface MyBotCommand {
     default void processNonCommandUpdate(Message message, String text) {
     }
 
-    default boolean accept(Message message) {
+    default boolean acceptNonCommandMessage(Message message) {
+        return message.hasText();
+    }
+
+   default boolean accept(Message message) {
         return message.hasText();
     }
 

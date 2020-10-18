@@ -86,7 +86,7 @@ public class CommandExecutor {
     public void processNonCommandUpdate(Message message, String text) {
         NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(message.getChatId());
 
-        if (navigableBotCommand != null && navigableBotCommand.accept(message)) {
+        if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(message)) {
             navigableBotCommand.processNonCommandUpdate(message, text);
         }
     }

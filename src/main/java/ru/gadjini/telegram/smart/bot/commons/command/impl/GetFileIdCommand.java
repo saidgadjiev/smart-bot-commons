@@ -33,7 +33,7 @@ public class GetFileIdCommand implements BotCommand, NavigableBotCommand {
     }
 
     @Override
-    public boolean accept(Message message) {
+    public boolean acceptNonCommandMessage(Message message) {
         return userService.isAdmin(message.getFrom().getId());
     }
 
