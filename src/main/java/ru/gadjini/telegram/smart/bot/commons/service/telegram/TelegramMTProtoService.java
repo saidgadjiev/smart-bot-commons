@@ -138,7 +138,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
             } catch (IOException e) {
                 throw new TelegramApiRequestException(sendDocument.getChatId(), "Unable to deserialize response(" + response + ")\n" + e.getMessage(), e);
             }
-        } catch (RestClientException e) {
+        } catch (Exception e) {
             throw new UnknownDownloadingUploadingException(e);
         } finally {
             if (StringUtils.isNotBlank(sendDocument.getDocument().getFilePath())) {
@@ -276,7 +276,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error download({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
-            throw new TelegramApiException(e);
+            throw new UnknownDownloadingUploadingException(e);
         }
     }
 

@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.UnknownDownloadingUploadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -256,8 +257,8 @@ public class TelegramBotApiService implements TelegramMediaService {
             } catch (IOException e) {
                 throw new TelegramApiRequestException(sendDocument.getChatId(), "Unable to deserialize response(" + response + ")\n" + e.getMessage(), e);
             }
-        } catch (RestClientException e) {
-            throw new TelegramApiRequestException(sendDocument.getChatId(), e.getMessage(), e);
+        } catch (Exception e) {
+            throw new UnknownDownloadingUploadingException(e);
         }
     }
 
@@ -360,8 +361,8 @@ public class TelegramBotApiService implements TelegramMediaService {
 
             stopWatch.stop();
             LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-        } catch (RestClientException e) {
-            throw new TelegramApiException(e);
+        } catch (Exception e) {
+            throw new UnknownDownloadingUploadingException(e);
         }
     }
 
