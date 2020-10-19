@@ -9,7 +9,9 @@ public class FileLimitProperties {
 
     public static final int FLOOD_WAIT_SLEEP_TIME = 30000;
 
-    public static final int MAX_ATTEMPTS = 20;
+    public static final int FLOOD_WAIT_MAX_ATTEMPTS = 13;
+
+    public static final int TELEGRAM_API_MAX_ATTEMPTS = 3;
 
     @Value("${light.file.max.weight:104857600}")
     private long lightFileMaxWeight;

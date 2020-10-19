@@ -6,7 +6,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
@@ -43,16 +42,15 @@ public class ForceMediaMessageService implements MediaMessageService {
     public SendFileResult sendDocument(SendDocument sendDocument) {
         int attempts = 0;
         Throwable lastEx = null;
-        while (attempts < FileLimitProperties.MAX_ATTEMPTS) {
+        while (attempts < FileLimitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
             ++attempts;
             try {
                 return mediaMessageService.sendDocument(sendDocument);
             } catch (Throwable ex) {
                 LOGGER.debug("Attemp({}, {})", attempts, ex.getMessage());
                 lastEx = ex;
-                int downloadingExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, DownloadingException.class);
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
-                if (downloadingExceptionIndexOf == -1 && floodWaitExceptionIndexOf == -1) {
+                if (floodWaitExceptionIndexOf == -1) {
                     throw ex;
                 } else {
                     try {

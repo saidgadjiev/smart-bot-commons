@@ -6,17 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
+import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
+import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.TelegramMediaServiceProvider;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
-import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 
 import javax.annotation.PostConstruct;
 import java.util.Locale;
@@ -105,25 +106,29 @@ public class FileManager {
     public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         boolean downloaded = false;
         Throwable lastEx = null;
-        int attempts = 0;
-        while (!downloaded && attempts < FileLimitProperties.MAX_ATTEMPTS) {
-            ++attempts;
+        int floodWaitAttempts = 0;
+        int telegramApiExceptionAttempts = 0;
+        while (!downloaded && floodWaitAttempts < FileLimitProperties.FLOOD_WAIT_MAX_ATTEMPTS
+                && telegramApiExceptionAttempts < FileLimitProperties.TELEGRAM_API_MAX_ATTEMPTS) {
             try {
                 downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
             } catch (Throwable ex) {
-                LOGGER.debug("Attemp({}, {})", attempts, ex.getMessage());
+                LOGGER.debug("Attemp({}, {}, {})", floodWaitAttempts, telegramApiExceptionAttempts, ex.getMessage());
                 lastEx = ex;
-                int downloadingExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, DownloadingException.class);
+                int telegramApiExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiException.class);
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
-                if (downloadingExceptionIndexOf == -1 && floodWaitExceptionIndexOf == -1) {
-                    throw ex;
+                if (floodWaitExceptionIndexOf != -1) {
+                    ++floodWaitAttempts;
+                } else if (telegramApiExceptionIndexOf != -1) {
+                    ++telegramApiExceptionAttempts;
                 } else {
-                    try {
-                        Thread.sleep(FileLimitProperties.FLOOD_WAIT_SLEEP_TIME);
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    throw ex;
+                }
+                try {
+                    Thread.sleep(FileLimitProperties.FLOOD_WAIT_SLEEP_TIME);
+                } catch (InterruptedException e) {
+                    throw new DownloadingException(e);
                 }
             }
         }

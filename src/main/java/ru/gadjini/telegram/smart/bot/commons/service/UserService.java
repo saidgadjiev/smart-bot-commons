@@ -1,15 +1,16 @@
 package ru.gadjini.telegram.smart.bot.commons.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.User;
 import ru.gadjini.telegram.smart.bot.commons.dao.UserDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
+import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.User;
 
 import java.util.Locale;
 
@@ -71,8 +72,10 @@ public class UserService {
     }
 
     public boolean handleBotBlockedByUser(Throwable ex) {
-        if (ex instanceof TelegramApiRequestException) {
-            TelegramApiRequestException exception = (TelegramApiRequestException) ex;
+        int apiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
+
+        if (apiRequestExceptionIndexOf != -1) {
+            TelegramApiRequestException exception = (TelegramApiRequestException) ExceptionUtils.getThrowableList(ex).get(apiRequestExceptionIndexOf);
             if (exception.getErrorCode() == 403) {
                 blockUser((int) exception.getLongChatId());
 
