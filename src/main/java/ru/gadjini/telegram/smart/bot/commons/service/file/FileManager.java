@@ -157,4 +157,11 @@ public class FileManager {
     public void restoreFileIfNeed(String filePath, String fileId) {
         telegramService.restoreFileIfNeed(filePath, fileId);
     }
+
+    public static boolean isSomethingWentWrongWithDownloading(Throwable ex) {
+        int telegramAPiExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiException.class);
+        int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+
+        return telegramAPiExceptionIndexOf != -1 || floodWaitExceptionIndexOf != -1;
+    }
 }
