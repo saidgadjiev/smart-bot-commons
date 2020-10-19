@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.UnknownDownloadingUploadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
-import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
@@ -107,21 +107,21 @@ public class FileManager {
         boolean downloaded = false;
         Throwable lastEx = null;
         int floodWaitAttempts = 0;
-        int telegramApiExceptionAttempts = 0;
+        int unknownExceptionAttempts = 0;
         while (!downloaded && floodWaitAttempts < FileLimitProperties.FLOOD_WAIT_MAX_ATTEMPTS
-                && telegramApiExceptionAttempts < FileLimitProperties.TELEGRAM_API_MAX_ATTEMPTS) {
+                && unknownExceptionAttempts < FileLimitProperties.UNKNOWN_EXCEPTION_MAX_ATTEMPTS) {
             try {
                 downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
             } catch (Throwable ex) {
-                LOGGER.debug("Attemp({}, {}, {})", floodWaitAttempts, telegramApiExceptionAttempts, ex.getMessage());
+                LOGGER.debug("Attemp({}, {}, {})", floodWaitAttempts, unknownExceptionAttempts, ex.getMessage());
                 lastEx = ex;
-                int telegramApiExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiException.class);
+                int unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, UnknownDownloadingUploadingException.class);
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
                 if (floodWaitExceptionIndexOf != -1) {
                     ++floodWaitAttempts;
-                } else if (telegramApiExceptionIndexOf != -1) {
-                    ++telegramApiExceptionAttempts;
+                } else if (unknownExceptionIndexOf != -1) {
+                    ++unknownExceptionAttempts;
                 } else {
                     throw ex;
                 }
@@ -159,9 +159,9 @@ public class FileManager {
     }
 
     public static boolean isSomethingWentWrongWithDownloadingUploading(Throwable ex) {
-        int telegramAPiExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiException.class);
+        int unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, UnknownDownloadingUploadingException.class);
         int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
 
-        return telegramAPiExceptionIndexOf != -1 || floodWaitExceptionIndexOf != -1;
+        return unknownExceptionIndexOf != -1 || floodWaitExceptionIndexOf != -1;
     }
 }
