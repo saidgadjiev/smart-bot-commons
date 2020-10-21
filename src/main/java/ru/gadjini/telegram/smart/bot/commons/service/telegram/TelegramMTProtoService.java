@@ -138,6 +138,8 @@ public class TelegramMTProtoService implements TelegramMediaService {
             } catch (IOException e) {
                 throw new TelegramApiRequestException(sendDocument.getChatId(), "Unable to deserialize response(" + response + ")\n" + e.getMessage(), e);
             }
+        } catch (TelegramApiRequestException ex) {
+            throw ex;
         } catch (Exception e) {
             throw new UnknownDownloadingUploadingException(e);
         } finally {
