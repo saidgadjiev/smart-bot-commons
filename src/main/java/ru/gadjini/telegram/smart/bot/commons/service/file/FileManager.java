@@ -7,10 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
-import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
-import ru.gadjini.telegram.smart.bot.commons.exception.UnknownDownloadingUploadingException;
-import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
+import ru.gadjini.telegram.smart.bot.commons.exception.*;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
@@ -118,6 +115,9 @@ public class FileManager {
                 lastEx = ex;
                 int unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, UnknownDownloadingUploadingException.class);
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+                if (unknownExceptionIndexOf == -1) {
+                    unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TimeoutException.class);
+                }
                 if (floodWaitExceptionIndexOf != -1) {
                     ++floodWaitAttempts;
                 } else if (unknownExceptionIndexOf != -1) {
@@ -158,9 +158,10 @@ public class FileManager {
         telegramService.restoreFileIfNeed(filePath, fileId);
     }
 
-    public static boolean isFloodWaitException(Throwable ex) {
+    public static boolean isNoneCriticalDownloadingException(Throwable ex) {
         int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+        int timeoutException = ExceptionUtils.indexOfThrowable(ex, TimeoutException.class);
 
-        return floodWaitExceptionIndexOf != -1;
+        return floodWaitExceptionIndexOf != -1 || timeoutException != -1;
     }
 }

@@ -14,10 +14,8 @@ import org.springframework.http.HttpEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
-import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
-import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
-import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
-import ru.gadjini.telegram.smart.bot.commons.exception.UnknownDownloadingUploadingException;
+import ru.gadjini.telegram.smart.bot.commons.exception.TimeoutException;
+import ru.gadjini.telegram.smart.bot.commons.exception.*;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -30,6 +28,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.GetFile;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
 import ru.gadjini.telegram.smart.bot.commons.property.MTProtoProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
@@ -262,8 +261,10 @@ public class TelegramMTProtoService implements TelegramMediaService {
                 });
 
                 if (!apiResponse.getOk()) {
-                    if (Objects.equals(apiResponse.getErrorCode(), 420)) {
+                    if (Objects.equals(apiResponse.getErrorCode(), HttpCodes.TOO_MANY_REQUESTS)) {
                         throw new FloodWaitException("Flood wait", (int) Double.parseDouble(apiResponse.getErrorDescription()));
+                    } else if (Objects.equals(apiResponse.getErrorCode(), HttpCodes.REQUEST_TIMEOUT)) {
+                        throw new TimeoutException("Time out");
                     }
                     throw new DownloadCanceledException("Download canceled " + fileId);
                 }
@@ -273,8 +274,8 @@ public class TelegramMTProtoService implements TelegramMediaService {
 
             stopWatch.stop();
             LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-        } catch (DownloadCanceledException | FloodWaitException | TelegramApiException e) {
-            LOGGER.error("Download canceled({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+        } catch (DownloadCanceledException | FloodWaitException | TelegramApiException | TimeoutException e) {
+            LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
             throw e;
         } catch (Exception e) {
             LOGGER.error("Error download({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
@@ -305,8 +306,10 @@ public class TelegramMTProtoService implements TelegramMediaService {
                     });
 
                     if (!apiResponse.getOk()) {
-                        if (Objects.equals(apiResponse.getErrorCode(), 420)) {
+                        if (Objects.equals(apiResponse.getErrorCode(), HttpCodes.TOO_MANY_REQUESTS)) {
                             throw new FloodWaitException("Flood wait", (int) Double.parseDouble(apiResponse.getErrorDescription()));
+                        } else if (Objects.equals(apiResponse.getErrorCode(), HttpCodes.REQUEST_TIMEOUT)) {
+                            throw new TimeoutException("Time out");
                         }
                         throw new DownloadCanceledException("Download canceled " + fileId);
                     }
@@ -316,7 +319,7 @@ public class TelegramMTProtoService implements TelegramMediaService {
 
                 stopWatch.stop();
                 LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
-            } catch (DownloadCanceledException | FloodWaitException | TelegramApiException e) {
+            } catch (DownloadCanceledException | FloodWaitException | TelegramApiException | TimeoutException e) {
                 LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
                 throw e;
             } catch (Exception e) {
