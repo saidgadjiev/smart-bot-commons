@@ -24,6 +24,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallback
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.GetFile;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
@@ -249,7 +250,7 @@ public class TelegramBotApiService implements TelegramMediaService {
                 if (result.getOk()) {
                     return result.getResult();
                 } else {
-                    if (result.errorCode == 429) {
+                    if (result.errorCode == HttpCodes.TOO_MANY_REQUESTS) {
                         throw new FloodWaitException(result.getErrorDescription(), 30);
                     }
                     throw new TelegramApiRequestException(sendDocument.getChatId(), "Error sending document", result);
@@ -257,6 +258,8 @@ public class TelegramBotApiService implements TelegramMediaService {
             } catch (IOException e) {
                 throw new TelegramApiRequestException(sendDocument.getChatId(), "Unable to deserialize response(" + response + ")\n" + e.getMessage(), e);
             }
+        } catch (FloodWaitException | TelegramApiRequestException e) {
+            throw e;
         } catch (Exception e) {
             throw new UnknownDownloadingUploadingException(e);
         }
