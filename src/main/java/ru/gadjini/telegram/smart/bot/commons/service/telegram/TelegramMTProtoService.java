@@ -337,8 +337,6 @@ public class TelegramMTProtoService implements TelegramMediaService {
         } catch (InterruptedException e) {
             throw new DownloadCanceledException("Download canceled " + fileId);
         } catch (Exception e) {
-            cancelDownloading(fileId);
-
             throw new DownloadingException(e.getMessage(), e);
         }
     }
