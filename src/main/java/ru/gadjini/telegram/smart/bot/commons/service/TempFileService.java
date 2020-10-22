@@ -58,6 +58,8 @@ public class TempFileService {
         try {
             File file = new File(parent.getFile(), fileName);
             Files.createFile(file.toPath());
+            file.setReadable(true, false);
+            file.setWritable(true, false);
 
             LOGGER.debug("Create({}, {})", chatId, file.getAbsolutePath());
             return new SmartTempFile(file, true);
@@ -70,6 +72,8 @@ public class TempFileService {
         try {
             File file = new File(parent.getFile(), generateFileName(chatId, fileId, tag, ext));
             Files.createFile(file.toPath());
+            file.setReadable(true, false);
+            file.setWritable(true, false);
 
             LOGGER.debug("Create({}, {}, {})", chatId, fileId, file.getAbsolutePath());
             return new SmartTempFile(file, true);
@@ -82,6 +86,8 @@ public class TempFileService {
         try {
             File file = new File(tempDir, generateFileName(chatId, fileId, tag, ext));
             Files.createFile(file.toPath());
+            file.setReadable(true, false);
+            file.setWritable(true, false);
 
             LOGGER.debug("Create({}, {}, {})", chatId, fileId, file.getAbsolutePath());
             return new SmartTempFile(file);
