@@ -110,13 +110,13 @@ public class FileManager {
                 downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
             } catch (Throwable ex) {
-                LOGGER.debug("Attemp({}, {})", unknownExceptionAttempts, ex.getMessage());
                 lastEx = ex;
                 int unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, UnknownDownloadingUploadingException.class);
                 if (unknownExceptionIndexOf == -1) {
                     unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TimeoutException.class);
                 }
                 if (unknownExceptionIndexOf != -1) {
+                    LOGGER.debug("Attemp({}, {})", unknownExceptionAttempts, ex.getMessage());
                     ++unknownExceptionAttempts;
                 } else {
                     throw ex;

@@ -47,12 +47,12 @@ public class ForceMediaMessageService implements MediaMessageService {
             try {
                 return mediaMessageService.sendDocument(sendDocument);
             } catch (Throwable ex) {
-                LOGGER.debug("Attemp({}, {})", attempts, ex.getMessage());
                 lastEx = ex;
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
                 if (floodWaitExceptionIndexOf == -1) {
                     throw ex;
                 } else {
+                    LOGGER.debug("Attemp({}, {})", attempts, ex.getMessage());
                     try {
                         Thread.sleep(FileLimitProperties.SLEEP_TIME_BEFORE_ATTEMPT);
                     } catch (InterruptedException e) {
