@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.file;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -158,5 +159,15 @@ public class FileManager {
         int timeoutException = ExceptionUtils.indexOfThrowable(ex, TimeoutException.class);
 
         return floodWaitExceptionIndexOf != -1 || timeoutException != -1;
+    }
+
+    public static boolean isNoneCriticalDownloadingException(String exception) {
+        if (StringUtils.isBlank(exception)) {
+            return false;
+        }
+        boolean floodWait = exception.contains(FloodWaitException.class.getSimpleName());
+        boolean timeout = exception.contains(TimeoutException.class.getSimpleName());
+
+        return floodWait || timeout;
     }
 }
