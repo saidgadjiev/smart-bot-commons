@@ -54,7 +54,7 @@ public class ForceMediaMessageService implements MediaMessageService {
                     throw ex;
                 } else {
                     try {
-                        Thread.sleep(FileLimitProperties.FLOOD_WAIT_SLEEP_TIME);
+                        Thread.sleep(FileLimitProperties.SLEEP_TIME_BEFORE_ATTEMPT);
                     } catch (InterruptedException e) {
                         throw new RuntimeException(e);
                     }

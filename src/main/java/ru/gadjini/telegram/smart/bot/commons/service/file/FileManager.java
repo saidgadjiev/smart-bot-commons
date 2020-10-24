@@ -103,30 +103,25 @@ public class FileManager {
     public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         boolean downloaded = false;
         Throwable lastEx = null;
-        int floodWaitAttempts = 0;
         int unknownExceptionAttempts = 0;
-        while (!downloaded && floodWaitAttempts < FileLimitProperties.FLOOD_WAIT_MAX_ATTEMPTS
-                && unknownExceptionAttempts < FileLimitProperties.UNKNOWN_EXCEPTION_MAX_ATTEMPTS) {
+        while (!downloaded && unknownExceptionAttempts < FileLimitProperties.UNKNOWN_EXCEPTION_MAX_ATTEMPTS) {
             try {
                 downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
             } catch (Throwable ex) {
-                LOGGER.debug("Attemp({}, {}, {})", floodWaitAttempts, unknownExceptionAttempts, ex.getMessage());
+                LOGGER.debug("Attemp({}, {})", unknownExceptionAttempts, ex.getMessage());
                 lastEx = ex;
                 int unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, UnknownDownloadingUploadingException.class);
-                int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
                 if (unknownExceptionIndexOf == -1) {
                     unknownExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TimeoutException.class);
                 }
-                if (floodWaitExceptionIndexOf != -1) {
-                    ++floodWaitAttempts;
-                } else if (unknownExceptionIndexOf != -1) {
+                if (unknownExceptionIndexOf != -1) {
                     ++unknownExceptionAttempts;
                 } else {
                     throw ex;
                 }
                 try {
-                    Thread.sleep(FileLimitProperties.FLOOD_WAIT_SLEEP_TIME);
+                    Thread.sleep(FileLimitProperties.SLEEP_TIME_BEFORE_ATTEMPT);
                 } catch (InterruptedException e) {
                     throw new DownloadingException(e);
                 }
