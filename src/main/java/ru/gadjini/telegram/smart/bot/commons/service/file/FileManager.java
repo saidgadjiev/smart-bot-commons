@@ -16,6 +16,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.TelegramMediaServiceProvider;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
+import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.Locale;
@@ -38,6 +39,9 @@ public class FileManager {
     @Value("${file.time.limit:180}")
     private int fileTimeLimit;
 
+    @Value("${max.file.size:#{null}}")
+    private Long maxFileSize;
+
     @Autowired
     public FileManager(TelegramMTProtoService telegramService, TelegramMediaServiceProvider mediaServiceProvider,
                        FileLimitsDao fileLimitsDao, LocalisationService localisationService, UserService userService) {
@@ -51,6 +55,10 @@ public class FileManager {
     @PostConstruct
     public void init() {
         LOGGER.debug("File time limit({})", fileTimeLimit);
+
+        if (maxFileSize != null) {
+            LOGGER.debug("Max file size({})", MemoryUtils.humanReadableByteCount(maxFileSize));
+        }
     }
 
     public void setInputFilePending(long chatId, Integer replyToMessageId, String fileId, long fileSize, String command) {
@@ -68,6 +76,7 @@ public class FileManager {
     }
 
     public void inputFile(long chatId, String fileId, long fileSize) {
+        checkFileSize(fileSize, chatId);
         if (fileSize == 0) {
             LOGGER.debug("File size ({}, {}, {})", chatId, fileId, fileId);
         }
@@ -169,5 +178,14 @@ public class FileManager {
         boolean timeout = exception.contains(TimeoutException.class.getSimpleName());
 
         return floodWait || timeout;
+    }
+
+    private void checkFileSize(long fileSize, long chatId) {
+        if (maxFileSize != null && fileSize > maxFileSize) {
+            Locale locale = userService.getLocaleOrDefault((int) chatId);
+            throw new UserException(localisationService.getMessage(MessagesProperties.MAX_FILE_SIZE, new Object[] {
+                    MemoryUtils.humanReadableByteCount(maxFileSize)
+            }, locale));
+        }
     }
 }
