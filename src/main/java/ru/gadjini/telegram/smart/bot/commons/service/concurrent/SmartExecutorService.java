@@ -193,6 +193,10 @@ public class SmartExecutorService {
         default void setCanceledByUser(boolean canceledByUser) {
 
         }
+
+        default boolean isCanceledByUser() {
+            return false;
+        }
     }
 
     public interface RejectJobHandler {
