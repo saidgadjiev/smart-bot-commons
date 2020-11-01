@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
@@ -19,8 +20,14 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileWorkObject;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobDelegate;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorker;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorkerFactory;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.event.CurrentTasksCanceled;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.event.QueueJobInitialization;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.event.QueueJobShuttingDown;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.event.TaskCanceled;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
@@ -43,16 +50,35 @@ public class QueueJob {
 
     private FileManager fileManager;
 
-    private QueueJobDelegate queueWorker;
-
     private UserService userService;
 
     private MessageService messageService;
 
     private LocalisationService localisationService;
 
+    private QueueWorkerFactory queueWorkerFactory;
+
+    private ApplicationEventPublisher applicationEventPublisher;
+
+    private QueueJobConfigurator queueJobConfigurator;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
+
+    @Autowired
+    public void setQueueJobConfigurator(QueueJobConfigurator queueJobConfigurator) {
+        this.queueJobConfigurator = queueJobConfigurator;
+    }
+
+    @Autowired
+    public void setApplicationEventPublisher(ApplicationEventPublisher applicationEventPublisher) {
+        this.applicationEventPublisher = applicationEventPublisher;
+    }
+
+    @Autowired
+    public void setQueueWorkerFactory(QueueWorkerFactory queueWorkerFactory) {
+        this.queueWorkerFactory = queueWorkerFactory;
+    }
 
     @Autowired
     public void setLocalisationService(LocalisationService localisationService) {
@@ -85,11 +111,6 @@ public class QueueJob {
     }
 
     @Autowired
-    public void setQueueWorker(QueueJobDelegate queueWorker) {
-        this.queueWorker = queueWorker;
-    }
-
-    @Autowired
     public void setExecutor(@Qualifier("queueTaskExecutor") SmartExecutorService executor) {
         this.executor = executor;
     }
@@ -97,7 +118,7 @@ public class QueueJob {
     @PostConstruct
     public final void init() {
         LOGGER.debug("Disable jobs {}", disableJobs);
-        queueWorker.init();
+        applicationEventPublisher.publishEvent(new QueueJobInitialization());
         try {
             queueService.resetProcessing();
         } catch (Exception ex) {
@@ -118,7 +139,7 @@ public class QueueJob {
             if (items.size() > 0) {
                 LOGGER.debug("Push heavy jobs({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorker.mapWorker(queueItem))));
+            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
         }
         ThreadPoolExecutor lightExecutor = executor.getExecutor(SmartExecutorService.JobWeight.LIGHT);
         if (lightExecutor.getActiveCount() < lightExecutor.getCorePoolSize()) {
@@ -127,7 +148,7 @@ public class QueueJob {
             if (items.size() > 0) {
                 LOGGER.debug("Push light jobs({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorker.mapWorker(queueItem))));
+            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
         }
         if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
             Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount());
@@ -135,7 +156,7 @@ public class QueueJob {
             if (items.size() > 0) {
                 LOGGER.debug("Push light jobs to heavy threads({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorker.mapWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
+            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
         }
     }
 
@@ -146,13 +167,13 @@ public class QueueJob {
 
     public final int removeAndCancelCurrentTasks(long chatId) {
         List<QueueItem> conversionQueueItems = queueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
-        for (QueueItem conversionQueueItem : conversionQueueItems) {
-            if (!executor.cancelAndComplete(conversionQueueItem.getId(), true)) {
-                fileManager.fileWorkObject(conversionQueueItem.getUserId(), conversionQueueItem.getSize()).stop();
+        for (QueueItem item : conversionQueueItems) {
+            if (!executor.cancelAndComplete(item.getId(), true)) {
+                fileManager.fileWorkObject(item.getUserId(), item.getSize()).stop();
             }
-            queueWorker.afterTaskCanceled(conversionQueueItem);
+            applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
-        queueWorker.currentTasksRemoved((int) chatId);
+        applicationEventPublisher.publishEvent(new CurrentTasksCanceled((int) chatId));
 
         return conversionQueueItems.size();
     }
@@ -173,9 +194,9 @@ public class QueueJob {
             if (!executor.cancelAndComplete(jobId, true)) {
                 fileManager.fileWorkObject(queueItem.getId(), queueItem.getSize()).stop();
             }
-            queueWorker.afterTaskCanceled(queueItem);
+            applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
-        if (queueWorker.isNeedUpdateMessageAfterCancel(queueItem)) {
+        if (queueJobConfigurator.isNeedUpdateMessageAfterCancel(queueItem)) {
             messageService.editMessage(new EditMessageText(
                     chatId, messageId, localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))));
         }
@@ -183,7 +204,7 @@ public class QueueJob {
 
     public final void shutdown() {
         executor.shutdown();
-        queueWorker.shutdown();
+        applicationEventPublisher.publishEvent(new QueueJobShuttingDown());
     }
 
     public class QueueTask implements SmartExecutorService.Job {
@@ -196,11 +217,11 @@ public class QueueJob {
 
         private FileWorkObject fileWorkObject;
 
-        private QueueJobDelegate.WorkerTaskDelegate workerTaskDelegate;
+        private QueueWorker workerTaskDelegate;
 
-        private QueueTask(QueueItem queueItem, QueueJobDelegate.WorkerTaskDelegate workerTaskDelegate) {
+        private QueueTask(QueueItem queueItem, QueueWorker queueWorker) {
             this.queueItem = queueItem;
-            this.workerTaskDelegate = workerTaskDelegate;
+            this.workerTaskDelegate = queueWorker;
             this.fileWorkObject = fileManager.fileWorkObject(queueItem.getUserId(), queueItem.getSize());
         }
 
