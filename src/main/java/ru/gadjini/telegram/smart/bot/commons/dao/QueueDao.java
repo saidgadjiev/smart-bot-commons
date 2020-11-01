@@ -18,7 +18,7 @@ public class QueueDao {
     private QueueDaoDelegate queueDaoDelegate;
 
     @Autowired
-    private QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate) {
+    public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate) {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
     }

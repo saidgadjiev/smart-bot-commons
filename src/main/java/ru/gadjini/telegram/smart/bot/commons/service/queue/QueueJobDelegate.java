@@ -7,13 +7,27 @@ import java.util.Locale;
 
 public interface QueueJobDelegate {
 
-    void init();
+    default void init() {
+
+    }
 
     WorkerTaskDelegate mapWorker(QueueItem queueItem);
 
-    void afterTaskCanceled(int id);
+    default void afterTaskCanceled(QueueItem queueItem) {
 
-    void shutdown();
+    }
+
+    default void shutdown() {
+
+    }
+
+    default void currentTasksRemoved(int userId) {
+
+    }
+
+    default boolean isNeedUpdateMessageAfterCancel(QueueItem queueItem) {
+        return true;
+    }
 
     interface WorkerTaskDelegate {
 
@@ -21,13 +35,23 @@ public interface QueueJobDelegate {
 
         void cancel();
 
-        String getErrorCode(Throwable e);
+        default String getErrorCode(Throwable e) {
+            return null;
+        }
 
         String getWaitingMessage(QueueItem queueItem, Locale locale);
 
         InlineKeyboardMarkup getWaitingKeyboard(QueueItem queueItem, Locale locale);
 
         default void finish() {
+
+        }
+
+        default boolean shouldBeDeletedAfterCompleted() {
+            return false;
+        }
+
+        default void unhandledException(Throwable e) {
 
         }
     }

@@ -4,12 +4,16 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.BusyWorkerException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
+import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
@@ -44,6 +48,16 @@ public class QueueJob {
     private UserService userService;
 
     private MessageService messageService;
+
+    private LocalisationService localisationService;
+
+    @Value("${disable.jobs:false}")
+    private boolean disableJobs;
+
+    @Autowired
+    public void setLocalisationService(LocalisationService localisationService) {
+        this.localisationService = localisationService;
+    }
 
     @Autowired
     public void setQueueService(QueueService queueService) {
@@ -82,6 +96,7 @@ public class QueueJob {
 
     @PostConstruct
     public final void init() {
+        LOGGER.debug("Disable jobs {}", disableJobs);
         queueWorker.init();
         try {
             queueService.resetProcessing();
@@ -93,6 +108,9 @@ public class QueueJob {
 
     @Scheduled(fixedDelay = 5000)
     public final void pushJobs() {
+        if (disableJobs) {
+            return;
+        }
         ThreadPoolExecutor heavyExecutor = executor.getExecutor(SmartExecutorService.JobWeight.HEAVY);
         if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
             Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.HEAVY, heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount());
@@ -132,24 +150,35 @@ public class QueueJob {
             if (!executor.cancelAndComplete(conversionQueueItem.getId(), true)) {
                 fileManager.fileWorkObject(conversionQueueItem.getUserId(), conversionQueueItem.getSize()).stop();
             }
-            queueWorker.afterTaskCanceled(conversionQueueItem.getId());
+            queueWorker.afterTaskCanceled(conversionQueueItem);
         }
+        queueWorker.currentTasksRemoved((int) chatId);
 
         return conversionQueueItems.size();
     }
 
-    public final boolean cancel(int jobId) {
-        QueueItem item = queueService.deleteAndGetById(jobId);
-
-        if (item == null) {
-            return false;
+    public void cancel(long chatId, int messageId, String queryId, int jobId) {
+        QueueItem queueItem = queueService.getById(jobId);
+        if (queueItem == null) {
+            messageService.sendAnswerCallbackQuery(new AnswerCallbackQuery(
+                    queryId,
+                    localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_ITEM_NOT_FOUND, userService.getLocaleOrDefault((int) chatId)),
+                    true
+            ));
+        } else {
+            messageService.sendAnswerCallbackQuery(new AnswerCallbackQuery(
+                    queryId,
+                    localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))
+            ));
+            if (!executor.cancelAndComplete(jobId, true)) {
+                fileManager.fileWorkObject(queueItem.getId(), queueItem.getSize()).stop();
+            }
+            queueWorker.afterTaskCanceled(queueItem);
         }
-        if (!executor.cancelAndComplete(jobId, true)) {
-            fileManager.fileWorkObject(item.getId(), item.getSize()).stop();
+        if (queueWorker.isNeedUpdateMessageAfterCancel(queueItem)) {
+            messageService.editMessage(new EditMessageText(
+                    chatId, messageId, localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))));
         }
-        queueWorker.afterTaskCanceled(jobId);
-
-        return item.getStatus() != QueueItem.Status.COMPLETED;
     }
 
     public final void shutdown() {
@@ -187,10 +216,14 @@ public class QueueJob {
 
         @Override
         public void execute() throws Exception {
+            boolean success = false;
             try {
                 fileWorkObject.start();
                 workerTaskDelegate.execute();
-                queueService.setCompleted(queueItem.getId());
+                if (!workerTaskDelegate.shouldBeDeletedAfterCompleted()) {
+                    queueService.setCompleted(queueItem.getId());
+                }
+                success = true;
             } catch (BusyWorkerException ex) {
                 queueService.setWaiting(queueItem.getId());
             } catch (Throwable ex) {
@@ -199,6 +232,7 @@ public class QueueJob {
                         handleNoneCriticalDownloadingException(ex);
                     } else {
                         queueService.setException(queueItem.getId(), ex);
+                        workerTaskDelegate.unhandledException(ex);
 
                         throw ex;
                     }
@@ -206,8 +240,13 @@ public class QueueJob {
             } finally {
                 if (checker == null || !checker.get()) {
                     executor.complete(queueItem.getId());
-                    fileWorkObject.stop();
                     workerTaskDelegate.finish();
+                    if (success) {
+                        fileWorkObject.stop();
+                        if (workerTaskDelegate.shouldBeDeletedAfterCompleted()) {
+                            queueService.deleteById(queueItem.getId());
+                        }
+                    }
                 }
             }
         }
@@ -216,10 +255,10 @@ public class QueueJob {
         public void cancel() {
             if (canceledByUser) {
                 queueService.deleteById(queueItem.getId());
+                fileWorkObject.stop();
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
             executor.complete(queueItem.getId());
-            fileWorkObject.stop();
             workerTaskDelegate.cancel();
         }
 

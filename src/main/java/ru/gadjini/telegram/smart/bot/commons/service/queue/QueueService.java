@@ -68,4 +68,8 @@ public class QueueService {
     public void deleteById(int id) {
         queueDao.deleteById(id);
     }
+
+    public boolean exists(int id) {
+        return queueDao.exists(id);
+    }
 }
