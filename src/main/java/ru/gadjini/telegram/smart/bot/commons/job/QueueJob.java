@@ -217,11 +217,11 @@ public class QueueJob {
 
         private FileWorkObject fileWorkObject;
 
-        private QueueWorker workerTaskDelegate;
+        private QueueWorker queueWorker;
 
         private QueueTask(QueueItem queueItem, QueueWorker queueWorker) {
             this.queueItem = queueItem;
-            this.workerTaskDelegate = queueWorker;
+            this.queueWorker = queueWorker;
             this.fileWorkObject = fileManager.fileWorkObject(queueItem.getUserId(), queueItem.getSize());
         }
 
@@ -240,8 +240,8 @@ public class QueueJob {
             boolean success = false;
             try {
                 fileWorkObject.start();
-                workerTaskDelegate.execute();
-                if (!workerTaskDelegate.shouldBeDeletedAfterCompleted()) {
+                queueWorker.execute();
+                if (!queueWorker.shouldBeDeletedAfterCompleted()) {
                     queueService.setCompleted(queueItem.getId());
                 }
                 success = true;
@@ -253,7 +253,7 @@ public class QueueJob {
                         handleNoneCriticalDownloadingException(ex);
                     } else {
                         queueService.setException(queueItem.getId(), ex);
-                        workerTaskDelegate.unhandledException(ex);
+                        queueWorker.unhandledException(ex);
 
                         throw ex;
                     }
@@ -261,10 +261,10 @@ public class QueueJob {
             } finally {
                 if (checker == null || !checker.get()) {
                     executor.complete(queueItem.getId());
-                    workerTaskDelegate.finish();
+                    queueWorker.finish();
                     if (success) {
                         fileWorkObject.stop();
-                        if (workerTaskDelegate.shouldBeDeletedAfterCompleted()) {
+                        if (queueWorker.shouldBeDeletedAfterCompleted()) {
                             queueService.deleteById(queueItem.getId());
                         }
                     }
@@ -280,12 +280,12 @@ public class QueueJob {
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
             executor.complete(queueItem.getId());
-            workerTaskDelegate.cancel();
+            queueWorker.cancel();
         }
 
         @Override
         public String getErrorCode(Throwable e) {
-            return workerTaskDelegate.getErrorCode(e);
+            return queueWorker.getErrorCode(e);
         }
 
         @Override
@@ -342,11 +342,11 @@ public class QueueJob {
                 return;
             }
             Locale locale = userService.getLocaleOrDefault(queueItem.getUserId());
-            String message = workerTaskDelegate.getWaitingMessage(queueItem, locale);
+            String message = queueWorker.getWaitingMessage(queueItem, locale);
 
             messageService.editMessage(new EditMessageText((long) queueItem.getUserId(), queueItem.getProgressMessageId(), message)
                     .setNoLogging(true)
-                    .setReplyMarkup(workerTaskDelegate.getWaitingKeyboard(queueItem, locale)));
+                    .setReplyMarkup(queueWorker.getWaitingKeyboard(queueItem, locale)));
         }
     }
 }
