@@ -241,7 +241,7 @@ public class QueueJob {
             try {
                 fileWorkObject.start();
                 queueWorker.execute();
-                if (!queueWorker.shouldBeDeletedAfterCompleted()) {
+                if (!queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
                     queueService.setCompleted(queueItem.getId());
                 }
                 success = true;
@@ -264,7 +264,7 @@ public class QueueJob {
                     queueWorker.finish();
                     if (success) {
                         fileWorkObject.stop();
-                        if (queueWorker.shouldBeDeletedAfterCompleted()) {
+                        if (queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
                             queueService.deleteById(queueItem.getId());
                         }
                     }
@@ -285,7 +285,7 @@ public class QueueJob {
 
         @Override
         public String getErrorCode(Throwable e) {
-            return queueWorker.getErrorCode(e);
+            return queueJobConfigurator.getErrorCode(e);
         }
 
         @Override
@@ -342,11 +342,11 @@ public class QueueJob {
                 return;
             }
             Locale locale = userService.getLocaleOrDefault(queueItem.getUserId());
-            String message = queueWorker.getWaitingMessage(queueItem, locale);
+            String message = queueJobConfigurator.getWaitingMessage(queueItem, locale);
 
             messageService.editMessage(new EditMessageText((long) queueItem.getUserId(), queueItem.getProgressMessageId(), message)
                     .setNoLogging(true)
-                    .setReplyMarkup(queueWorker.getWaitingKeyboard(queueItem, locale)));
+                    .setReplyMarkup(queueJobConfigurator.getWaitingKeyboard(queueItem, locale)));
         }
     }
 }
