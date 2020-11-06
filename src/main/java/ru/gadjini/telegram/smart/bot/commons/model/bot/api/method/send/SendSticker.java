@@ -73,6 +73,10 @@ public class SendSticker {
         return this;
     }
 
+    public InputFile getSticker() {
+        return sticker;
+    }
+
     @Override
     public String toString() {
         return "SendSticker{" +

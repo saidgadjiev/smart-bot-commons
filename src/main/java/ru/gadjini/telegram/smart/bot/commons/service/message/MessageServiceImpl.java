@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
@@ -20,8 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramLocalBotApiService;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -34,11 +34,11 @@ public class MessageServiceImpl implements MessageService {
 
     private LocalisationService localisationService;
 
-    private TelegramBotApiService telegramService;
+    private TelegramLocalBotApiService telegramService;
 
     @Autowired
     public MessageServiceImpl(LocalisationService localisationService,
-                              TelegramBotApiService telegramService) {
+                              TelegramLocalBotApiService telegramService) {
         this.localisationService = localisationService;
         this.telegramService = telegramService;
     }
