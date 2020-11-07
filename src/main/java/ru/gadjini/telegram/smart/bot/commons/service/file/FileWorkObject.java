@@ -1,7 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.service.file;
 
-import ru.gadjini.telegram.smart.bot.commons.service.message.TelegramMediaServiceProvider;
-
 import java.util.concurrent.TimeUnit;
 
 public class FileWorkObject {
@@ -10,18 +8,11 @@ public class FileWorkObject {
 
     private long chatId;
 
-    private long fileSize;
-
     private FileLimitsDao fileLimitsDao;
 
-    private TelegramMediaServiceProvider mediaServiceProvider;
-
-    public FileWorkObject(int fileTimeLimit, long chatId, long fileSize, FileLimitsDao fileLimitsDao,
-                          TelegramMediaServiceProvider mediaServiceProvider) {
+    public FileWorkObject(int fileTimeLimit, long chatId, FileLimitsDao fileLimitsDao) {
         this.chatId = chatId;
-        this.fileSize = fileSize;
         this.fileLimitsDao = fileLimitsDao;
-        this.mediaServiceProvider = mediaServiceProvider;
         this.fileTimeLimit = fileTimeLimit;
     }
 
@@ -30,9 +21,6 @@ public class FileWorkObject {
     }
 
     public void start() {
-        if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
-            return;
-        }
         if (fileTimeLimit <= 0) {
             return;
         }
@@ -42,9 +30,6 @@ public class FileWorkObject {
     }
 
     public void stop() {
-        if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
-            return;
-        }
         if (fileTimeLimit <= 0) {
             return;
         }

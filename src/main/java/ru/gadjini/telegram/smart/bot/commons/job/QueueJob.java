@@ -118,7 +118,7 @@ public class QueueJob {
     @PostConstruct
     public final void init() {
         LOGGER.debug("Disable jobs {}", disableJobs);
-        applicationEventPublisher.publishEvent(new QueueJobInitialization());
+        applicationEventPublisher.publishEvent(new QueueJobInitialization(this));
         try {
             queueService.resetProcessing();
         } catch (Exception ex) {
@@ -169,7 +169,7 @@ public class QueueJob {
         List<QueueItem> conversionQueueItems = queueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         for (QueueItem item : conversionQueueItems) {
             if (!executor.cancelAndComplete(item.getId(), true)) {
-                fileManager.fileWorkObject(item.getUserId(), item.getSize()).stop();
+                fileManager.fileWorkObject(item.getUserId()).stop();
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
@@ -192,7 +192,7 @@ public class QueueJob {
                     localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))
             ));
             if (!executor.cancelAndComplete(jobId, true)) {
-                fileManager.fileWorkObject(queueItem.getId(), queueItem.getSize()).stop();
+                fileManager.fileWorkObject(queueItem.getId()).stop();
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
@@ -222,7 +222,7 @@ public class QueueJob {
         private QueueTask(QueueItem queueItem, QueueWorker queueWorker) {
             this.queueItem = queueItem;
             this.queueWorker = queueWorker;
-            this.fileWorkObject = fileManager.fileWorkObject(queueItem.getUserId(), queueItem.getSize());
+            this.fileWorkObject = fileManager.fileWorkObject(queueItem.getUserId());
         }
 
         @Override

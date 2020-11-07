@@ -21,7 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramLocalBotApiService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -34,11 +34,11 @@ public class MessageServiceImpl implements MessageService {
 
     private LocalisationService localisationService;
 
-    private TelegramLocalBotApiService telegramService;
+    private TelegramBotApiService telegramService;
 
     @Autowired
     public MessageServiceImpl(LocalisationService localisationService,
-                              TelegramLocalBotApiService telegramService) {
+                              TelegramBotApiService telegramService) {
         this.localisationService = localisationService;
         this.telegramService = telegramService;
     }

@@ -12,7 +12,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 @Service
 @Qualifier("media")
@@ -20,25 +20,20 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     private MessageMediaService fileService;
 
-    private TelegramMTProtoService telegramService;
-
-    private TelegramMediaServiceProvider mediaServiceProvider;
+    private TelegramBotApiService telegramLocalBotApiService;
 
     @Autowired
-    public MediaMessageServiceImpl(MessageMediaService fileService,
-                                   TelegramMTProtoService telegramService, TelegramMediaServiceProvider mediaServiceProvider) {
+    public MediaMessageServiceImpl(MessageMediaService fileService, TelegramBotApiService telegramLocalBotApiService) {
         this.fileService = fileService;
-        this.telegramService = telegramService;
-        this.mediaServiceProvider = mediaServiceProvider;
+        this.telegramLocalBotApiService = telegramLocalBotApiService;
     }
-
 
     @Override
     public EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia) {
         if (StringUtils.isNotBlank(editMessageMedia.getMedia().getCaption())) {
             editMessageMedia.getMedia().setParseMode(ParseMode.HTML);
         }
-        Message message = mediaServiceProvider.getMediaService(editMessageMedia.getMedia()).editMessageMedia(editMessageMedia);
+        Message message = telegramLocalBotApiService.editMessageMedia(editMessageMedia);
 
         return new EditMediaResult(fileService.getFileId(message));
     }
@@ -49,14 +44,14 @@ public class MediaMessageServiceImpl implements MediaMessageService {
             sendDocument.setParseMode(ParseMode.HTML);
         }
 
-        Message message = mediaServiceProvider.getMediaService(sendDocument.getDocument()).sendDocument(sendDocument);
+        Message message = telegramLocalBotApiService.sendDocument(sendDocument);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
 
     @Override
     public SendFileResult sendPhoto(SendPhoto sendPhoto) {
-        Message message = mediaServiceProvider.getMediaService(sendPhoto.getPhoto()).sendPhoto(sendPhoto);
+        Message message = telegramLocalBotApiService.sendPhoto(sendPhoto);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -66,7 +61,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         if (StringUtils.isNotBlank(sendVideo.getCaption())) {
             sendVideo.setParseMode(ParseMode.HTML);
         }
-        mediaServiceProvider.getMediaService(sendVideo.getVideo()).sendVideo(sendVideo);
+        telegramLocalBotApiService.sendVideo(sendVideo);
     }
 
     @Override
@@ -75,12 +70,12 @@ public class MediaMessageServiceImpl implements MediaMessageService {
             sendAudio.setParseMode(ParseMode.HTML);
         }
 
-        mediaServiceProvider.getMediaService(sendAudio.getAudio()).sendAudio(sendAudio);
+        telegramLocalBotApiService.sendAudio(sendAudio);
     }
 
     @Override
     public MediaType getMediaType(String fileId) {
-        return telegramService.getMediaType(fileId);
+        return MediaType.DOCUMENT;
     }
 
     @Override
@@ -110,7 +105,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     @Override
     public SendFileResult sendSticker(SendSticker sendSticker) {
-        Message message = mediaServiceProvider.getStickerMediaService().sendSticker(sendSticker);
+        Message message = telegramLocalBotApiService.sendSticker(sendSticker);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }

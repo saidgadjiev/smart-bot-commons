@@ -14,8 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.service.message.TelegramMediaServiceProvider;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMTProtoService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
@@ -26,9 +25,7 @@ public class FileManager {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileManager.class);
 
-    private TelegramMTProtoService telegramService;
-
-    private TelegramMediaServiceProvider mediaServiceProvider;
+    private TelegramBotApiService telegramLocalBotApiService;
 
     private FileLimitsDao fileLimitsDao;
 
@@ -43,10 +40,9 @@ public class FileManager {
     private Long maxFileSize;
 
     @Autowired
-    public FileManager(TelegramMTProtoService telegramService, TelegramMediaServiceProvider mediaServiceProvider,
+    public FileManager(TelegramBotApiService telegramLocalBotApiService,
                        FileLimitsDao fileLimitsDao, LocalisationService localisationService, UserService userService) {
-        this.telegramService = telegramService;
-        this.mediaServiceProvider = mediaServiceProvider;
+        this.telegramLocalBotApiService = telegramLocalBotApiService;
         this.fileLimitsDao = fileLimitsDao;
         this.localisationService = localisationService;
         this.userService = userService;
@@ -61,10 +57,7 @@ public class FileManager {
         }
     }
 
-    public void setInputFilePending(long chatId, Integer replyToMessageId, String fileId, long fileSize, String command) {
-        if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
-            return;
-        }
+    public void setInputFilePending(long chatId, Integer replyToMessageId, String fileId, String command) {
         if (fileTimeLimit <= 0) {
             return;
         }
@@ -79,9 +72,6 @@ public class FileManager {
         checkFileSize(fileSize, chatId);
         if (fileSize == 0) {
             LOGGER.debug("File size ({}, {}, {})", chatId, fileId, fileId);
-        }
-        if (mediaServiceProvider.isBotApiDownloadFile(fileSize)) {
-            return;
         }
         InputFileState inputFileState = fileLimitsDao.getInputFile(chatId);
         if (inputFileState != null && fileTimeLimit > 0) {
@@ -107,7 +97,7 @@ public class FileManager {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        mediaServiceProvider.getDownloadMediaService(fileSize).downloadFileByFileId(fileId, fileSize, progress, outputFile);
+        telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
     }
 
     public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
@@ -143,24 +133,20 @@ public class FileManager {
         }
     }
 
-    public FileWorkObject fileWorkObject(long chatId, long fileSize) {
-        return new FileWorkObject(fileTimeLimit, chatId, fileSize, fileLimitsDao, mediaServiceProvider);
+    public FileWorkObject fileWorkObject(long chatId) {
+        return new FileWorkObject(fileTimeLimit, chatId, fileLimitsDao);
     }
 
     public boolean cancelDownloading(String fileId) {
-        return telegramService.cancelDownloading(fileId);
+        return telegramLocalBotApiService.cancelDownloading(fileId);
     }
 
     public boolean cancelUploading(String filePath) {
-        return telegramService.cancelUploading(filePath);
+        return telegramLocalBotApiService.cancelUploading(filePath);
     }
 
     public void cancelDownloads() {
-        telegramService.cancelDownloads();
-    }
-
-    public void restoreFileIfNeed(String filePath, String fileId) {
-        telegramService.restoreFileIfNeed(filePath, fileId);
+        telegramLocalBotApiService.cancelDownloads();
     }
 
     public static boolean isNoneCriticalDownloadingException(Throwable ex) {
@@ -183,7 +169,7 @@ public class FileManager {
     private void checkFileSize(long fileSize, long chatId) {
         if (maxFileSize != null && fileSize > maxFileSize) {
             Locale locale = userService.getLocaleOrDefault((int) chatId);
-            throw new UserException(localisationService.getMessage(MessagesProperties.MAX_FILE_SIZE, new Object[] {
+            throw new UserException(localisationService.getMessage(MessagesProperties.MAX_FILE_SIZE, new Object[]{
                     MemoryUtils.humanReadableByteCount(maxFileSize)
             }, locale));
         }
