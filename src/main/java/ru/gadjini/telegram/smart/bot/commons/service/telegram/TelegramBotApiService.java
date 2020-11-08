@@ -368,7 +368,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
         try {
             EditMessageText editMessageText = new EditMessageText();
-            editMessageText.setChatId(Long.valueOf(progress.getChatId()));
+            editMessageText.setChatId(progress.getChatId());
             editMessageText.setText(progress.getProgressMessage());
             editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getProgressReplyMarkup(), InlineKeyboardMarkup.class));
             editMessageText.setMessageId(progress.getProgressMessageId());
@@ -385,7 +385,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
         try {
             EditMessageText editMessageText = new EditMessageText();
-            editMessageText.setChatId(Long.valueOf(progress.getChatId()));
+            editMessageText.setChatId(progress.getChatId());
             editMessageText.setText(progress.getAfterProgressCompletionMessage());
             editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getAfterProgressCompletionReplyMarkup(), InlineKeyboardMarkup.class));
             editMessageText.setMessageId(progress.getProgressMessageId());
