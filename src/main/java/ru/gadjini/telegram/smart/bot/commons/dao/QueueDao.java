@@ -9,6 +9,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 
 import java.sql.ResultSet;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class QueueDao {
@@ -25,10 +27,11 @@ public class QueueDao {
 
     public void setException(int id, String exception) {
         jdbcTemplate.update(
-                "UPDATE " + getQueueName() + " SET exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
+                "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
                 ps -> {
-                    ps.setString(1, exception);
-                    ps.setInt(2, id);
+                    ps.setInt(1, QueueItem.Status.EXCEPTION.getCode());
+                    ps.setString(2, exception);
+                    ps.setInt(3, id);
                 }
         );
     }
@@ -98,6 +101,14 @@ public class QueueDao {
                     ps.setInt(1, progressMessageId);
                     ps.setInt(2, id);
                 });
+    }
+
+    public void deleteByIdAndStatuses(int id, Set<QueueItem.Status> statuses) {
+        jdbcTemplate.update(
+                "DELETE FROM " + getQueueName() + " WHERE id = ? AND status IN(" + statuses.stream()
+                        .map(s -> String.valueOf(s.getCode())).collect(Collectors.joining(",")) + ")",
+                ps -> ps.setInt(1, id)
+        );
     }
 
     public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {

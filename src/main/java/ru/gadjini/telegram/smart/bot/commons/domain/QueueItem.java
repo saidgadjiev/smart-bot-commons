@@ -160,7 +160,9 @@ public abstract class QueueItem {
 
         COMPLETED(3),
 
-        BLOCKED(4);
+        BLOCKED(4),
+
+        UNKNOWN(-1);
 
         private final int code;
 
@@ -178,7 +180,8 @@ public abstract class QueueItem {
                     return status;
                 }
             }
-            throw new IllegalArgumentException("Unknown queue item status " + code);
+
+            return UNKNOWN;
         }
     }
 }

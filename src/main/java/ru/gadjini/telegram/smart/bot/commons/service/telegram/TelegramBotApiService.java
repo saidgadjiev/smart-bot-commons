@@ -34,8 +34,8 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallback
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
-import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
@@ -377,6 +377,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         return Set.of("creator", "administrator", "member", "restricted").contains(status);
     }
 
+    @SuppressWarnings("PMD")
     private void updateProgressBeforeStart(Progress progress) {
         if (progress == null) {
             return;
@@ -390,13 +391,11 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             editMessageText.setParseMode(ParseMode.HTML);
 
             execute(editMessageText);
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e) {
-            LOGGER.error("Error: " + e.getMessage() + " code: " + e.getErrorCode() + " description: " + e.getApiResponse(), e);
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
-            LOGGER.error(e.getMessage(), e);
+        } catch (Exception ignore) {
         }
     }
 
+    @SuppressWarnings("PMD")
     private void updateProgressAfterComplete(Progress progress) {
         if (progress == null || StringUtils.isBlank(progress.getAfterProgressCompletionMessage())) {
             return;
@@ -410,10 +409,8 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             editMessageText.setParseMode(ParseMode.HTML);
 
             execute(editMessageText);
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e) {
-            LOGGER.error("Error: " + e.getMessage() + " code: " + e.getErrorCode() + " description: " + e.getApiResponse(), e);
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
-            LOGGER.error(e.getMessage(), e);
+        } catch (Exception ignore) {
+
         }
     }
 

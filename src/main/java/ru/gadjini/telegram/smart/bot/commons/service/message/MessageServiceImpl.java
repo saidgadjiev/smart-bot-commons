@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
@@ -28,6 +27,7 @@ import java.util.function.Consumer;
 
 @Service
 @Qualifier("message")
+@SuppressWarnings("PMD")
 public class MessageServiceImpl implements MessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageServiceImpl.class);
@@ -47,8 +47,7 @@ public class MessageServiceImpl implements MessageService {
     public void sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
         try {
             telegramService.sendAnswerCallbackQuery(answerCallbackQuery);
-        } catch (TelegramApiException ex) {
-            LOGGER.error(ex.getMessage(), ex);
+        } catch (Exception ignore) {
         }
     }
 
@@ -83,8 +82,7 @@ public class MessageServiceImpl implements MessageService {
 
         try {
             telegramService.editReplyMarkup(edit);
-        } catch (TelegramApiException ex) {
-            LOGGER.error(ex.getMessage(), ex);
+        } catch (Exception ignore) {
         }
     }
 
@@ -94,10 +92,7 @@ public class MessageServiceImpl implements MessageService {
 
         try {
             telegramService.editMessageText(editMessageText);
-        } catch (TelegramApiException ex) {
-            if (!editMessageText.isNoLogging()) {
-                LOGGER.error(ex.getMessage(), ex);
-            }
+        } catch (Exception ex) {
             if (editMessageText.isThrowEx()) {
                 throw ex;
             }
@@ -108,19 +103,14 @@ public class MessageServiceImpl implements MessageService {
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
         editMessageCaption.setParseMode(ParseMode.HTML);
 
-        try {
-            telegramService.editMessageCaption(editMessageCaption);
-        } catch (TelegramApiException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        telegramService.editMessageCaption(editMessageCaption);
     }
 
     @Override
     public void deleteMessage(long chatId, int messageId) {
         try {
             telegramService.deleteMessage(new DeleteMessage(chatId, messageId));
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
+        } catch (Exception ignore) {
         }
     }
 

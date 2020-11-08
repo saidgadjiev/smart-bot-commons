@@ -34,6 +34,7 @@ import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
 
@@ -192,6 +193,7 @@ public class QueueJob {
                     localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))
             ));
             if (!executor.cancelAndComplete(jobId, true)) {
+                queueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
                 fileManager.fileWorkObject(queueItem.getId()).stop();
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
