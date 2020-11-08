@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.io;
 
-import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -11,7 +10,9 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 
 public class SmartTempFile {
 
@@ -226,17 +227,26 @@ public class SmartTempFile {
     public void smartDelete() {
         if (file != null) {
             try {
-                FileUtils.deleteQuietly(file);
+                Files.deleteIfExists(file.toPath());
                 if (file.exists()) {
                     LOGGER.debug("Temp file not deleted({})", file.getAbsolutePath());
                 }
                 if (deleteParentDir) {
-                    FileUtils.deleteDirectory(file.getParentFile());
+                    Files.list(file.getParentFile().toPath())
+                            .sorted(Comparator.reverseOrder())
+                            .map(Path::toFile)
+                            .forEach(file -> {
+                                try {
+                                    Files.deleteIfExists(file.toPath());
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            });
                     if (file.getParentFile().exists()) {
-                        LOGGER.debug("Temp file not deleted({})", file.getParentFile().getAbsolutePath());
+                        LOGGER.debug("Temp parent dir not deleted({})", file.getParentFile().getAbsolutePath());
                     }
                 }
-            } catch (IOException ex) {
+            } catch (Exception ex) {
                 LOGGER.error(ex.getMessage(), ex);
             }
         }
