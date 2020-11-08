@@ -13,7 +13,6 @@ import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import java.util.Locale;
@@ -31,17 +30,14 @@ public class MediaFilter extends BaseBotFilter {
 
     private MessageMediaService fileService;
 
-    private FileManager fileManager;
-
     private FileLimitProperties fileLimitProperties;
 
     @Autowired
     public MediaFilter(UserService userService, LocalisationService localisationService,
-                       MessageMediaService fileService, FileManager fileManager, FileLimitProperties fileLimitProperties) {
+                       MessageMediaService fileService, FileLimitProperties fileLimitProperties) {
         this.userService = userService;
         this.localisationService = localisationService;
         this.fileService = fileService;
-        this.fileManager = fileManager;
         this.fileLimitProperties = fileLimitProperties;
     }
 
@@ -51,7 +47,6 @@ public class MediaFilter extends BaseBotFilter {
             MessageMedia file = fileService.getMedia(update.getMessage(), Locale.getDefault());
             if (file != null) {
                 checkInMediaSize(update.getMessage(), file);
-                fileManager.inputFile(update.getMessage().getChatId(), file.getFileId(), file.getFileSize());
             }
         }
 

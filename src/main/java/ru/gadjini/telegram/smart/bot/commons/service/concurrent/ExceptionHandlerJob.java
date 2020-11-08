@@ -17,7 +17,6 @@ import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 
@@ -36,17 +35,13 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
 
     private LocalisationService localisationService;
 
-    private FileManager fileManager;
-
     private SmartExecutorService.Job job;
 
     ExceptionHandlerJob(MessageService messageService, UserService userService,
-                        LocalisationService localisationService,
-                        FileManager fileManager, SmartExecutorService.Job job) {
+                        LocalisationService localisationService, SmartExecutorService.Job job) {
         this.messageService = messageService;
         this.userService = userService;
         this.localisationService = localisationService;
-        this.fileManager = fileManager;
         this.job = job;
     }
 
@@ -124,7 +119,6 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                                             MessagesProperties.MESSAGE_ERROR), locale)).setReplyToMessageId(job.getReplyToMessageId()));
                 } else if (floodWaitExceptionIndexOf != -1) {
                     LOGGER.error(e.getMessage());
-                    fileManager.resetLimits(job.getChatId());
                     FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
                     sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
                             localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,

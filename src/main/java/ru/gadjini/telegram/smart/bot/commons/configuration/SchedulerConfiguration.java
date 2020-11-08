@@ -11,7 +11,6 @@ import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import javax.annotation.PostConstruct;
@@ -46,9 +45,9 @@ public class SchedulerConfiguration {
 
     @Bean
     @Qualifier("queueTaskExecutor")
-    public SmartExecutorService conversionTaskExecutor(UserService userService, FileManager fileManager,
+    public SmartExecutorService conversionTaskExecutor(UserService userService,
                                                        @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
-        SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, fileManager, userService);
+        SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
         ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
         ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
 

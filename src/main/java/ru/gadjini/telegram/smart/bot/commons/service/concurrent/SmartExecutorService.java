@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.lang.reflect.Field;
@@ -23,8 +22,6 @@ public class SmartExecutorService {
 
     private LocalisationService localisationService;
 
-    private FileManager fileManager;
-
     private UserService userService;
 
     private Map<JobWeight, ThreadPoolExecutor> executors;
@@ -33,10 +30,9 @@ public class SmartExecutorService {
 
     private final Map<Integer, Job> activeTasks = new ConcurrentHashMap<>();
 
-    public SmartExecutorService(MessageService messageService, LocalisationService localisationService, FileManager fileManager, UserService userService) {
+    public SmartExecutorService(MessageService messageService, LocalisationService localisationService, UserService userService) {
         this.messageService = messageService;
         this.localisationService = localisationService;
-        this.fileManager = fileManager;
         this.userService = userService;
     }
 
@@ -49,7 +45,7 @@ public class SmartExecutorService {
     }
 
     public void execute(Job job, JobWeight jobWeight) {
-        Future<?> submit = executors.get(jobWeight).submit(new ExceptionHandlerJob(messageService, userService, localisationService, fileManager, job));
+        Future<?> submit = executors.get(jobWeight).submit(new ExceptionHandlerJob(messageService, userService, localisationService, job));
         job.setCancelChecker(submit::isCancelled);
         processing.put(job.getId(), submit);
         activeTasks.put(job.getId(), job);

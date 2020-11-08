@@ -18,7 +18,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileWorkObject;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
@@ -48,8 +47,6 @@ public class QueueJob {
     private SmartExecutorService executor;
 
     private FileLimitProperties fileLimitProperties;
-
-    private FileManager fileManager;
 
     private UserService userService;
 
@@ -104,11 +101,6 @@ public class QueueJob {
     @Autowired
     public void setUserService(UserService userService) {
         this.userService = userService;
-    }
-
-    @Autowired
-    public void setFileManager(FileManager fileManager) {
-        this.fileManager = fileManager;
     }
 
     @Autowired
@@ -169,9 +161,7 @@ public class QueueJob {
     public final int removeAndCancelCurrentTasks(long chatId) {
         List<QueueItem> conversionQueueItems = queueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         for (QueueItem item : conversionQueueItems) {
-            if (!executor.cancelAndComplete(item.getId(), true)) {
-                fileManager.fileWorkObject(item.getUserId()).stop();
-            }
+            executor.cancelAndComplete(item.getId(), true);
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
         applicationEventPublisher.publishEvent(new CurrentTasksCanceled((int) chatId));
@@ -194,7 +184,6 @@ public class QueueJob {
             ));
             if (!executor.cancelAndComplete(jobId, true)) {
                 queueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
-                fileManager.fileWorkObject(queueItem.getId()).stop();
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
@@ -217,14 +206,11 @@ public class QueueJob {
 
         private volatile boolean canceledByUser;
 
-        private FileWorkObject fileWorkObject;
-
         private QueueWorker queueWorker;
 
         private QueueTask(QueueItem queueItem, QueueWorker queueWorker) {
             this.queueItem = queueItem;
             this.queueWorker = queueWorker;
-            this.fileWorkObject = fileManager.fileWorkObject(queueItem.getUserId());
         }
 
         @Override
@@ -241,7 +227,6 @@ public class QueueJob {
         public void execute() throws Exception {
             boolean success = false;
             try {
-                fileWorkObject.start();
                 queueWorker.execute();
                 if (!queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
                     queueService.setCompleted(queueItem.getId());
@@ -264,11 +249,8 @@ public class QueueJob {
                 if (checker == null || !checker.get()) {
                     executor.complete(queueItem.getId());
                     queueWorker.finish();
-                    if (success) {
-                        fileWorkObject.stop();
-                        if (queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
-                            queueService.deleteById(queueItem.getId());
-                        }
+                    if (success && queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
+                        queueService.deleteById(queueItem.getId());
                     }
                 }
             }
@@ -278,7 +260,6 @@ public class QueueJob {
         public void cancel() {
             if (canceledByUser) {
                 queueService.deleteById(queueItem.getId());
-                fileWorkObject.stop();
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
             executor.complete(queueItem.getId());

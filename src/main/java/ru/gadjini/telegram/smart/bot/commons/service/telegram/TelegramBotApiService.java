@@ -18,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
-import ru.gadjini.telegram.smart.bot.commons.exception.UnknownDownloadingUploadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -46,6 +45,7 @@ import java.util.Set;
 import java.util.concurrent.*;
 
 @Service
+@SuppressWarnings("PMD")
 public class TelegramBotApiService extends DefaultAbsSender implements TelegramMediaService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotApiService.class);
@@ -239,9 +239,6 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             } catch (TelegramApiException | FloodWaitException e) {
                 LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
                 throw e;
-            } catch (Exception e) {
-                LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
-                throw new UnknownDownloadingUploadingException(e);
             }
         });
 
@@ -340,7 +337,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     private void executeWithoutResult(Executable executable) {
         try {
             executable.executeWithException();
-        } catch (Exception e) {
+        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
             throw catchException(e);
         }
     }
@@ -348,12 +345,12 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     private <V> V executeWithResult(Callable<V> executable) {
         try {
             return executable.executeWithResult();
-        } catch (Exception e) {
+        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
             throw catchException(e);
         }
     }
 
-    private RuntimeException catchException(Exception ex) {
+    private RuntimeException catchException(org.telegram.telegrambots.meta.exceptions.TelegramApiException ex) {
         if (ex instanceof org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) {
             org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e = (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) ex;
             LOGGER.error(e.getMessage() + "\n" + e.getErrorCode() + "\n" + e.getApiResponse(), e);
@@ -361,12 +358,9 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
                 return new FloodWaitException(e.getApiResponse(), 30);
             }
             return new TelegramApiRequestException(e.getApiResponse());
-        } else if (ex instanceof org.telegram.telegrambots.meta.exceptions.TelegramApiException) {
-            LOGGER.error(ex.getMessage(), ex);
-            return new TelegramApiException(ex);
         } else {
             LOGGER.error(ex.getMessage(), ex);
-            return new UnknownDownloadingUploadingException(ex);
+            return new TelegramApiException(ex);
         }
     }
 
@@ -377,7 +371,6 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         return Set.of("creator", "administrator", "member", "restricted").contains(status);
     }
 
-    @SuppressWarnings("PMD")
     private void updateProgressBeforeStart(Progress progress) {
         if (progress == null) {
             return;
@@ -395,7 +388,6 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
     }
 
-    @SuppressWarnings("PMD")
     private void updateProgressAfterComplete(Progress progress) {
         if (progress == null || StringUtils.isBlank(progress.getAfterProgressCompletionMessage())) {
             return;
