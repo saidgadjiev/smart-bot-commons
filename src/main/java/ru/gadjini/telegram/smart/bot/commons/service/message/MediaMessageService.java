@@ -13,6 +13,10 @@ public interface MediaMessageService {
 
     SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
 
+    default SendFileResult sendDocument(SendDocument sendDocumentContext) {
+        return sendDocument(sendDocumentContext, null);
+    }
+
     SendFileResult sendPhoto(SendPhoto sendPhoto);
 
     void sendVideo(SendVideo sendVideo);

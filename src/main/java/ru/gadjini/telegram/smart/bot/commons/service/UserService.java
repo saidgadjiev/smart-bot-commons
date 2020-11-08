@@ -77,7 +77,7 @@ public class UserService {
         if (apiRequestExceptionIndexOf != -1) {
             TelegramApiRequestException exception = (TelegramApiRequestException) ExceptionUtils.getThrowableList(ex).get(apiRequestExceptionIndexOf);
             if (exception.getErrorCode() == 403) {
-                blockUser((int) exception.getLongChatId());
+                blockUser(Integer.parseInt(exception.getChatId()));
 
                 return true;
             }

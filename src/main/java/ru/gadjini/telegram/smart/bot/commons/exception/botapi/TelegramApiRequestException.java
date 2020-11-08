@@ -1,27 +1,15 @@
 package ru.gadjini.telegram.smart.bot.commons.exception.botapi;
 
-import ru.gadjini.telegram.smart.bot.commons.model.ApiResponse;
-
-
 public class TelegramApiRequestException extends TelegramApiException {
-    private String chatId;
-    private String apiResponse = null;
-    private Integer errorCode = 0;
+    private final String chatId;
+    private String apiResponse;
+    private Integer errorCode;
 
-    public TelegramApiRequestException(String message) {
-        super(message);
-    }
-
-    public TelegramApiRequestException(String chatId, String message, ApiResponse response) {
-        super(buildMessage(chatId, message, response));
+    public TelegramApiRequestException(String chatId, String message, Integer errorCode, String response, Throwable ex) {
+        super(buildMessage(chatId, message, errorCode, response), ex);
         this.chatId = chatId;
-        apiResponse = response.getErrorDescription();
-        errorCode = response.getErrorCode();
-    }
-
-    public TelegramApiRequestException(String chatId, String message, Throwable cause) {
-        super(buildMessage(chatId, message), cause);
-        this.chatId = chatId;
+        this.apiResponse = response;
+        this.errorCode = errorCode;
     }
 
     public String getApiResponse() {
@@ -36,21 +24,10 @@ public class TelegramApiRequestException extends TelegramApiException {
         return chatId;
     }
 
-    public long getLongChatId() {
-        return Long.parseLong(chatId);
-    }
-
-    private static String buildMessage(String chatId, String message) {
+    private static String buildMessage(String chatId, String message, Integer errorCode, String description) {
         StringBuilder msg = new StringBuilder();
-        msg.append("(").append(chatId).append(") ").append(message);
-
-        return msg.toString();
-    }
-
-    private static String buildMessage(String chatId, String message, ApiResponse response) {
-        StringBuilder msg = new StringBuilder();
-        msg.append("(").append(chatId).append(") ").append(message).append("\n").append(response.getErrorCode()).append(" ")
-                .append(response.getErrorDescription());
+        msg.append("(").append(chatId).append(") ").append(message).append("\n").append(errorCode).append(" ")
+                .append(description);
 
         return msg.toString();
     }

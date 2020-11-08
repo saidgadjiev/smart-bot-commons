@@ -78,7 +78,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     public Boolean isChatMember(IsChatMember isChatMember) {
-        return executeWithResult(() -> {
+        return executeWithResult(null, () -> {
             GetChatMember getChatMember = new GetChatMember();
             getChatMember.setChatId(isChatMember.getChatId());
             getChatMember.setUserId(isChatMember.getUserId());
@@ -90,13 +90,13 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     public Boolean sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
-        return executeWithResult(() -> {
+        return executeWithResult(null, () -> {
             return execute(objectMapper.convertValue(answerCallbackQuery, AnswerCallbackQuery.class));
         });
     }
 
     public Message sendMessage(SendMessage sendMessage) {
-        return executeWithResult(() -> {
+        return executeWithResult(sendMessage.getChatId(), () -> {
             Message execute = execute(objectMapper.convertValue(sendMessage, SendMessage.class));
 
             return objectMapper.convertValue(execute, Message.class);
@@ -104,32 +104,32 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     public void editReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) {
-        executeWithoutResult(() -> {
+        executeWithoutResult(editMessageReplyMarkup.getChatId(), () -> {
             execute(objectMapper.convertValue(editMessageReplyMarkup, EditMessageReplyMarkup.class));
         });
     }
 
     public void editMessageText(EditMessageText editMessageText) {
-        executeWithoutResult(() -> {
+        executeWithoutResult(editMessageText.getChatId(), () -> {
             execute(objectMapper.convertValue(editMessageText, EditMessageText.class));
         });
     }
 
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
-        executeWithoutResult(() -> {
+        executeWithoutResult(editMessageCaption.getChatId(), () -> {
             execute(objectMapper.convertValue(editMessageCaption, EditMessageCaption.class));
         });
     }
 
     public Boolean deleteMessage(DeleteMessage deleteMessage) {
-        return executeWithResult(() -> {
+        return executeWithResult(deleteMessage.getChatId(), () -> {
             return execute(objectMapper.convertValue(deleteMessage, DeleteMessage.class));
         });
     }
 
     @Override
     public Message editMessageMedia(EditMessageMedia editMessageMedia) {
-        return executeWithResult(() -> {
+        return executeWithResult(editMessageMedia.getChatId(), () -> {
             Message execute = (Message) execute(editMessageMedia);
 
             return objectMapper.convertValue(execute, Message.class);
@@ -138,7 +138,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public Message sendSticker(SendSticker sendSticker) {
-        return executeWithResult(() -> {
+        return executeWithResult(sendSticker.getChatId(), () -> {
             Message execute = execute(sendSticker);
 
             return objectMapper.convertValue(execute, Message.class);
@@ -152,7 +152,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
 
         try {
-            return executeWithResult(() -> {
+            return executeWithResult(sendDocument.getChatId(), () -> {
                 updateProgressBeforeStart(progress);
                 Message execute = execute(sendDocument);
 
@@ -169,7 +169,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public Message sendVideo(SendVideo sendVideo) {
-        return executeWithResult(() -> {
+        return executeWithResult(sendVideo.getChatId(), () -> {
             Message execute = execute(sendVideo);
 
             return objectMapper.convertValue(execute, Message.class);
@@ -178,7 +178,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public Message sendAudio(SendAudio sendAudio) {
-        return executeWithResult(() -> {
+        return executeWithResult(sendAudio.getChatId(), () -> {
             Message execute = execute(sendAudio);
 
             return objectMapper.convertValue(execute, Message.class);
@@ -187,7 +187,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public Message sendPhoto(SendPhoto sendPhoto) {
-        return executeWithResult(() -> {
+        return executeWithResult(sendPhoto.getChatId(), () -> {
             Message execute = execute(sendPhoto);
 
             return objectMapper.convertValue(execute, Message.class);
@@ -208,7 +208,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
                 stopWatch.start();
                 LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
 
-                executeWithoutResult(() -> {
+                executeWithoutResult(null, () -> {
                     updateProgressBeforeStart(progress);
                     org.telegram.telegrambots.meta.api.methods.GetFile gf = new org.telegram.telegrambots.meta.api.methods.GetFile();
                     gf.setFileId(fileId);
@@ -325,30 +325,30 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         return botProperties.getToken();
     }
 
-    private void executeWithoutResult(Executable executable) {
+    private void executeWithoutResult(String chatId, Executable executable) {
         try {
             executable.executeWithException();
         } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
-            throw catchException(e);
+            throw catchException(chatId, e);
         }
     }
 
-    private <V> V executeWithResult(Callable<V> executable) {
+    private <V> V executeWithResult(String chatId, Callable<V> executable) {
         try {
             return executable.executeWithResult();
         } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
-            throw catchException(e);
+            throw catchException(chatId, e);
         }
     }
 
-    private RuntimeException catchException(org.telegram.telegrambots.meta.exceptions.TelegramApiException ex) {
+    private RuntimeException catchException(String chatId, org.telegram.telegrambots.meta.exceptions.TelegramApiException ex) {
         if (ex instanceof org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) {
             org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e = (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) ex;
             LOGGER.error(e.getMessage() + "\n" + e.getErrorCode() + "\n" + e.getApiResponse(), e);
             if (e.getErrorCode() == HttpCodes.TOO_MANY_REQUESTS) {
                 return new FloodWaitException(e.getApiResponse(), 30);
             }
-            return new TelegramApiRequestException(e.getApiResponse());
+            return new TelegramApiRequestException(chatId, e.getMessage(), e.getErrorCode(), e.getApiResponse(), e);
         } else {
             LOGGER.error(ex.getMessage(), ex);
             return new TelegramApiException(ex);

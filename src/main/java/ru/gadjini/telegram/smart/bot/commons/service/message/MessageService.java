@@ -24,6 +24,10 @@ public interface MessageService {
 
     void editMessage(EditMessageText messageContext, boolean ignoreException);
 
+    default void editMessage(EditMessageText messageContext) {
+        editMessage(messageContext, true);
+    }
+
     void editMessageCaption(EditMessageCaption context);
 
     void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale);
