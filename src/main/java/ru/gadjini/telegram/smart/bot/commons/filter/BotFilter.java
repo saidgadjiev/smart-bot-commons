@@ -1,6 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.filter;
 
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
+import org.telegram.telegrambots.meta.api.objects.Update;
 
 public interface BotFilter {
 

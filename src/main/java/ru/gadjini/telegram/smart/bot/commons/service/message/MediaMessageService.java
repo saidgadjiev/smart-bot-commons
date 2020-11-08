@@ -1,17 +1,17 @@
 package ru.gadjini.telegram.smart.bot.commons.service.message;
 
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.MediaType;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
 
 public interface MediaMessageService {
     EditMediaResult editMessageMedia(EditMessageMedia editMediaContext);
 
     SendFileResult sendSticker(SendSticker sendSticker);
 
-    SendFileResult sendDocument(SendDocument sendDocumentContext);
+    SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
 
     SendFileResult sendPhoto(SendPhoto sendPhoto);
 
@@ -19,9 +19,4 @@ public interface MediaMessageService {
 
     void sendAudio(SendAudio sendAudio);
 
-    MediaType getMediaType(String fileId);
-
-    void sendFile(long chatId, String fileId);
-
-    void sendFile(long chatId, String fileId, String caption);
 }

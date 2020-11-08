@@ -2,9 +2,9 @@ package ru.gadjini.telegram.smart.bot.commons.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 
 @Component
 public class LastActivityFilter extends BaseBotFilter {

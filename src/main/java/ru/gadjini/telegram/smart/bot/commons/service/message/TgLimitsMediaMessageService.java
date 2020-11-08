@@ -6,14 +6,14 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.MediaType;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
@@ -62,9 +62,9 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public SendFileResult sendDocument(SendDocument sendDocument) {
+    public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
         if (validate(sendDocument)) {
-            return mediaMessageService.sendDocument(sendDocument);
+            return mediaMessageService.sendDocument(sendDocument, progress);
         }
 
         return null;
@@ -85,47 +85,34 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
         mediaMessageService.sendAudio(sendAudio);
     }
 
-    @Override
-    public MediaType getMediaType(String fileId) {
-        return mediaMessageService.getMediaType(fileId);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId) {
-        mediaMessageService.sendFile(chatId, fileId);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId, String caption) {
-        mediaMessageService.sendFile(chatId, fileId, caption);
-    }
-
     private boolean validate(SendDocument sendDocument) {
         InputFile document = sendDocument.getDocument();
-        if (StringUtils.isNotBlank(document.getFileId())) {
+        if (!document.isNew()) {
             return true;
         }
-        File file = new File(document.getFilePath());
+        File file = document.getNewMediaFile();
         if (file.length() == 0) {
             LOGGER.error("Zero file\n{}", Arrays.toString(Thread.currentThread().getStackTrace()));
-            messageService.sendMessage(new SendMessage(sendDocument.getChatId(),
-                    localisationService.getMessage(MessagesProperties.MESSAGE_ZERO_LENGTH_FILE,
-                            new Object[]{StringUtils.defaultIfBlank(sendDocument.getDocument().getFileName(), "")},
-                            userService.getLocaleOrDefault((int) sendDocument.getOrigChatId())))
-                    .setReplyMarkup(sendDocument.getReplyMarkup())
-                    .setReplyToMessageId(sendDocument.getReplyToMessageId()));
+            messageService.sendMessage(SendMessage.builder().chatId(sendDocument.getChatId())
+                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_ZERO_LENGTH_FILE,
+                            new Object[]{StringUtils.defaultIfBlank(sendDocument.getDocument().getMediaName(), "")},
+                            userService.getLocaleOrDefault(Integer.parseInt(sendDocument.getChatId()))))
+                    .replyMarkup(sendDocument.getReplyMarkup())
+                    .replyToMessageId(sendDocument.getReplyToMessageId())
+                    .build());
 
             return false;
         }
         if (file.length() > TgConstants.LARGE_FILE_SIZE) {
             LOGGER.debug("Large out file({}, {})", sendDocument.getChatId(), MemoryUtils.humanReadableByteCount(file.length()));
             String text = localisationService.getMessage(MessagesProperties.MESSAGE_TOO_LARGE_OUT_FILE,
-                    new Object[]{sendDocument.getDocument().getFileName(), MemoryUtils.humanReadableByteCount(file.length())},
-                    userService.getLocaleOrDefault((int) sendDocument.getOrigChatId()));
+                    new Object[]{sendDocument.getDocument().getMediaName(), MemoryUtils.humanReadableByteCount(file.length())},
+                    userService.getLocaleOrDefault(Integer.parseInt(sendDocument.getChatId())));
 
-            messageService.sendMessage(new SendMessage(sendDocument.getChatId(), text)
-                    .setReplyMarkup(sendDocument.getReplyMarkup())
-                    .setReplyToMessageId(sendDocument.getReplyToMessageId()));
+            messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(sendDocument.getChatId())).text(text)
+                    .replyMarkup(sendDocument.getReplyMarkup())
+                    .replyToMessageId(sendDocument.getReplyToMessageId())
+                    .build());
 
             return false;
         } else {

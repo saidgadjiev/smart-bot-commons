@@ -6,19 +6,18 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.DeleteMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageCaption;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageReplyMarkup;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
@@ -77,7 +76,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void removeInlineKeyboard(long chatId, int messageId) {
         EditMessageReplyMarkup edit = new EditMessageReplyMarkup();
-        edit.setChatId(chatId);
+        edit.setChatId(String.valueOf(chatId));
         edit.setMessageId(messageId);
 
         try {
@@ -87,13 +86,13 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText editMessageText) {
+    public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
         editMessageText.setParseMode(ParseMode.HTML);
 
         try {
             telegramService.editMessageText(editMessageText);
         } catch (Exception ex) {
-            if (editMessageText.isThrowEx()) {
+            if (!ignoreException) {
                 throw ex;
             }
         }
@@ -109,22 +108,22 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void deleteMessage(long chatId, int messageId) {
         try {
-            telegramService.deleteMessage(new DeleteMessage(chatId, messageId));
+            telegramService.deleteMessage(new DeleteMessage(String.valueOf(chatId), messageId));
         } catch (Exception ignore) {
         }
     }
 
     @Override
     public void sendErrorMessage(long chatId, Locale locale) {
-        sendMessage(new HtmlMessage(chatId, localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale)));
+        sendMessage(SendMessage.builder().chatId(String.valueOf(chatId))
+                .text(localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale))
+                .parseMode(ParseMode.HTML).build());
     }
 
     @Override
     public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        sendMessage(
-                new HtmlMessage(chatId, localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
-                        .setReplyMarkup(replyKeyboard)
-        );
+        sendMessage(SendMessage.builder().chatId(String.valueOf(chatId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
+                .replyMarkup(replyKeyboard).build());
     }
 
     private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {

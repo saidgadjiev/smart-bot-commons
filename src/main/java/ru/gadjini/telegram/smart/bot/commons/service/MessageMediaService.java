@@ -5,11 +5,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.PhotoSize;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Sticker;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.PhotoSize;
+import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
 
@@ -69,7 +69,7 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getDocument().getFileId());
             messageMedia.setMimeType(message.getDocument().getMimeType());
             messageMedia.setFileSize(message.getDocument().getFileSize());
-            messageMedia.setThumb(message.getDocument().hasThumb() ? message.getDocument().getThumb().getFileId() : null);
+            messageMedia.setThumb(message.getDocument().getThumb() != null ? message.getDocument().getThumb().getFileId() : null);
             messageMedia.setFormat(formatService.getFormat(messageMedia.getFileName(), messageMedia.getMimeType()));
 
             return messageMedia;
@@ -93,7 +93,7 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getVideo().getFileId());
             messageMedia.setFileSize(message.getVideo().getFileSize());
             messageMedia.setFileName(message.getVideo().getFileName());
-            messageMedia.setThumb(message.getVideo().hasThumb() ? message.getVideo().getThumb().getFileId() : null);
+            messageMedia.setThumb(message.getVideo().getThumb() != null ? message.getVideo().getThumb().getFileId() : null);
             messageMedia.setMimeType(message.getVideo().getMimeType());
             messageMedia.setFormat(format);
 
@@ -111,7 +111,7 @@ public class MessageMediaService {
             messageMedia.setMimeType(message.getAudio().getMimeType());
             messageMedia.setFileSize(message.getAudio().getFileSize());
             messageMedia.setFileName(message.getAudio().getFileName());
-            messageMedia.setThumb(message.getAudio().hasThumb() ? message.getAudio().getThumb().getFileId() : null);
+            messageMedia.setThumb(message.getAudio().getThumb() != null ? message.getAudio().getThumb().getFileId() : null);
             messageMedia.setFormat(format);
 
             return messageMedia;
@@ -119,11 +119,11 @@ public class MessageMediaService {
             Sticker sticker = message.getSticker();
             messageMedia.setFileId(sticker.getFileId());
             String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
-            fileName += sticker.getAnimated() ? "tgs" : "webp";
+            fileName += sticker.getIsAnimated() ? "tgs" : "webp";
             messageMedia.setFileName(fileName);
-            messageMedia.setMimeType(sticker.getAnimated() ? null : "image/webp");
+            messageMedia.setMimeType(sticker.getIsAnimated() ? null : "image/webp");
             messageMedia.setFileSize(message.getSticker().getFileSize());
-            messageMedia.setFormat(sticker.getAnimated() ? Format.TGS : Format.WEBP);
+            messageMedia.setFormat(sticker.getIsAnimated() ? Format.TGS : Format.WEBP);
 
             return messageMedia;
         }

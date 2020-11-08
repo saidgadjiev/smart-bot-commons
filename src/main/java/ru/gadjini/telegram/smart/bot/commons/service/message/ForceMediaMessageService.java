@@ -6,13 +6,13 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.MediaType;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 
 @Component
@@ -39,13 +39,13 @@ public class ForceMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public SendFileResult sendDocument(SendDocument sendDocument) {
+    public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
         int attempts = 0;
         Throwable lastEx = null;
         while (attempts < FileLimitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
             ++attempts;
             try {
-                return mediaMessageService.sendDocument(sendDocument);
+                return mediaMessageService.sendDocument(sendDocument, progress);
             } catch (Throwable ex) {
                 lastEx = ex;
                 int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
@@ -80,18 +80,4 @@ public class ForceMediaMessageService implements MediaMessageService {
         mediaMessageService.sendAudio(sendAudio);
     }
 
-    @Override
-    public MediaType getMediaType(String fileId) {
-        return mediaMessageService.getMediaType(fileId);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId) {
-        mediaMessageService.sendFile(chatId, fileId);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId, String caption) {
-        mediaMessageService.sendFile(chatId, fileId, caption);
-    }
 }

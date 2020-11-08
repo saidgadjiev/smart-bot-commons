@@ -4,13 +4,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.MediaType;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.ParseMode;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
@@ -39,12 +39,12 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
-    public SendFileResult sendDocument(SendDocument sendDocument) {
+    public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
         if (StringUtils.isNotBlank(sendDocument.getCaption())) {
             sendDocument.setParseMode(ParseMode.HTML);
         }
 
-        Message message = telegramLocalBotApiService.sendDocument(sendDocument);
+        Message message = telegramLocalBotApiService.sendDocument(sendDocument, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -71,36 +71,6 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         }
 
         telegramLocalBotApiService.sendAudio(sendAudio);
-    }
-
-    @Override
-    public MediaType getMediaType(String fileId) {
-        return MediaType.DOCUMENT;
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId) {
-        sendFile(chatId, fileId, null);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId, String caption) {
-        MediaType mediaType = getMediaType(fileId);
-
-        switch (mediaType) {
-            case PHOTO:
-                sendPhoto(new SendPhoto(chatId, fileId).setCaption(caption));
-                break;
-            case VIDEO:
-                sendVideo(new SendVideo(chatId, fileId).setCaption(caption));
-                break;
-            case AUDIO:
-                sendAudio(new SendAudio(chatId, fileId).setCaption(caption));
-                break;
-            default:
-                sendDocument(new SendDocument(chatId, fileId).setCaption(caption));
-                break;
-        }
     }
 
     @Override

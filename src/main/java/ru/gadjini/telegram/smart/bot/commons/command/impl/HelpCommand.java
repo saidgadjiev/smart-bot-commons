@@ -3,12 +3,12 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -70,7 +70,7 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
 
     private void sendHelpMessage(int userId, Locale locale) {
         messageService.sendMessage(
-                new HtmlMessage((long) userId, localisationService.getMessage(MessagesProperties.MESSAGE_HELP,
+                new SendMessage(String.valueOf(userId), localisationService.getMessage(MessagesProperties.MESSAGE_HELP,
                         new Object[]{commandMessageBuilder.getCommandsInfo(locale)},
                         locale)));
     }

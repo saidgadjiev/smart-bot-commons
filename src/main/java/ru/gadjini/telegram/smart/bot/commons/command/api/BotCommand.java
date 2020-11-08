@@ -1,6 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.command.api;
 
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
+import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface BotCommand extends MyBotCommand {
     String COMMAND_INIT_CHARACTER = "/";

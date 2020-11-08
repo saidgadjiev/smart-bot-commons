@@ -11,9 +11,13 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.*;
 import org.telegram.telegrambots.meta.api.objects.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
@@ -21,17 +25,8 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
-import ru.gadjini.telegram.smart.bot.commons.model.SmartToTgModelMapper;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.DeleteMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageCaption;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageReplyMarkup;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -58,11 +53,9 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     private final BotProperties botProperties;
 
-    private final BotApiProperties localBotApiProperties;
+    private final BotApiProperties botApiProperties;
 
     private ObjectMapper objectMapper;
-
-    private SmartToTgModelMapper modelMapper;
 
     private ThreadPoolExecutor mediaWorkers;
 
@@ -71,13 +64,11 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Autowired
     public TelegramBotApiService(BotProperties botProperties, ObjectMapper objectMapper,
-                                 DefaultBotOptions botOptions, BotApiProperties localBotApiProperties,
-                                 SmartToTgModelMapper modelMapper) {
+                                 DefaultBotOptions botOptions, BotApiProperties botApiProperties) {
         super(botOptions);
         this.botProperties = botProperties;
         this.objectMapper = objectMapper;
-        this.localBotApiProperties = localBotApiProperties;
-        this.modelMapper = modelMapper;
+        this.botApiProperties = botApiProperties;
     }
 
     @PostConstruct
@@ -100,13 +91,13 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     public Boolean sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
         return executeWithResult(() -> {
-            return execute(objectMapper.convertValue(answerCallbackQuery, org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery.class));
+            return execute(objectMapper.convertValue(answerCallbackQuery, AnswerCallbackQuery.class));
         });
     }
 
     public Message sendMessage(SendMessage sendMessage) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = execute(objectMapper.convertValue(sendMessage, org.telegram.telegrambots.meta.api.methods.send.SendMessage.class));
+            Message execute = execute(objectMapper.convertValue(sendMessage, SendMessage.class));
 
             return objectMapper.convertValue(execute, Message.class);
         });
@@ -114,32 +105,32 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     public void editReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) {
         executeWithoutResult(() -> {
-            execute(objectMapper.convertValue(editMessageReplyMarkup, org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup.class));
+            execute(objectMapper.convertValue(editMessageReplyMarkup, EditMessageReplyMarkup.class));
         });
     }
 
     public void editMessageText(EditMessageText editMessageText) {
         executeWithoutResult(() -> {
-            execute(objectMapper.convertValue(editMessageText, org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText.class));
+            execute(objectMapper.convertValue(editMessageText, EditMessageText.class));
         });
     }
 
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
         executeWithoutResult(() -> {
-            execute(objectMapper.convertValue(editMessageCaption, org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption.class));
+            execute(objectMapper.convertValue(editMessageCaption, EditMessageCaption.class));
         });
     }
 
     public Boolean deleteMessage(DeleteMessage deleteMessage) {
         return executeWithResult(() -> {
-            return execute(objectMapper.convertValue(deleteMessage, org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage.class));
+            return execute(objectMapper.convertValue(deleteMessage, DeleteMessage.class));
         });
     }
 
     @Override
     public Message editMessageMedia(EditMessageMedia editMessageMedia) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = (org.telegram.telegrambots.meta.api.objects.Message) execute(modelMapper.map(editMessageMedia));
+            Message execute = (Message) execute(editMessageMedia);
 
             return objectMapper.convertValue(execute, Message.class);
         });
@@ -148,30 +139,30 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     @Override
     public Message sendSticker(SendSticker sendSticker) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = execute(modelMapper.map(sendSticker));
+            Message execute = execute(sendSticker);
 
             return objectMapper.convertValue(execute, Message.class);
         });
     }
 
     @Override
-    public Message sendDocument(SendDocument sendDocument) {
-        if (StringUtils.isNotBlank(sendDocument.getDocument().getFilePath())) {
-            uploading.put(sendDocument.getDocument().getFilePath(), new SmartTempFile(new File(sendDocument.getDocument().getFilePath())));
+    public Message sendDocument(SendDocument sendDocument, Progress progress) {
+        if (sendDocument.getDocument().isNew()) {
+            uploading.put(sendDocument.getDocument().getNewMediaFile().getAbsolutePath(), new SmartTempFile(sendDocument.getDocument().getNewMediaFile()));
         }
 
         try {
             return executeWithResult(() -> {
-                updateProgressBeforeStart(sendDocument.getProgress());
-                org.telegram.telegrambots.meta.api.objects.Message execute = execute(modelMapper.map(sendDocument));
+                updateProgressBeforeStart(progress);
+                Message execute = execute(sendDocument);
 
-                updateProgressAfterComplete(sendDocument.getProgress());
+                updateProgressAfterComplete(progress);
 
                 return objectMapper.convertValue(execute, Message.class);
             });
         } finally {
-            if (StringUtils.isNotBlank(sendDocument.getDocument().getFilePath())) {
-                uploading.remove(sendDocument.getDocument().getFilePath());
+            if (sendDocument.getDocument().isNew()) {
+                uploading.remove(sendDocument.getDocument().getNewMediaFile().getAbsolutePath());
             }
         }
     }
@@ -179,7 +170,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     @Override
     public Message sendVideo(SendVideo sendVideo) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = execute(modelMapper.map(sendVideo));
+            Message execute = execute(sendVideo);
 
             return objectMapper.convertValue(execute, Message.class);
         });
@@ -188,7 +179,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     @Override
     public Message sendAudio(SendAudio sendAudio) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = execute(modelMapper.map(sendAudio));
+            Message execute = execute(sendAudio);
 
             return objectMapper.convertValue(execute, Message.class);
         });
@@ -197,7 +188,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     @Override
     public Message sendPhoto(SendPhoto sendPhoto) {
         return executeWithResult(() -> {
-            org.telegram.telegrambots.meta.api.objects.Message execute = execute(modelMapper.map(sendPhoto));
+            Message execute = execute(sendPhoto);
 
             return objectMapper.convertValue(execute, Message.class);
         });
@@ -376,7 +367,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             return;
         }
         try {
-            org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText editMessageText = new org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText();
+            EditMessageText editMessageText = new EditMessageText();
             editMessageText.setChatId(Long.valueOf(progress.getChatId()));
             editMessageText.setText(progress.getProgressMessage());
             editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getProgressReplyMarkup(), InlineKeyboardMarkup.class));
@@ -393,7 +384,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             return;
         }
         try {
-            org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText editMessageText = new org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText();
+            EditMessageText editMessageText = new EditMessageText();
             editMessageText.setChatId(Long.valueOf(progress.getChatId()));
             editMessageText.setText(progress.getAfterProgressCompletionMessage());
             editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getAfterProgressCompletionReplyMarkup(), InlineKeyboardMarkup.class));
@@ -407,9 +398,9 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     private String getLocalFilePath(String apiFilePath) {
-        String path = apiFilePath.replace(localBotApiProperties.getWorkDir(), "");
+        String path = apiFilePath.replace(botApiProperties.getWorkDir(), "");
 
-        return localBotApiProperties.getLocalWorkDir() + path;
+        return botApiProperties.getLocalWorkDir() + path;
     }
 
     private ThreadPoolExecutor mediaWorkers() {

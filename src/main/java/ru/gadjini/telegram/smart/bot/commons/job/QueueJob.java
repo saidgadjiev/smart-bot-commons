@@ -8,11 +8,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.BusyWorkerException;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -172,24 +172,28 @@ public class QueueJob {
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
         QueueItem queueItem = queueService.getById(jobId);
         if (queueItem == null) {
-            messageService.sendAnswerCallbackQuery(new AnswerCallbackQuery(
-                    queryId,
-                    localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_ITEM_NOT_FOUND, userService.getLocaleOrDefault((int) chatId)),
-                    true
-            ));
+            messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder()
+                    .callbackQueryId(queryId)
+                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_ITEM_NOT_FOUND, userService.getLocaleOrDefault((int) chatId)))
+                    .showAlert(true)
+                    .build()
+            );
         } else {
-            messageService.sendAnswerCallbackQuery(new AnswerCallbackQuery(
-                    queryId,
-                    localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))
-            ));
+            messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder().callbackQueryId(queryId)
+                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId)))
+                    .build()
+            );
             if (!executor.cancelAndComplete(jobId, true)) {
                 queueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
         if (queueJobConfigurator.isNeedUpdateMessageAfterCancel(queueItem)) {
-            messageService.editMessage(new EditMessageText(
-                    chatId, messageId, localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId))));
+            messageService.editMessage(EditMessageText.builder()
+                    .chatId(String.valueOf(chatId))
+                    .messageId(messageId)
+                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId)))
+                    .build(), false);
         }
     }
 
@@ -327,9 +331,12 @@ public class QueueJob {
             Locale locale = userService.getLocaleOrDefault(queueItem.getUserId());
             String message = queueJobConfigurator.getWaitingMessage(queueItem, locale);
 
-            messageService.editMessage(new EditMessageText((long) queueItem.getUserId(), queueItem.getProgressMessageId(), message)
-                    .setNoLogging(true)
-                    .setReplyMarkup(queueJobConfigurator.getWaitingKeyboard(queueItem, locale)));
+            messageService.editMessage(EditMessageText.builder()
+                    .chatId(String.valueOf(queueItem.getUserId()))
+                    .messageId(queueItem.getProgressMessageId())
+                    .text(message)
+                    .replyMarkup(queueJobConfigurator.getWaitingKeyboard(queueItem, locale))
+                    .build(), false);
         }
     }
 }

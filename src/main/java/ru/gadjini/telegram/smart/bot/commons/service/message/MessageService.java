@@ -1,11 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.service.message;
 
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageCaption;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -22,7 +22,7 @@ public interface MessageService {
 
     void removeInlineKeyboard(long chatId, int messageId);
 
-    void editMessage(EditMessageText messageContext);
+    void editMessage(EditMessageText messageContext, boolean ignoreException);
 
     void editMessageCaption(EditMessageCaption context);
 

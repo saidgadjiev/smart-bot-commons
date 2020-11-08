@@ -1,7 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.service.queue;
 
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.InlineKeyboardMarkup;
 
 import java.util.Locale;
 

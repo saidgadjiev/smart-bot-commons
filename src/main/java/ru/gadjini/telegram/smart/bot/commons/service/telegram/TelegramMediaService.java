@@ -1,17 +1,17 @@
 package ru.gadjini.telegram.smart.bot.commons.service.telegram;
 
+import org.telegram.telegrambots.meta.api.methods.send.*;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.*;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 
 public interface TelegramMediaService {
     Message editMessageMedia(EditMessageMedia editMessageMedia);
 
     Message sendSticker(SendSticker sendSticker);
 
-    Message sendDocument(SendDocument sendDocument);
+    Message sendDocument(SendDocument sendDocument, Progress progress);
 
     Message sendVideo(SendVideo sendVideo);
 

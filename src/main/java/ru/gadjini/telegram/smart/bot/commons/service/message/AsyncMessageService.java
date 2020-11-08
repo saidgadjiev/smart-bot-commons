@@ -3,16 +3,16 @@ package ru.gadjini.telegram.smart.bot.commons.service.message;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageCaption;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.job.TgMethodExecutor;
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -61,8 +61,8 @@ public class AsyncMessageService implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText editMessageText) {
-        messageSenderJob.push(() -> messageService.editMessage(editMessageText));
+    public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
+        messageSenderJob.push(() -> messageService.editMessage(editMessageText, false));
     }
 
     @Override
@@ -77,14 +77,17 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void sendErrorMessage(long chatId, Locale locale) {
-        sendMessage(new HtmlMessage(chatId, localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale)));
+        sendMessage(SendMessage.builder().chatId(String.valueOf(chatId))
+                .text(localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale))
+                .parseMode(ParseMode.HTML)
+                .build());
     }
 
     @Override
     public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        sendMessage(
-                new HtmlMessage(chatId, localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
-                        .setReplyMarkup(replyKeyboard)
-        );
+        sendMessage(SendMessage.builder()
+                .chatId(String.valueOf(chatId))
+                .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
+                .replyMarkup(replyKeyboard).build());
     }
 }

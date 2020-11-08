@@ -1,6 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.keyboard;
 
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.Locale;
 

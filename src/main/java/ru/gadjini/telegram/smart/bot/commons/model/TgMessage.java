@@ -1,9 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.model;
 
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.CallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.User;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
 
 import java.util.ArrayList;
 import java.util.List;

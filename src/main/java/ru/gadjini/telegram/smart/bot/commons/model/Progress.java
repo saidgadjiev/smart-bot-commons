@@ -1,7 +1,7 @@
-package ru.gadjini.telegram.smart.bot.commons.model.bot.api.object;
+package ru.gadjini.telegram.smart.bot.commons.model;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 
 public class Progress {
 

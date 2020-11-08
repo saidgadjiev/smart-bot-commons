@@ -2,8 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.service.command;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.CallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
+import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParamsParser;
 

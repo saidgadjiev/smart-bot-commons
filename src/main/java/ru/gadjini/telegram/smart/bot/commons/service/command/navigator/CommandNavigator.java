@@ -10,7 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.navigator.keyboard.CommandNavigatorDao;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 
 import java.util.Collection;

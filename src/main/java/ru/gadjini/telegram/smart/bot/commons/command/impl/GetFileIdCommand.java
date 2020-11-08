@@ -3,12 +3,12 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -39,17 +39,13 @@ public class GetFileIdCommand implements BotCommand, NavigableBotCommand {
 
     @Override
     public void processMessage(Message message, String[] params) {
-        messageService.sendMessage(new SendMessage(
-                message.getChatId(), "Send me a file"
-        ));
+        messageService.sendMessage(new SendMessage(String.valueOf(message.getChatId()), "Send me a file"));
     }
 
     @Override
     public void processNonCommandUpdate(Message message, String text) {
         MessageMedia media = messageMediaService.getMedia(message, Locale.getDefault());
-        messageService.sendMessage(new SendMessage(
-                message.getChatId(), media.getFileId()
-        ));
+        messageService.sendMessage(new SendMessage(String.valueOf(message.getChatId()), media.getFileId()));
     }
 
     @Override

@@ -3,13 +3,13 @@ package ru.gadjini.telegram.smart.bot.commons.filter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -80,8 +80,8 @@ public class StartCommandFilter extends BaseBotFilter {
                     createOrUpdateResult.getUser().getLocale());
             ReplyKeyboard mainMenu = replyKeyboardService.getMainMenu(message.getChatId(), createOrUpdateResult.getUser().getLocale());
             messageService.sendMessage(
-                    new HtmlMessage(message.getChatId(), text)
-                            .setReplyMarkup(mainMenu)
+                    SendMessage.builder().chatId(String.valueOf(message.getChatId())).text(text)
+                            .replyMarkup(mainMenu).build()
             );
 
             commandNavigator.setCurrentCommand(message.getChatId(), CommandNames.START_COMMAND_NAME);

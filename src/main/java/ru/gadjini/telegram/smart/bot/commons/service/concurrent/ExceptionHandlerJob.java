@@ -4,16 +4,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.InlineKeyboardMarkup;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.buttons.InlineKeyboardButton;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
@@ -108,29 +107,29 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                     if (((UserException) e).isPrintLog()) {
                         LOGGER.error(e.getMessage(), e);
                     }
-                    sendUserExceptionMessage(
-                            new HtmlMessage(job.getChatId(), ((UserException) e).getHumanMessage())
-                                    .setReplyToMessageId(((UserException) e).getReplyToMessageId()));
+                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId())).text(((UserException) e).getHumanMessage())
+                            .replyToMessageId(((UserException) e).getReplyToMessageId()).build());
                 } else if (e instanceof ProcessException) {
                     LOGGER.error(e.getMessage(), e);
                     sendUserExceptionMessage(
-                            new HtmlMessage(job.getChatId(),
-                                    localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                            MessagesProperties.MESSAGE_ERROR), locale)).setReplyToMessageId(job.getReplyToMessageId()));
+                            SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                    .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                            MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId()).build());
                 } else if (floodWaitExceptionIndexOf != -1) {
                     LOGGER.error(e.getMessage());
                     FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
-                    sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
-                            localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
+                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                            .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
                                     new Object[]{floodWaitException.getSleepTime()},
                                     locale)
-                    ).setReplyToMessageId(job.getReplyToMessageId())
-                            .setReplyMarkup(floodWaitKeyboard(locale)));
+                            ).replyToMessageId(job.getReplyToMessageId())
+                            .replyMarkup(floodWaitKeyboard(locale)).build());
                 } else {
                     LOGGER.error(e.getMessage(), e);
-                    sendUserExceptionMessage(new HtmlMessage(job.getChatId(),
-                            localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                    MessagesProperties.MESSAGE_ERROR), locale)).setReplyToMessageId(job.getReplyToMessageId()));
+                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                            .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                    MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId())
+                            .build());
                 }
             }
         }

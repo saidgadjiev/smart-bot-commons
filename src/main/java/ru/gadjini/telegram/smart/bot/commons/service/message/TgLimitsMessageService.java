@@ -4,12 +4,12 @@ import com.google.common.base.Splitter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.SendMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageCaption;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.updatemessages.EditMessageText;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.AnswerCallbackQuery;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Message;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 @Qualifier("messageLimits")
 public class TgLimitsMessageService implements MessageService {
 
-    public static final int TEXT_LENGTH_LIMIT = 4000;
+    private static final int TEXT_LENGTH_LIMIT = 4000;
 
     private MessageService messageService;
 
@@ -54,18 +54,23 @@ public class TgLimitsMessageService implements MessageService {
                     .split(sendMessage.getText())
                     .forEach(parts::add);
             for (int i = 0; i < parts.size() - 1; ++i) {
-                SendMessage msg = new SendMessage(sendMessage.getChatId(), parts.get(i))
-                        .setReplyToMessageId(sendMessage.getReplyToMessageId())
-                        .setDisableWebPagePreview(sendMessage.getDisableWebPagePreview())
-                        .setParseMode(sendMessage.getParseMode());
+                SendMessage msg = SendMessage.builder()
+                        .chatId(String.valueOf(sendMessage.getChatId()))
+                        .text(parts.get(i))
+                        .replyToMessageId(sendMessage.getReplyToMessageId())
+                        .disableWebPagePreview(sendMessage.getDisableWebPagePreview())
+                        .parseMode(sendMessage.getParseMode())
+                        .build();
                 messageService.sendMessage(msg);
             }
 
-            SendMessage msg = new SendMessage(sendMessage.getChatId(), parts.get(parts.size() - 1))
-                    .setReplyToMessageId(sendMessage.getReplyToMessageId())
-                    .setDisableWebPagePreview(sendMessage.getDisableWebPagePreview())
-                    .setParseMode(sendMessage.getParseMode())
-                    .setReplyMarkup(sendMessage.getReplyMarkup());
+            SendMessage msg = SendMessage.builder()
+                    .chatId(String.valueOf(sendMessage.getChatId()))
+                    .text(parts.get(parts.size() - 1))
+                    .replyToMessageId(sendMessage.getReplyToMessageId())
+                    .disableWebPagePreview(sendMessage.getDisableWebPagePreview())
+                    .parseMode(sendMessage.getParseMode())
+                    .replyMarkup(sendMessage.getReplyMarkup()).build();
             messageService.sendMessage(msg, callback);
         }
     }
@@ -76,8 +81,8 @@ public class TgLimitsMessageService implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText messageContext) {
-        messageService.editMessage(messageContext);
+    public void editMessage(EditMessageText messageContext, boolean ignoreException) {
+        messageService.editMessage(messageContext, false);
     }
 
     @Override

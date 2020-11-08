@@ -6,15 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.send.HtmlMessage;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.Update;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.object.User;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.api.objects.User;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.SubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 
 import javax.annotation.PostConstruct;
 import java.util.Locale;
@@ -66,6 +66,6 @@ public class SubscriptionFilter extends BaseBotFilter {
     private void sendNeedSubscription(User user) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
         String msg = localisationService.getMessage(MessagesProperties.MESSAGE_NEED_SUBSCRIPTION, locale);
-        messageService.sendMessage(new HtmlMessage((long) user.getId(), msg));
+        messageService.sendMessage(new SendMessage(String.valueOf(user.getId()), msg));
     }
 }
