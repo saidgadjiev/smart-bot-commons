@@ -43,10 +43,10 @@ public class ForceMediaMessageService implements MediaMessageService {
 
     @Override
     public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
-        int attempts = 0;
+        int attempts = 1;
         int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
         Throwable lastEx = null;
-        while (attempts < FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
+        while (attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
             ++attempts;
             try {
                 return mediaMessageService.sendDocument(sendDocument, progress);
