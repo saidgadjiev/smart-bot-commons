@@ -5,6 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
+import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.sql.ResultSet;
@@ -19,10 +20,13 @@ public class QueueDao {
 
     private QueueDaoDelegate queueDaoDelegate;
 
+    private QueueProperties queueProperties;
+
     @Autowired
-    public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate) {
+    public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate, QueueProperties queueProperties) {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
+        this.queueProperties = queueProperties;
     }
 
     public void setException(int id, String exception) {
@@ -53,10 +57,10 @@ public class QueueDao {
 
     public void setWaiting(int id, String exception) {
         jdbcTemplate.update(
-                "UPDATE " + getQueueName() + " SET exception = ?, status = ? WHERE id = ?",
+                "UPDATE " + getQueueName() + " SET exception = ?, status = case when attempts <= ? then 0 else 2 end WHERE id = ?",
                 ps -> {
                     ps.setString(1, exception);
-                    ps.setInt(2, QueueItem.Status.WAITING.getCode());
+                    ps.setInt(2, queueProperties.getMaxAttempts());
                     ps.setInt(3, id);
                 }
         );
