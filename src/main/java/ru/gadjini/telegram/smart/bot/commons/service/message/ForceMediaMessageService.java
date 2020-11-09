@@ -14,6 +14,9 @@ import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodWaitProperties;
+import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
+
+import java.net.SocketException;
 
 @Component
 @Qualifier("forceMedia")
@@ -49,18 +52,13 @@ public class ForceMediaMessageService implements MediaMessageService {
                 return mediaMessageService.sendDocument(sendDocument, progress);
             } catch (Throwable ex) {
                 lastEx = ex;
-                int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
-                if (floodWaitExceptionIndexOf == -1) {
-                    throw ex;
-                } else {
+                if (shouldTryToUploadAgain(ex)) {
                     LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
+                    ThreadUtils.sleep(sleepTime, RuntimeException::new);
                     ++attempts;
-                    try {
-                        Thread.sleep(sleepTime);
-                        sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-                    } catch (InterruptedException e) {
-                        throw new RuntimeException(e);
-                    }
+                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+                } else {
+                    throw ex;
                 }
             }
         }
@@ -83,4 +81,10 @@ public class ForceMediaMessageService implements MediaMessageService {
         mediaMessageService.sendAudio(sendAudio);
     }
 
+    private boolean shouldTryToUploadAgain(Throwable ex) {
+        int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
+        int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+
+        return socketException != -1 || floodWaitExceptionIndexOf != -1;
+    }
 }

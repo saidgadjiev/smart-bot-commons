@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.file;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.NoHttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodWaitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
+import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
 
 import java.util.Objects;
 
@@ -35,31 +37,21 @@ public class FileManager {
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         boolean downloaded = false;
         Throwable lastEx = null;
-        int floodWaitExceptionAttempts = 1;
+        int attempts = 1;
         int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-        while (!downloaded && floodWaitExceptionAttempts <= FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT) {
+        while (!downloaded && attempts <= FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT) {
             try {
                 telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
             } catch (Throwable ex) {
                 lastEx = ex;
-                int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
-                if (telegramApiRequestExceptionIndexOf != -1) {
-                    TelegramApiRequestException apiRequestException = (TelegramApiRequestException) ExceptionUtils.getThrowables(ex)[telegramApiRequestExceptionIndexOf];
-                    if (Objects.equals(apiRequestException.getApiResponse(), "Bad Request: wrong file_id or the file is temporarily unavailable")) {
-                        LOGGER.debug("Attemp({}, {}, {})", floodWaitExceptionAttempts, ex.getMessage(), sleepTime);
-                        ++floodWaitExceptionAttempts;
-                    } else {
-                        throw ex;
-                    }
+                if (shouldTryToDownloadAgain(ex)) {
+                    LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
+                    ThreadUtils.sleep(sleepTime, DownloadingException::new);
+                    ++attempts;
+                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
                 } else {
                     throw ex;
-                }
-                try {
-                    Thread.sleep(sleepTime);
-                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-                } catch (InterruptedException e) {
-                    throw new DownloadingException(e);
                 }
             }
         }
@@ -93,4 +85,17 @@ public class FileManager {
         }
         return exception.contains(FloodWaitException.class.getSimpleName());
     }
+
+    private boolean shouldTryToDownloadAgain(Throwable ex) {
+        int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
+        int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
+        if (telegramApiRequestExceptionIndexOf != -1) {
+            TelegramApiRequestException apiRequestException = (TelegramApiRequestException) ExceptionUtils.getThrowables(ex)[telegramApiRequestExceptionIndexOf];
+
+            return Objects.equals(apiRequestException.getApiResponse(), "Bad Request: wrong file_id or the file is temporarily unavailable");
+        } else {
+            return indexOfNoResponseException != -1;
+        }
+    }
+
 }
