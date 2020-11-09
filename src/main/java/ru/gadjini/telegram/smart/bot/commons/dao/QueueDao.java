@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
@@ -8,6 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
+import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.util.List;
 import java.util.Set;
@@ -15,6 +18,8 @@ import java.util.stream.Collectors;
 
 @Repository
 public class QueueDao {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(QueueDao.class);
 
     private JdbcTemplate jdbcTemplate;
 
@@ -27,6 +32,11 @@ public class QueueDao {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
         this.queueProperties = queueProperties;
+    }
+
+    @PostConstruct
+    public void init() {
+        LOGGER.debug("Max attempts({})", queueProperties.getMaxAttempts());
     }
 
     public void setException(int id, String exception) {
