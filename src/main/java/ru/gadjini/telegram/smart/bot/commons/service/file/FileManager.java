@@ -74,9 +74,7 @@ public class FileManager {
     }
 
     public static boolean isNoneCriticalDownloadingException(Throwable ex) {
-        int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
-
-        return floodWaitExceptionIndexOf != -1;
+        return shouldTryToDownloadAgain(ex);
     }
 
     public static boolean isNoneCriticalDownloadingException(String exception) {
@@ -86,7 +84,7 @@ public class FileManager {
         return exception.contains(FloodWaitException.class.getSimpleName());
     }
 
-    private boolean shouldTryToDownloadAgain(Throwable ex) {
+    private static boolean shouldTryToDownloadAgain(Throwable ex) {
         int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
         int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
         if (telegramApiRequestExceptionIndexOf != -1) {
