@@ -123,6 +123,7 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
         sendMessage(SendMessage.builder().chatId(String.valueOf(chatId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
+                .parseMode(ParseMode.HTML)
                 .replyMarkup(replyKeyboard).build());
     }
 
