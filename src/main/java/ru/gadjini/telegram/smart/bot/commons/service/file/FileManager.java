@@ -39,7 +39,7 @@ public class FileManager {
         Throwable lastEx = null;
         int attempts = 1;
         int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-        while (!downloaded && attempts <= FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT) {
+        while (!downloaded && attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
             try {
                 telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
