@@ -11,8 +11,6 @@ public class MessagesProperties {
 
     public static final String LANGUAGE_COMMAND_NAME = "language.command.name";
 
-    public static final String MAX_FILE_SIZE = "max.file.size";
-
     public static final String RETRY_COMMAND_DESCRIPTION = "retry.command.description";
 
     public static final String GO_BACK_COMMAND_NAME = "go.back.command.name";
@@ -41,13 +39,15 @@ public class MessagesProperties {
 
     public static final String MESSAGE_ZERO_LENGTH_FILE = "message.zero.length.file";
 
-    public static final String MESSAGE_INPUT_FILE_WAIT = "message.input.file.wait";
-
-    public static final String MESSAGE_INPUT_FILE_WAIT_TTL = "message.input.file.wait.ttl";
-
     public static final String MESSAGE_BOT_IS_SLEEPING = "message.bot.is.sleeping";
 
     public static final String MESSAGE_QUERY_CANCELED = "message.query.canceled";
+
+    public static final String UPDATED_CALLBACK_ANSWER = "updated.callback.answer";
+
+    public static final String UPDATE_QUERY_STATUS_COMMAND_DESCRIPTION = "update.query.status.command.description";
+
+    public static final String CANCEL_QUERY_COMMAND_DESCRIPTION = "cancel.query.command.description";
 
     public static final String MESSAGE_QUERY_ITEM_NOT_FOUND = "message.query.item.not.found";
 }

@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
@@ -108,11 +109,13 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                         LOGGER.error(e.getMessage(), e);
                     }
                     sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId())).text(((UserException) e).getHumanMessage())
+                            .parseMode(ParseMode.HTML)
                             .replyToMessageId(((UserException) e).getReplyToMessageId()).build());
                 } else if (e instanceof ProcessException) {
                     LOGGER.error(e.getMessage(), e);
                     sendUserExceptionMessage(
                             SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                    .parseMode(ParseMode.HTML)
                                     .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
                                             MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId()).build());
                 } else if (floodWaitExceptionIndexOf != -1) {
@@ -123,12 +126,14 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                                     new Object[]{floodWaitException.getSleepTime()},
                                     locale)
                             ).replyToMessageId(job.getReplyToMessageId())
+                            .parseMode(ParseMode.HTML)
                             .replyMarkup(floodWaitKeyboard(locale)).build());
                 } else {
                     LOGGER.error(e.getMessage(), e);
                     sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
                             .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                    MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId())
+                                    MessagesProperties.MESSAGE_ERROR), locale))
+                            .parseMode(ParseMode.HTML).replyToMessageId(job.getReplyToMessageId())
                             .build());
                 }
             }

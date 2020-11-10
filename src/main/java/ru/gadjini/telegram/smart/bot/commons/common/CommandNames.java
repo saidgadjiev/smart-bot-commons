@@ -24,4 +24,8 @@ public class CommandNames {
 
     public static final String RETRY = "rtr";
 
+    public static final String CANCEL_QUERY_COMMAND_NAME = "c";
+
+    public static final String UPDATE_QUERY_STATUS = "updq";
+
 }
