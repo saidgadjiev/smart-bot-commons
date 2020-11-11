@@ -67,6 +67,11 @@ public class ForceMediaMessageService implements MediaMessageService {
     }
 
     @Override
+    public void sendFile(long chatId, String fileId) {
+        mediaMessageService.sendFile(chatId, fileId);
+    }
+
+    @Override
     public SendFileResult sendPhoto(SendPhoto sendPhoto) {
         return mediaMessageService.sendPhoto(sendPhoto);
     }

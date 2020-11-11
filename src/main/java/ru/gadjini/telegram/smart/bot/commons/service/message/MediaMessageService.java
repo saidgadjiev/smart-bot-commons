@@ -13,6 +13,8 @@ public interface MediaMessageService {
 
     SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
 
+    void sendFile(long chatId, String fileId);
+
     default SendFileResult sendDocument(SendDocument sendDocumentContext) {
         return sendDocument(sendDocumentContext, null);
     }

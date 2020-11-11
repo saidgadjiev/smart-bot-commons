@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
@@ -16,6 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiServ
 
 @Service
 @Qualifier("media")
+@SuppressWarnings("PMD")
 public class MediaMessageServiceImpl implements MediaMessageService {
 
     private MessageMediaService fileService;
@@ -47,6 +49,35 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         Message message = telegramLocalBotApiService.sendDocument(sendDocument, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
+    }
+
+    @Override
+    public void sendFile(long chatId, String fileId) {
+        try {
+            sendDocument(new SendDocument(String.valueOf(chatId), new InputFile(fileId)));
+            return;
+        } catch (Exception ignore) {
+        }
+        try {
+            sendVideo(new SendVideo(String.valueOf(chatId), new InputFile(fileId)));
+            return;
+        } catch (Exception ignore) {
+        }
+        try {
+            sendPhoto(new SendPhoto(String.valueOf(chatId), new InputFile(fileId)));
+        } catch (Exception ignore) {
+
+        }
+        try {
+            sendAudio(SendAudio.builder().chatId(String.valueOf(chatId)).audio(new InputFile(fileId)).build());
+        } catch (Exception ignore) {
+
+        }
+        try {
+            sendSticker(new SendSticker(String.valueOf(chatId), new InputFile(fileId)));
+        } catch (Exception ignore) {
+
+        }
     }
 
     @Override
