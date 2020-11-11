@@ -42,7 +42,7 @@ public class MessageMedia {
     }
 
     public void setFileName(String fileName) {
-        this.fileName = StringUtils.defaultString(fileName, "").replace("\"", "");
+        this.fileName = getFixedFileName(fileName);
     }
 
     public String getMimeType() {
@@ -87,6 +87,10 @@ public class MessageMedia {
         tgFile.setThumb(thumb);
 
         return tgFile;
+    }
+
+    private String getFixedFileName(String fileName) {
+        return StringUtils.defaultString(fileName, "").replace("\"", "").replace(";", "");
     }
 
     @Override

@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
-import ru.gadjini.telegram.smart.bot.commons.utils.MimeTypeUtils;
 
 import java.util.Comparator;
 import java.util.Locale;
@@ -116,9 +115,5 @@ public class MessageMediaService {
         }
 
         return null;
-    }
-
-    public static void main(String[] args) {
-        System.out.println(MimeTypeUtils.getExtension("audio/mpeg"));
     }
 }
