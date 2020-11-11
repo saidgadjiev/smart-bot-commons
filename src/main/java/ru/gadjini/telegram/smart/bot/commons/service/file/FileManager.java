@@ -16,6 +16,7 @@ import ru.gadjini.telegram.smart.bot.commons.property.FloodWaitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
 
+import java.net.SocketException;
 import java.util.Objects;
 
 @Service
@@ -24,6 +25,8 @@ public class FileManager {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileManager.class);
 
     private TelegramBotApiService telegramLocalBotApiService;
+
+    private static final String FILE_ID_TEMPORARILY_UNAVAILABLE = "Bad Request: wrong file_id or the file is temporarily unavailable";
 
     @Autowired
     public FileManager(TelegramBotApiService telegramLocalBotApiService) {
@@ -81,18 +84,22 @@ public class FileManager {
         if (StringUtils.isBlank(exception)) {
             return false;
         }
-        return exception.contains(FloodWaitException.class.getSimpleName());
+        return exception.contains(FloodWaitException.class.getSimpleName()) ||
+                exception.contains(NoHttpResponseException.class.getSimpleName()) ||
+                exception.contains(SocketException.class.getSimpleName()) ||
+                exception.contains(FILE_ID_TEMPORARILY_UNAVAILABLE);
     }
 
     private static boolean shouldTryToDownloadAgain(Throwable ex) {
         int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
         int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
+        int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
         if (telegramApiRequestExceptionIndexOf != -1) {
             TelegramApiRequestException apiRequestException = (TelegramApiRequestException) ExceptionUtils.getThrowables(ex)[telegramApiRequestExceptionIndexOf];
 
-            return Objects.equals(apiRequestException.getApiResponse(), "Bad Request: wrong file_id or the file is temporarily unavailable");
+            return Objects.equals(apiRequestException.getApiResponse(), FILE_ID_TEMPORARILY_UNAVAILABLE);
         } else {
-            return indexOfNoResponseException != -1;
+            return indexOfNoResponseException != -1 || socketException != -1;
         }
     }
 
