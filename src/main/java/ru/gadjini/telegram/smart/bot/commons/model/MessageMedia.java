@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.model;
 
+import org.apache.commons.lang3.StringUtils;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
@@ -41,7 +42,7 @@ public class MessageMedia {
     }
 
     public void setFileName(String fileName) {
-        this.fileName = fileName;
+        this.fileName = StringUtils.defaultString(fileName, "").replace("\"", "");
     }
 
     public String getMimeType() {
