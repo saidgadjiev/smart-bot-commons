@@ -29,9 +29,9 @@ public class QueueService {
         queueDao.setWaitingIfThereAreAttemptsElseException(id, exception);
     }
 
-    public void setException(int id, Throwable ex) {
+    public void setExceptionStatus(int id, Throwable ex) {
         String exception = ExceptionUtils.getMessage(ex) + "\n" + ExceptionUtils.getStackTrace(ex);
-        queueDao.setException(id, exception);
+        queueDao.setExceptionStatus(id, exception);
     }
 
     public String getException(int id) {

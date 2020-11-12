@@ -243,7 +243,7 @@ public class QueueJob {
                     if (FileManager.isNoneCriticalDownloadingException(ex)) {
                         handleNoneCriticalDownloadingException(ex);
                     } else {
-                        queueService.setException(queueItem.getId(), ex);
+                        queueService.setExceptionStatus(queueItem.getId(), ex);
                         queueWorker.unhandledException(ex);
 
                         throw ex;

@@ -39,7 +39,7 @@ public class QueueDao {
         LOGGER.debug("Max attempts({})", queueProperties.getMaxAttempts());
     }
 
-    public void setException(int id, String exception) {
+    public void setExceptionStatus(int id, String exception) {
         jdbcTemplate.update(
                 "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
                 ps -> {
