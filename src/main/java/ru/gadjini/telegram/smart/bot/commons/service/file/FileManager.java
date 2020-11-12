@@ -53,15 +53,36 @@ public class FileManager {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        try {
-            downloadingSemaphore.acquire();
+        boolean downloaded = false;
+        Throwable lastEx = null;
+        int attempts = 1;
+        int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+        while (!downloaded && attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
             try {
-                tryToDownload(fileId, fileSize, progress, outputFile);
-            } finally {
-                downloadingSemaphore.release();
+                try {
+                    downloadingSemaphore.acquire();
+                    telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
+                } catch (InterruptedException ex) {
+                    throw new DownloadCanceledException("Download canceled " + fileId);
+                } finally {
+                    downloadingSemaphore.release();
+                }
+                downloaded = true;
+            } catch (Throwable ex) {
+                lastEx = ex;
+                if (shouldTryToDownloadAgain(ex)) {
+                    LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
+                    ThreadUtils.sleep(sleepTime, DownloadingException::new);
+                    ++attempts;
+                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+                } else {
+                    throw ex;
+                }
             }
-        } catch (InterruptedException e) {
-            throw new DownloadCanceledException("Download canceled " + fileId);
+        }
+
+        if (!downloaded) {
+            throw new DownloadingException(lastEx);
         }
     }
 
@@ -89,33 +110,6 @@ public class FileManager {
                 exception.contains(NoHttpResponseException.class.getSimpleName()) ||
                 exception.contains(SocketException.class.getSimpleName()) ||
                 exception.contains(FILE_ID_TEMPORARILY_UNAVAILABLE);
-    }
-
-    private void tryToDownload(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        boolean downloaded = false;
-        Throwable lastEx = null;
-        int attempts = 1;
-        int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-        while (!downloaded && attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
-            try {
-                telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
-                downloaded = true;
-            } catch (Throwable ex) {
-                lastEx = ex;
-                if (shouldTryToDownloadAgain(ex)) {
-                    LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
-                    ThreadUtils.sleep(sleepTime, DownloadingException::new);
-                    ++attempts;
-                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-                } else {
-                    throw ex;
-                }
-            }
-        }
-
-        if (!downloaded) {
-            throw new DownloadingException(lastEx);
-        }
     }
 
     private static boolean shouldTryToDownloadAgain(Throwable ex) {
