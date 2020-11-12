@@ -24,9 +24,9 @@ public class QueueService {
         return queueDao.poll(weight, limit);
     }
 
-    public void setWaiting(int id, Throwable ex) {
+    public void setWaitingIfThereAreAttemptsElseException(int id, Throwable ex) {
         String exception = ExceptionUtils.getMessage(ex) + "\n" + ExceptionUtils.getStackTrace(ex);
-        queueDao.setWaiting(id, exception);
+        queueDao.setWaitingIfThereAreAttemptsElseException(id, exception);
     }
 
     public void setException(int id, Throwable ex) {
@@ -46,8 +46,8 @@ public class QueueService {
         queueDao.setCompleted(id);
     }
 
-    public void setWaiting(int id) {
-        queueDao.setWaiting(id);
+    public void setWaitingAndDecrementAttempts(int id) {
+        queueDao.setWaitingAndDecrementAttempts(id);
     }
 
     public QueueItem getById(int id) {

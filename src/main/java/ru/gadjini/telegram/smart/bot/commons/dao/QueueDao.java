@@ -60,14 +60,14 @@ public class QueueDao {
         );
     }
 
-    public void setWaiting(int id) {
-        jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0 WHERE id = ?",
+    public void setWaitingAndDecrementAttempts(int id) {
+        jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE id = ?",
                 ps -> ps.setInt(1, id));
     }
 
-    public void setWaiting(int id, String exception) {
+    public void setWaitingIfThereAreAttemptsElseException(int id, String exception) {
         jdbcTemplate.update(
-                "UPDATE " + getQueueName() + " SET exception = ?, status = case when attempts <= ? then 0 else 2 end WHERE id = ?",
+                "UPDATE " + getQueueName() + " SET exception = ?, status = case when attempts < ? then 0 else 2 end WHERE id = ?",
                 ps -> {
                     ps.setString(1, exception);
                     ps.setInt(2, queueProperties.getMaxAttempts());

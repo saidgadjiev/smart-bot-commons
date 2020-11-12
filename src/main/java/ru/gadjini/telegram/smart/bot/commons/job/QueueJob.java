@@ -154,7 +154,7 @@ public class QueueJob {
     }
 
     public final void rejectTask(SmartExecutorService.Job job) {
-        queueService.setWaiting(job.getId());
+        queueService.setWaitingAndDecrementAttempts(job.getId());
         LOGGER.debug("Rejected({}, {})", job.getId(), job.getWeight());
     }
 
@@ -237,7 +237,7 @@ public class QueueJob {
                 }
                 success = true;
             } catch (BusyWorkerException ex) {
-                queueService.setWaiting(queueItem.getId());
+                queueService.setWaitingAndDecrementAttempts(queueItem.getId());
             } catch (Throwable ex) {
                 if (checker == null || !checker.get()) {
                     if (FileManager.isNoneCriticalDownloadingException(ex)) {
@@ -316,7 +316,7 @@ public class QueueJob {
         }
 
         private void handleNoneCriticalDownloadingException(Throwable ex) {
-            queueService.setWaiting(queueItem.getId(), ex);
+            queueService.setWaitingIfThereAreAttemptsElseException(queueItem.getId(), ex);
             if (!FileManager.isNoneCriticalDownloadingException(queueItem.getException())) {
                 updateProgressMessageAfterNoneCriticalException(queueItem.getId());
             }
