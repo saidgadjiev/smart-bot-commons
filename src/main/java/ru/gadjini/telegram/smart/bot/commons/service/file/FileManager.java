@@ -6,22 +6,18 @@ import org.apache.http.NoHttpResponseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
-import ru.gadjini.telegram.smart.bot.commons.property.FloodWaitProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
 
-import javax.annotation.PostConstruct;
 import java.net.SocketException;
 import java.util.Objects;
-import java.util.concurrent.Semaphore;
 
 @Service
 public class FileManager {
@@ -30,22 +26,18 @@ public class FileManager {
 
     private static final String FILE_ID_TEMPORARILY_UNAVAILABLE = "Bad Request: wrong file_id or the file is temporarily unavailable";
 
+    private static final int SLEEP_TIME_BEFORE_ATTEMPT = 90000;
+
+    private static final int MAX_ATTEMPTS = 3;
+
     private TelegramBotApiService telegramLocalBotApiService;
 
-    private Semaphore downloadingSemaphore;
-
-    @Value("${file.downloading.concurrency.level:2}")
-    private int fileDownloadingConcurrencyLevel;
+    private FloodWaitController floodWaitController;
 
     @Autowired
-    public FileManager(TelegramBotApiService telegramLocalBotApiService) {
+    public FileManager(TelegramBotApiService telegramLocalBotApiService, FloodWaitController floodWaitController) {
         this.telegramLocalBotApiService = telegramLocalBotApiService;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOGGER.debug("File downloading concurrency level({})", fileDownloadingConcurrencyLevel);
-        this.downloadingSemaphore = new Semaphore(fileDownloadingConcurrencyLevel);
+        this.floodWaitController = floodWaitController;
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
@@ -53,19 +45,17 @@ public class FileManager {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        floodWaitController.startDownloading(fileId);
         try {
-            downloadingSemaphore.acquire();
-            try {
-                tryToDownload(fileId, fileSize, progress, outputFile);
-            } finally {
-                downloadingSemaphore.release();
-            }
-        } catch (InterruptedException e) {
-            throw new DownloadCanceledException("Download canceled " + fileId);
+            tryToDownload(fileId, fileSize, progress, outputFile);
+        } finally {
+            floodWaitController.finishDownloading(fileId);
         }
     }
 
     public boolean cancelDownloading(String fileId) {
+        floodWaitController.cancelDownloading(fileId);
+
         return telegramLocalBotApiService.cancelDownloading(fileId);
     }
 
@@ -95,8 +85,8 @@ public class FileManager {
         boolean downloaded = false;
         Throwable lastEx = null;
         int attempts = 1;
-        int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
-        while (!downloaded && attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
+        int sleepTime = SLEEP_TIME_BEFORE_ATTEMPT;
+        while (!downloaded && attempts <= MAX_ATTEMPTS) {
             try {
                 telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
                 downloaded = true;
@@ -106,7 +96,7 @@ public class FileManager {
                     LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
                     ThreadUtils.sleep(sleepTime, DownloadingException::new);
                     ++attempts;
-                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+                    sleepTime += SLEEP_TIME_BEFORE_ATTEMPT;
                 } else {
                     throw ex;
                 }
@@ -122,12 +112,13 @@ public class FileManager {
         int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
         int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
         int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
+        int floodWaitException = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
         if (telegramApiRequestExceptionIndexOf != -1) {
             TelegramApiRequestException apiRequestException = (TelegramApiRequestException) ExceptionUtils.getThrowables(ex)[telegramApiRequestExceptionIndexOf];
 
             return Objects.equals(apiRequestException.getApiResponse(), FILE_ID_TEMPORARILY_UNAVAILABLE);
         } else {
-            return indexOfNoResponseException != -1 || socketException != -1;
+            return indexOfNoResponseException != -1 || socketException != -1 || floodWaitException != -1;
         }
     }
 

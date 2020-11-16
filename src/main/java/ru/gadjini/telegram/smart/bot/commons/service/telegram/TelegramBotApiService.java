@@ -4,6 +4,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ContentType;
+import org.apache.http.entity.StringEntity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.*;
@@ -18,6 +22,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.*;
 import org.telegram.telegrambots.meta.api.objects.ChatMember;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
@@ -31,6 +36,8 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
@@ -44,6 +51,8 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     private final Map<String, SmartTempFile> downloading = new ConcurrentHashMap<>();
 
+    private final Map<String, HttpPost> downloadingRequests = new ConcurrentHashMap<>();
+
     private final Map<String, SmartTempFile> uploading = new ConcurrentHashMap<>();
 
     private final BotProperties botProperties;
@@ -52,6 +61,10 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     private ObjectMapper objectMapper;
 
+    private Method createHttpRequestMethod;
+
+    private Method sendHttpPostRequestMethod;
+
     @Autowired
     public TelegramBotApiService(BotProperties botProperties, ObjectMapper objectMapper,
                                  DefaultBotOptions botOptions, BotApiProperties botApiProperties) {
@@ -59,6 +72,14 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         this.botProperties = botProperties;
         this.objectMapper = objectMapper;
         this.botApiProperties = botApiProperties;
+        try {
+            this.createHttpRequestMethod = DefaultAbsSender.class.getDeclaredMethod("configuredHttpPost", String.class);
+            this.createHttpRequestMethod.setAccessible(true);
+            this.sendHttpPostRequestMethod = DefaultAbsSender.class.getDeclaredMethod("sendHttpPostRequest", HttpPost.class);
+            this.sendHttpPostRequestMethod.setAccessible(true);
+        } catch (NoSuchMethodException e) {
+            throw new RuntimeException(e);
+        }
     }
 
     public Boolean isChatMember(IsChatMember isChatMember) {
@@ -193,17 +214,27 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
             executeWithoutResult(null, () -> {
                 updateProgressBeforeStart(progress);
-                org.telegram.telegrambots.meta.api.methods.GetFile gf = new org.telegram.telegrambots.meta.api.methods.GetFile();
+                GetFile gf = new GetFile();
                 gf.setFileId(fileId);
-                org.telegram.telegrambots.meta.api.objects.File file = execute(gf);
-                String filePath = getLocalFilePath(file.getFilePath());
-
+                HttpPost downloadingRequest = createDownloadingRequest(gf);
+                downloadingRequests.put(fileId, downloadingRequest);
                 try {
-                    FileUtils.copyFile(new File(filePath), outputFile.getFile());
-                } catch (IOException e) {
-                    throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
+                    String responseContent = (String) sendHttpPostRequestMethod.invoke(this, downloadingRequest);
+                    org.telegram.telegrambots.meta.api.objects.File file = gf.deserializeResponse(responseContent);
+                    if (downloadingRequest.isAborted()) {
+                        throw new DownloadCanceledException("Download canceled " + fileId);
+                    }
+                    String filePath = getLocalFilePath(file.getFilePath());
+
+                    try {
+                        FileUtils.copyFile(new File(filePath), outputFile.getFile());
+                    } catch (IOException e) {
+                        throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
+                    } finally {
+                        FileUtils.deleteQuietly(new File(filePath));
+                    }
                 } finally {
-                    FileUtils.deleteQuietly(new File(filePath));
+                    downloadingRequests.remove(fileId);
                 }
                 updateProgressAfterComplete(progress);
             });
@@ -254,13 +285,21 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-
+            }
+            HttpPost httpPost = downloadingRequests.get(fileId);
+            if (httpPost != null) {
+                try {
+                    httpPost.abort();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
                 return true;
             }
 
             return false;
         } finally {
             downloading.remove(fileId);
+            downloadingRequests.remove(fileId);
         }
     }
 
@@ -270,6 +309,13 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             for (Map.Entry<String, SmartTempFile> entry : downloading.entrySet()) {
                 try {
                     entry.getValue().smartDelete();
+                } catch (Exception e) {
+                    LOGGER.error(e.getMessage(), e);
+                }
+            }
+            for (Map.Entry<String, HttpPost> entry : downloadingRequests.entrySet()) {
+                try {
+                    entry.getValue().abort();
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
@@ -336,7 +382,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     private void executeWithoutResult(String chatId, Executable executable) {
         try {
             executable.executeWithException();
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
+        } catch (Exception e) {
             throw catchException(chatId, e);
         }
     }
@@ -344,12 +390,12 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     private <V> V executeWithResult(String chatId, Callable<V> executable) {
         try {
             return executable.executeWithResult();
-        } catch (org.telegram.telegrambots.meta.exceptions.TelegramApiException e) {
+        } catch (Exception e) {
             throw catchException(chatId, e);
         }
     }
 
-    private RuntimeException catchException(String chatId, org.telegram.telegrambots.meta.exceptions.TelegramApiException ex) {
+    private RuntimeException catchException(String chatId, Exception ex) {
         if (ex instanceof org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) {
             org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e = (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) ex;
             LOGGER.error(e.getMessage() + "\n" + e.getErrorCode() + "\n" + e.getApiResponse(), e);
@@ -363,13 +409,27 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
     }
 
+    private HttpPost createDownloadingRequest(GetFile method) throws org.telegram.telegrambots.meta.exceptions.TelegramApiException {
+        try {
+            method.validate();
+            String url = getBaseUrl() + method.getMethod();
+            HttpPost httppost = (HttpPost) createHttpRequestMethod.invoke(this, url);
+            httppost.addHeader("charset", StandardCharsets.UTF_8.name());
+            httppost.setEntity(new StringEntity(objectMapper.writeValueAsString(method), ContentType.APPLICATION_JSON));
+
+            return httppost;
+        } catch (Exception e) {
+            throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
+        }
+    }
+
     private interface Executable {
 
-        void executeWithException() throws org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+        void executeWithException() throws Exception;
     }
 
     private interface Callable<V> {
 
-        V executeWithResult() throws org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+        V executeWithResult() throws Exception;
     }
 }

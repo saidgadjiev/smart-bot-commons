@@ -13,7 +13,6 @@ import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiExcepti
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
-import ru.gadjini.telegram.smart.bot.commons.property.FloodWaitProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
 
 import java.net.SocketException;
@@ -23,6 +22,10 @@ import java.net.SocketException;
 public class ForceMediaMessageService implements MediaMessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ForceMediaMessageService.class);
+
+    private static final int SLEEP_TIME_BEFORE_ATTEMPT = 60000;
+
+    private static final int MAX_ATTEMPTS = 3;
 
     private MediaMessageService mediaMessageService;
 
@@ -44,9 +47,9 @@ public class ForceMediaMessageService implements MediaMessageService {
     @Override
     public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
         int attempts = 1;
-        int sleepTime = FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+        int sleepTime = SLEEP_TIME_BEFORE_ATTEMPT;
         Throwable lastEx = null;
-        while (attempts <= FloodWaitProperties.FLOOD_WAIT_MAX_ATTEMPTS) {
+        while (attempts <= MAX_ATTEMPTS) {
             ++attempts;
             try {
                 return mediaMessageService.sendDocument(sendDocument, progress);
@@ -56,7 +59,7 @@ public class ForceMediaMessageService implements MediaMessageService {
                     LOGGER.debug("Attemp({}, {}, {})", attempts, ex.getMessage(), sleepTime);
                     ThreadUtils.sleep(sleepTime, RuntimeException::new);
                     ++attempts;
-                    sleepTime += FloodWaitProperties.SLEEP_TIME_BEFORE_ATTEMPT;
+                    sleepTime += SLEEP_TIME_BEFORE_ATTEMPT;
                 } else {
                     throw ex;
                 }

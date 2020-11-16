@@ -336,7 +336,7 @@ public class QueueJob {
                     .messageId(queueItem.getProgressMessageId())
                     .text(message)
                     .replyMarkup(queueJobConfigurator.getWaitingKeyboard(queueItem, locale))
-                    .build(), false);
+                    .build());
         }
     }
 }

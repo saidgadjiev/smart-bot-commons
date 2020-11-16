@@ -62,7 +62,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
-        messageSenderJob.push(() -> messageService.editMessage(editMessageText, false));
+        messageSenderJob.push(() -> messageService.editMessage(editMessageText, ignoreException));
     }
 
     @Override

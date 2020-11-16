@@ -82,7 +82,7 @@ public class TgLimitsMessageService implements MessageService {
 
     @Override
     public void editMessage(EditMessageText messageContext, boolean ignoreException) {
-        messageService.editMessage(messageContext, false);
+        messageService.editMessage(messageContext, ignoreException);
     }
 
     @Override
