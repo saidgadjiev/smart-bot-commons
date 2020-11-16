@@ -34,7 +34,8 @@ public class FloodWaitController {
 
     @PostConstruct
     public void init() {
-        LOGGER.debug("File downloading concurrency level({})", floodWaitProperties.getFileDownloadingConcurrencyLevel());
+        LOGGER.debug("File wait properties({}, {}, {}, {})", floodWaitProperties.getFileDownloadingConcurrencyLevel(),
+                floodWaitProperties.getSleepAfterXDownloads(), floodWaitProperties.getSleepTime(), floodWaitProperties.isEnableLogging());
     }
 
     public synchronized void startDownloading(String fileId) {
