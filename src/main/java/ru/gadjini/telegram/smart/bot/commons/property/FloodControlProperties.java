@@ -12,6 +12,8 @@ public class FloodControlProperties {
 
     private int fileDownloadingConcurrencyLevel = 1;
 
+    private boolean enableLogging = false;
+
     public int getSleepTime() {
         return sleepTime;
     }
@@ -34,5 +36,13 @@ public class FloodControlProperties {
 
     public void setFileDownloadingConcurrencyLevel(int fileDownloadingConcurrencyLevel) {
         this.fileDownloadingConcurrencyLevel = fileDownloadingConcurrencyLevel;
+    }
+
+    public boolean isEnableLogging() {
+        return enableLogging;
+    }
+
+    public void setEnableLogging(boolean enableLogging) {
+        this.enableLogging = enableLogging;
     }
 }

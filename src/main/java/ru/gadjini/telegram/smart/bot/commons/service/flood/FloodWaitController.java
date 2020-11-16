@@ -39,6 +39,9 @@ public class FloodWaitController {
 
     public synchronized void startDownloading(String fileId) {
         if (!isThereAnyFreeDownloadingChannel() || isSleeping()) {
+            if (floodWaitProperties.isEnableLogging()) {
+                LOGGER.debug("Flood wait " + fileId);
+            }
             throw new FloodWaitException();
         } else {
             acquireDownloadingChannel(fileId);
