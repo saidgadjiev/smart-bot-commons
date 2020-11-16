@@ -13,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.BusyWorkerException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -236,7 +237,7 @@ public class QueueJob {
                     queueService.setCompleted(queueItem.getId());
                 }
                 success = true;
-            } catch (BusyWorkerException ex) {
+            } catch (BusyWorkerException | FloodControlException ex) {
                 queueService.setWaitingAndDecrementAttempts(queueItem.getId());
             } catch (Throwable ex) {
                 if (checker == null || !checker.get()) {

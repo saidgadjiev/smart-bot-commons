@@ -4,7 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 
@@ -43,7 +43,7 @@ public class FloodWaitController {
             if (floodWaitProperties.isEnableLogging()) {
                 LOGGER.debug("Flood wait " + fileId);
             }
-            throw new FloodWaitException();
+            throw new FloodControlException();
         } else {
             acquireDownloadingChannel(fileId);
         }
