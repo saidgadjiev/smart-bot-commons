@@ -42,18 +42,14 @@ public class FileManager {
         this.floodWaitController = floodWaitController;
     }
 
-    public void forceDownloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        forceDownloadFileByFileId(fileId, fileSize, null, outputFile);
-    }
-
     public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
         downloadFileByFileId(fileId, fileSize, null, outputFile);
     }
 
-    public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         while (true) {
             try {
-                downloadFileByFileId(fileId, fileSize, progress, outputFile);
+                doDownloadWithFloodControl(fileId, fileSize, progress, outputFile);
                 break;
             } catch (FloodControlException e) {
                 try {
@@ -62,15 +58,6 @@ public class FileManager {
                     throw new DownloadCanceledException("Download canceled " + fileId);
                 }
             }
-        }
-    }
-
-    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        floodWaitController.startDownloading(fileId);
-        try {
-            tryToDownload(fileId, fileSize, progress, outputFile);
-        } finally {
-            floodWaitController.finishDownloading(fileId, fileSize);
         }
     }
 
@@ -100,6 +87,15 @@ public class FileManager {
                 exception.contains(NoHttpResponseException.class.getSimpleName()) ||
                 exception.contains(SocketException.class.getSimpleName()) ||
                 exception.contains(FILE_ID_TEMPORARILY_UNAVAILABLE);
+    }
+
+    private void doDownloadWithFloodControl(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        floodWaitController.startDownloading(fileId);
+        try {
+            tryToDownload(fileId, fileSize, progress, outputFile);
+        } finally {
+            floodWaitController.finishDownloading(fileId, fileSize);
+        }
     }
 
     private void tryToDownload(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
