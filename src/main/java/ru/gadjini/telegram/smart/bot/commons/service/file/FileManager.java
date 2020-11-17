@@ -41,15 +41,27 @@ public class FileManager {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        downloadFileByFileId(fileId, fileSize, null, outputFile);
+        downloadFileByFileId(fileId, fileSize, null, outputFile, false);
+    }
+
+    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile, boolean ignoreFloodWaitControl) {
+        downloadFileByFileId(fileId, fileSize, null, outputFile, ignoreFloodWaitControl);
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        floodWaitController.startDownloading(fileId);
-        try {
+        downloadFileByFileId(fileId, fileSize, progress, outputFile, false);
+    }
+
+    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile, boolean ignoreFloodWaitControl) {
+        if (ignoreFloodWaitControl) {
             tryToDownload(fileId, fileSize, progress, outputFile);
-        } finally {
-            floodWaitController.finishDownloading(fileId);
+        } else {
+            floodWaitController.startDownloading(fileId);
+            try {
+                tryToDownload(fileId, fileSize, progress, outputFile);
+            } finally {
+                floodWaitController.finishDownloading(fileId);
+            }
         }
     }
 
