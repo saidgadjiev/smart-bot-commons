@@ -78,7 +78,7 @@ public class QueueDao {
 
     public void resetProcessing() {
         jdbcTemplate.update(
-                "UPDATE " + getQueueName() + " SET status = 0 WHERE status = 1"
+                "UPDATE " + getQueueName() + " SET status = 0, attempts = attempts - 1 WHERE status = 1"
         );
     }
 
