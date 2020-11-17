@@ -70,12 +70,12 @@ public class FileManager {
         try {
             tryToDownload(fileId, fileSize, progress, outputFile);
         } finally {
-            floodWaitController.finishDownloading(fileId);
+            floodWaitController.finishDownloading(fileId, fileSize);
         }
     }
 
-    public boolean cancelDownloading(String fileId) {
-        floodWaitController.cancelDownloading(fileId);
+    public boolean cancelDownloading(String fileId, long fileSize) {
+        floodWaitController.cancelDownloading(fileId, fileSize);
 
         return telegramLocalBotApiService.cancelDownloading(fileId);
     }

@@ -8,18 +8,18 @@ public class FloodControlProperties {
     private int sleepAfterXDownloads = 1;
 
     //In seconds
-    private int sleepTime = 5;
+    private int maxSleepTime = 20;
 
     private int fileDownloadingConcurrencyLevel = 1;
 
     private boolean enableLogging = false;
 
-    public int getSleepTime() {
-        return sleepTime;
+    public int getMaxSleepTime() {
+        return maxSleepTime;
     }
 
-    public void setSleepTime(int sleepTime) {
-        this.sleepTime = sleepTime;
+    public void setMaxSleepTime(int maxSleepTime) {
+        this.maxSleepTime = maxSleepTime;
     }
 
     public int getSleepAfterXDownloads() {
