@@ -10,6 +10,9 @@ public class FloodControlProperties {
     //In seconds
     private int maxSleepTime = 20;
 
+    //In seconds
+    private int minSleepTime = 2;
+
     private int fileDownloadingConcurrencyLevel = 1;
 
     private boolean enableLogging = false;
@@ -44,5 +47,13 @@ public class FloodControlProperties {
 
     public void setEnableLogging(boolean enableLogging) {
         this.enableLogging = enableLogging;
+    }
+
+    public int getMinSleepTime() {
+        return minSleepTime;
+    }
+
+    public void setMinSleepTime(int minSleepTime) {
+        this.minSleepTime = minSleepTime;
     }
 }

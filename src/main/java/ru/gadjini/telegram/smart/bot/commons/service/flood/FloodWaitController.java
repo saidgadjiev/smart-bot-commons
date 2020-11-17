@@ -100,7 +100,7 @@ public class FloodWaitController {
     private long getSleepTime(long fileSize) {
         long sleepOnEverySize = TgConstants.LARGE_FILE_SIZE / floodWaitProperties.getMaxSleepTime();
 
-        return Math.max(1, fileSize / sleepOnEverySize);
+        return floodWaitProperties.getMinSleepTime() + fileSize / sleepOnEverySize;
     }
 
     private static class SleepTime {
