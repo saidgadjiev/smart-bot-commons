@@ -20,7 +20,7 @@ import java.util.function.Consumer;
 @Qualifier("messageLimits")
 public class TgLimitsMessageService implements MessageService {
 
-    private static final int TEXT_LENGTH_LIMIT = 4000;
+    public static final int TEXT_LENGTH_LIMIT = 4000;
 
     private MessageService messageService;
 

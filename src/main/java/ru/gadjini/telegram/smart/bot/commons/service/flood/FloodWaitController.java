@@ -13,6 +13,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 
 @Component
 public class FloodWaitController {
@@ -39,11 +40,12 @@ public class FloodWaitController {
     }
 
     public synchronized void startDownloading(String fileId) {
-        if (!isThereAnyFreeDownloadingChannel() || isSleeping()) {
+        AtomicLong sleepTime = new AtomicLong(10);
+        if (!isThereAnyFreeDownloadingChannel() || isSleeping(sleepTime)) {
             if (floodWaitProperties.isEnableLogging()) {
                 LOGGER.debug("Flood wait " + fileId);
             }
-            throw new FloodControlException();
+            throw new FloodControlException(sleepTime.get());
         } else {
             acquireDownloadingChannel(fileId);
         }
@@ -83,12 +85,18 @@ public class FloodWaitController {
         return currentDownloads.size() < floodWaitProperties.getFileDownloadingConcurrencyLevel();
     }
 
-    private synchronized boolean isSleeping() {
+    private synchronized boolean isSleeping(AtomicLong sleepTime) {
         if (sleepStartedAt == null) {
             return false;
         }
         long seconds = Duration.between(sleepStartedAt, LocalDateTime.now()).toSeconds();
 
-        return seconds <= floodWaitProperties.getSleepTime();
+        boolean sleeping = seconds <= floodWaitProperties.getSleepTime();
+
+        if (sleeping) {
+            sleepTime.set(seconds);
+        }
+
+        return sleeping;
     }
 }

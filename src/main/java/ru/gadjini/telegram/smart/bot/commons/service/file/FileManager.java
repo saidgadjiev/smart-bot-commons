@@ -8,7 +8,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadingException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
@@ -40,28 +42,35 @@ public class FileManager {
         this.floodWaitController = floodWaitController;
     }
 
-    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        downloadFileByFileId(fileId, fileSize, null, outputFile, false);
+    public void forceDownloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
+        forceDownloadFileByFileId(fileId, fileSize, null, outputFile);
     }
 
-    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile, boolean ignoreFloodWaitControl) {
-        downloadFileByFileId(fileId, fileSize, null, outputFile, ignoreFloodWaitControl);
+    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
+        downloadFileByFileId(fileId, fileSize, null, outputFile);
+    }
+
+    public void forceDownloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        while (true) {
+            try {
+                downloadFileByFileId(fileId, fileSize, progress, outputFile);
+                break;
+            } catch (FloodControlException e) {
+                try {
+                    Thread.sleep(e.getSleepTime() * 1000);
+                } catch (InterruptedException ex) {
+                    throw new DownloadCanceledException("Download canceled " + fileId);
+                }
+            }
+        }
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        downloadFileByFileId(fileId, fileSize, progress, outputFile, false);
-    }
-
-    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile, boolean ignoreFloodWaitControl) {
-        if (ignoreFloodWaitControl) {
+        floodWaitController.startDownloading(fileId);
+        try {
             tryToDownload(fileId, fileSize, progress, outputFile);
-        } else {
-            floodWaitController.startDownloading(fileId);
-            try {
-                tryToDownload(fileId, fileSize, progress, outputFile);
-            } finally {
-                floodWaitController.finishDownloading(fileId);
-            }
+        } finally {
+            floodWaitController.finishDownloading(fileId);
         }
     }
 
