@@ -92,14 +92,14 @@ public class TgFile {
     public String sql() {
         StringBuilder sql = new StringBuilder("(\"");
 
-        sql.append(fileId).append("\",");
+        sql.append(escapeDoubleQuotes(fileId)).append("\",");
         if (StringUtils.isNotBlank(mimeType)) {
             sql.append("\"").append(mimeType).append("\",");
         } else {
             sql.append(",");
         }
         if (StringUtils.isNotBlank(fileName)) {
-            sql.append("\"").append(fileName).append("\",");
+            sql.append("\"").append(escapeDoubleQuotes(fileName)).append("\",");
         } else {
             sql.append(",");
         }
@@ -128,5 +128,9 @@ public class TgFile {
         }
 
         return pGobject;
+    }
+
+    private String escapeDoubleQuotes(String value) {
+        return value.replace("\"", "\"\"");
     }
 }
