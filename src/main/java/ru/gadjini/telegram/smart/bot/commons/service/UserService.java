@@ -54,6 +54,10 @@ public class UserService {
         return Locale.getDefault();
     }
 
+    public long countActiveUsersForToday() {
+        return userDao.countActiveUsersForToday();
+    }
+
     public void activity(User user) {
         if (user == null) {
             LOGGER.error("User is null");

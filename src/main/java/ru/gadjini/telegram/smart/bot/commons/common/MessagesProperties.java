@@ -52,4 +52,6 @@ public class MessagesProperties {
     public static final String MESSAGE_QUERY_ITEM_NOT_FOUND = "message.query.item.not.found";
 
     public static final String MESSAGE_QUEUE_STATS = "message.queue.stats";
+
+    public static final String MESSAGE_GLOBAL_STATS = "message.global.stats";
 }

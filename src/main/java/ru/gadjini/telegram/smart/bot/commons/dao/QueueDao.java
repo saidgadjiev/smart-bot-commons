@@ -21,6 +21,10 @@ public class QueueDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueDao.class);
 
+    public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.created_at ";
+
+    public static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()) ";
+
     private JdbcTemplate jdbcTemplate;
 
     private QueueDaoDelegate queueDaoDelegate;

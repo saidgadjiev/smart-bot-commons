@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
@@ -70,8 +71,8 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
 
     private void sendHelpMessage(int userId, Locale locale) {
         messageService.sendMessage(
-                new SendMessage(String.valueOf(userId), localisationService.getMessage(MessagesProperties.MESSAGE_HELP,
+                SendMessage.builder().chatId(String.valueOf(userId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_HELP,
                         new Object[]{commandMessageBuilder.getCommandsInfo(locale)},
-                        locale)));
+                        locale)).parseMode(ParseMode.HTML).build());
     }
 }

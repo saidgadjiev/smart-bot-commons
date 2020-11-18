@@ -96,4 +96,11 @@ public class UserDao {
                 }
         );
     }
+
+    public Long countActiveUsersForToday() {
+        return jdbcTemplate.query(
+                "SELECT count(user_id) as cnt FROM tg_user WHERE last_activity_at::date != created_at::date AND last_activity_at::date = current_date",
+                rs -> rs.next() ? rs.getLong("cnt") : 0
+        );
+    }
 }
