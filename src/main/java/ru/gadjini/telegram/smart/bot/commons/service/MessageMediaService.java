@@ -78,7 +78,6 @@ public class MessageMediaService {
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getVideo().getFileId());
             messageMedia.setFileSize(message.getVideo().getFileSize());
-            messageMedia.setFileName(message.getVideo().getFileName());
             messageMedia.setThumb(message.getVideo().getThumb() != null ? message.getVideo().getThumb().getFileId() : null);
             messageMedia.setMimeType(message.getVideo().getMimeType());
             messageMedia.setFormat(format);
@@ -96,7 +95,6 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getAudio().getFileId());
             messageMedia.setMimeType(message.getAudio().getMimeType());
             messageMedia.setFileSize(message.getAudio().getFileSize());
-            messageMedia.setFileName(message.getAudio().getFileName());
             messageMedia.setThumb(message.getAudio().getThumb() != null ? message.getAudio().getThumb().getFileId() : null);
             messageMedia.setFormat(format);
 
@@ -110,6 +108,17 @@ public class MessageMediaService {
             messageMedia.setMimeType(sticker.getIsAnimated() ? null : "image/webp");
             messageMedia.setFileSize(message.getSticker().getFileSize());
             messageMedia.setFormat(sticker.getIsAnimated() ? Format.TGS : Format.WEBP);
+
+            return messageMedia;
+        } else if (message.hasVoice()) {
+            Format format = formatService.getFormat(null, message.getVoice().getMimeType());
+            String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
+
+            messageMedia.setFileName(fileName);
+            messageMedia.setFileId(message.getVoice().getFileId());
+            messageMedia.setMimeType(message.getVoice().getMimeType());
+            messageMedia.setFileSize(message.getVoice().getFileSize());
+            messageMedia.setFormat(format);
 
             return messageMedia;
         }

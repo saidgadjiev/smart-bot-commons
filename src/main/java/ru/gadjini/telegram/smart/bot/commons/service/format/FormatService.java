@@ -27,13 +27,10 @@ public class FormatService {
     }
 
     public String getExt(String fileName, String mimeType) {
-        String extension = MimeTypeUtils.getExtension(mimeType);
+        String extension = MimeTypeUtils.getExtension(fileName, mimeType);
 
         if (StringUtils.isNotBlank(extension) && !".bin".equals(extension)) {
             extension = extension.substring(1);
-            if (extension.equals("mpga")) {
-                return "mp3";
-            }
         } else {
             extension = FilenameUtils.getExtension(fileName);
         }

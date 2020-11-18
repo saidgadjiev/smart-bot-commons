@@ -96,7 +96,15 @@ public enum Format {
         public String getExt() {
             return "mp4";
         }
-    };
+    },
+    AAC(FormatCategory.AUDIO),
+    AMR(FormatCategory.AUDIO),
+    AIFF(FormatCategory.AUDIO),
+    FLAC(FormatCategory.AUDIO),
+    MP3(FormatCategory.AUDIO),
+    OGG(FormatCategory.AUDIO),
+    WAV(FormatCategory.AUDIO),
+    WMA(FormatCategory.AUDIO);
 
     private FormatCategory category;
 
