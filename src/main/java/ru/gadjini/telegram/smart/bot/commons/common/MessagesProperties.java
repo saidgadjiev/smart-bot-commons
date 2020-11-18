@@ -50,4 +50,6 @@ public class MessagesProperties {
     public static final String CANCEL_QUERY_COMMAND_DESCRIPTION = "cancel.query.command.description";
 
     public static final String MESSAGE_QUERY_ITEM_NOT_FOUND = "message.query.item.not.found";
+
+    public static final String MESSAGE_QUEUE_STATS = "message.queue.stats";
 }

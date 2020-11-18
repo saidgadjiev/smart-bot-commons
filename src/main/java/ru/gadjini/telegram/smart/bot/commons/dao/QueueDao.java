@@ -117,6 +117,29 @@ public class QueueDao {
                 });
     }
 
+    public long countByStatusForToday(QueueItem.Status status) {
+        return jdbcTemplate.query(
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND created_at::date = current_date",
+                ps -> ps.setInt(1, status.getCode()),
+                rs -> rs.next() ? rs.getLong("cnt") : 0
+        );
+    }
+
+    public long countByStatusAllTime(QueueItem.Status status) {
+        return jdbcTemplate.query(
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ?",
+                ps -> ps.setInt(1, status.getCode()),
+                rs -> rs.next() ? rs.getLong("cnt") : 0
+        );
+    }
+
+    public Long countActiveUsersForToday() {
+        return jdbcTemplate.query(
+                "SELECT count(DISTINCT user_id) as cnt FROM " + getQueueName() + " WHERE created_at::date = current_date",
+                rs -> rs.next() ? rs.getLong("cnt") : 0
+        );
+    }
+
     public void deleteByIdAndStatuses(int id, Set<QueueItem.Status> statuses) {
         jdbcTemplate.update(
                 "DELETE FROM " + getQueueName() + " WHERE id = ? AND status IN(" + statuses.stream()

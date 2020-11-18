@@ -54,6 +54,18 @@ public class QueueService {
         return queueDao.getById(id);
     }
 
+    public long countByStatusAllTime(QueueItem.Status status) {
+        return queueDao.countByStatusAllTime(status);
+    }
+
+    public long countByStatusForToday(QueueItem.Status status) {
+        return queueDao.countByStatusForToday(status);
+    }
+
+    public long countActiveUsersForToday() {
+        return queueDao.countActiveUsersForToday();
+    }
+
     public void resetProcessing() {
         queueDao.resetProcessing();
     }
