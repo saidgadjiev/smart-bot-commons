@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.service;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -16,6 +18,8 @@ import java.util.Locale;
 
 @Service
 public class MessageMediaService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MessageMediaService.class);
 
     private LocalisationService localisationService;
 
@@ -112,6 +116,10 @@ public class MessageMediaService {
             return messageMedia;
         } else if (message.hasVoice()) {
             Format format = formatService.getFormat(null, message.getVoice().getMimeType());
+            if (format == null) {
+                LOGGER.debug("Voice format null({}, {})", message.getVoice().getMimeType(), message.getVoice().getFileId());
+                format = Format.OGG;
+            }
             String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
 
             messageMedia.setFileName(fileName);

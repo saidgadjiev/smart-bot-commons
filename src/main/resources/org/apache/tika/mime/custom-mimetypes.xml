@@ -15,6 +15,7 @@
     </mime-type>
     <mime-type type="audio/vorbis">
         <alias type="audio/x-vorbis+ogg"/>
+        <alias type="audio/ogg"/>
         <_comment>Ogg Vorbis Codec Compressed WAV File</_comment>
         <alias type="application/x-ogg"/>
         <magic priority="60">
