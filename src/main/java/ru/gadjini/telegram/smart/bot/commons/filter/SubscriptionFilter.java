@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -66,6 +67,7 @@ public class SubscriptionFilter extends BaseBotFilter {
     private void sendNeedSubscription(User user) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
         String msg = localisationService.getMessage(MessagesProperties.MESSAGE_NEED_SUBSCRIPTION, locale);
-        messageService.sendMessage(new SendMessage(String.valueOf(user.getId()), msg));
+        messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(user.getId())).text(msg)
+                .parseMode(ParseMode.HTML).build());
     }
 }
