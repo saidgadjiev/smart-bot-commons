@@ -97,13 +97,38 @@ public enum Format {
             return "mp4";
         }
     },
-    AAC(FormatCategory.AUDIO),
+    AAC(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
     AMR(FormatCategory.AUDIO),
     AIFF(FormatCategory.AUDIO),
-    FLAC(FormatCategory.AUDIO),
-    MP3(FormatCategory.AUDIO),
-    OGG(FormatCategory.AUDIO),
-    WAV(FormatCategory.AUDIO),
+    FLAC(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
+    MP3(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
+    OGG(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
+    WAV(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
     WMA(FormatCategory.AUDIO),
     M4A(FormatCategory.AUDIO),
     M4B(FormatCategory.AUDIO);
@@ -124,5 +149,9 @@ public enum Format {
 
     public FormatCategory getCategory() {
         return category;
+    }
+
+    public boolean canBeSentAsAudio() {
+        return false;
     }
 }

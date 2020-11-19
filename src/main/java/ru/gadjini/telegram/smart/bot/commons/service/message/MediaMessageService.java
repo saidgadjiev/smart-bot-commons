@@ -23,6 +23,6 @@ public interface MediaMessageService {
 
     void sendVideo(SendVideo sendVideo);
 
-    void sendAudio(SendAudio sendAudio);
+    SendFileResult sendAudio(SendAudio sendAudio);
 
 }

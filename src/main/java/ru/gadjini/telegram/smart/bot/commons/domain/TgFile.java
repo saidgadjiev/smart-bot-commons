@@ -23,6 +23,10 @@ public class TgFile {
 
     public static final String FORMAT = "format";
 
+    public static final String AUDIO_PERFORMER = "audio_performer";
+
+    public static final String AUDIO_TITLE = "audio_title";
+
     @JsonProperty(FILE_ID)
     private String fileId;
 
@@ -40,6 +44,16 @@ public class TgFile {
 
     @JsonProperty(THUMB)
     private String thumb;
+
+    private FileSource source;
+
+    @JsonProperty(AUDIO_PERFORMER)
+    private String audioPerformer;
+
+    @JsonProperty(AUDIO_TITLE)
+    private String audioTitle;
+
+    private Integer duration;
 
     public String getFileId() {
         return fileId;
@@ -89,6 +103,38 @@ public class TgFile {
         this.format = format;
     }
 
+    public FileSource getSource() {
+        return source;
+    }
+
+    public void setSource(FileSource source) {
+        this.source = source;
+    }
+
+    public String getAudioTitle() {
+        return audioTitle;
+    }
+
+    public void setAudioTitle(String audioTitle) {
+        this.audioTitle = audioTitle;
+    }
+
+    public String getAudioPerformer() {
+        return audioPerformer;
+    }
+
+    public void setAudioPerformer(String audioPerformer) {
+        this.audioPerformer = audioPerformer;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
     public String sql() {
         StringBuilder sql = new StringBuilder("(\"");
 
@@ -110,7 +156,27 @@ public class TgFile {
             sql.append(",");
         }
         if (format != null) {
-            sql.append("\"").append(format.name()).append("\"");
+            sql.append("\"").append(format.name()).append("\",");
+        } else {
+            sql.append(",");
+        }
+        if (StringUtils.isNotBlank(audioPerformer)) {
+            sql.append("\"").append(escapeDoubleQuotes(audioPerformer)).append("\",");
+        } else {
+            sql.append(",");
+        }
+        if (StringUtils.isNotBlank(audioTitle)) {
+            sql.append("\"").append(escapeDoubleQuotes(audioTitle)).append("\",");
+        } else {
+            sql.append(",");
+        }
+        if (source != null) {
+            sql.append("\"").append(source.name()).append("\",");
+        } else {
+            sql.append(",");
+        }
+        if (duration != null) {
+            sql.append(duration);
         }
 
         sql.append(")");

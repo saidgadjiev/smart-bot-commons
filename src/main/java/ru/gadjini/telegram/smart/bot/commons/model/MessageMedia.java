@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.model;
 
 import org.apache.commons.lang3.StringUtils;
+import ru.gadjini.telegram.smart.bot.commons.domain.FileSource;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
@@ -20,6 +21,14 @@ public class MessageMedia {
     private String thumb;
 
     private String cachedFileId;
+
+    private FileSource source;
+
+    private String audioPerformer;
+
+    private String audioTitle;
+
+    private Integer duration;
 
     public String getFileId() {
         return fileId;
@@ -77,6 +86,38 @@ public class MessageMedia {
         this.cachedFileId = cachedFileId;
     }
 
+    public FileSource getSource() {
+        return source;
+    }
+
+    public void setSource(FileSource source) {
+        this.source = source;
+    }
+
+    public String getAudioPerformer() {
+        return audioPerformer;
+    }
+
+    public void setAudioPerformer(String audioPerformer) {
+        this.audioPerformer = audioPerformer;
+    }
+
+    public String getAudioTitle() {
+        return audioTitle;
+    }
+
+    public void setAudioTitle(String audioTitle) {
+        this.audioTitle = audioTitle;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
     public TgFile toTgFile() {
         TgFile tgFile = new TgFile();
         tgFile.setFileId(fileId);
@@ -85,6 +126,9 @@ public class MessageMedia {
         tgFile.setMimeType(mimeType);
         tgFile.setSize(fileSize);
         tgFile.setThumb(thumb);
+        tgFile.setSource(source);
+        tgFile.setAudioTitle(audioTitle);
+        tgFile.setAudioPerformer(audioPerformer);
 
         return tgFile;
     }

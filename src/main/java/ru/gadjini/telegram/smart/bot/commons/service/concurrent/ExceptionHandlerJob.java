@@ -144,16 +144,7 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
         if (job.isSuppressUserExceptions()) {
             return;
         }
-        try {
-            messageService.sendMessage(sendMessage);
-        } catch (TelegramApiRequestException ex) {
-            if (ex.getErrorCode() == 400 && ex.getMessage().contains("reply message not found")) {
-                LOGGER.debug("Reply message not found try send without reply");
-                sendMessage.setReplyToMessageId(null);
-                messageService.sendMessage(sendMessage);
-            }
-            LOGGER.error(ex.getMessage(), ex);
-        }
+        messageService.sendMessage(sendMessage);
     }
 
     public SmartExecutorService.Job getOriginalJob() {

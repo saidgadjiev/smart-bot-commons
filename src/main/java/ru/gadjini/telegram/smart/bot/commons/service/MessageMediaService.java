@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.domain.FileSource;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
@@ -59,6 +60,7 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getDocument().getFileId());
             messageMedia.setMimeType(message.getDocument().getMimeType());
             messageMedia.setFileSize(message.getDocument().getFileSize());
+            messageMedia.setSource(FileSource.DOCUMENT);
             messageMedia.setThumb(message.getDocument().getThumb() != null ? message.getDocument().getThumb().getFileId() : null);
             messageMedia.setFormat(formatService.getFormat(messageMedia.getFileName(), messageMedia.getMimeType()));
 
@@ -70,6 +72,7 @@ public class MessageMediaService {
             messageMedia.setMimeType("image/jpeg");
             messageMedia.setFileSize(photoSize.getFileSize());
             messageMedia.setFormat(Format.JPG);
+            messageMedia.setSource(FileSource.PHOTO);
 
             return messageMedia;
         } else if (message.hasVideo()) {
@@ -85,6 +88,8 @@ public class MessageMediaService {
             messageMedia.setThumb(message.getVideo().getThumb() != null ? message.getVideo().getThumb().getFileId() : null);
             messageMedia.setMimeType(message.getVideo().getMimeType());
             messageMedia.setFormat(format);
+            messageMedia.setSource(FileSource.VIDEO);
+            messageMedia.setDuration(message.getVideo().getDuration());
 
             return messageMedia;
         } else if (message.hasAudio()) {
@@ -100,6 +105,10 @@ public class MessageMediaService {
             messageMedia.setMimeType(message.getAudio().getMimeType());
             messageMedia.setFileSize(message.getAudio().getFileSize());
             messageMedia.setThumb(message.getAudio().getThumb() != null ? message.getAudio().getThumb().getFileId() : null);
+            messageMedia.setAudioPerformer(message.getAudio().getPerformer());
+            messageMedia.setAudioTitle(message.getAudio().getTitle());
+            messageMedia.setSource(FileSource.AUDIO);
+            messageMedia.setDuration(message.getAudio().getDuration());
             messageMedia.setFormat(format);
 
             return messageMedia;
@@ -112,6 +121,7 @@ public class MessageMediaService {
             messageMedia.setMimeType(sticker.getIsAnimated() ? null : "image/webp");
             messageMedia.setFileSize(message.getSticker().getFileSize());
             messageMedia.setFormat(sticker.getIsAnimated() ? Format.TGS : Format.WEBP);
+            messageMedia.setSource(FileSource.STICKER);
 
             return messageMedia;
         } else if (message.hasVoice()) {
@@ -126,6 +136,8 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getVoice().getFileId());
             messageMedia.setMimeType(message.getVoice().getMimeType());
             messageMedia.setFileSize(message.getVoice().getFileSize());
+            messageMedia.setDuration(message.getVoice().getDuration());
+            messageMedia.setSource(FileSource.VOICE);
             messageMedia.setFormat(format);
 
             return messageMedia;

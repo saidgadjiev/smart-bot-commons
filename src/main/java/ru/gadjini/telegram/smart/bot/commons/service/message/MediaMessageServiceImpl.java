@@ -46,6 +46,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
             sendDocument.setParseMode(ParseMode.HTML);
         }
 
+        sendDocument.setAllowSendingWithoutReply(true);
         Message message = telegramLocalBotApiService.sendDocument(sendDocument, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
@@ -82,6 +83,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     @Override
     public SendFileResult sendPhoto(SendPhoto sendPhoto) {
+        sendPhoto.setAllowSendingWithoutReply(true);
         Message message = telegramLocalBotApiService.sendPhoto(sendPhoto);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
@@ -92,20 +94,25 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         if (StringUtils.isNotBlank(sendVideo.getCaption())) {
             sendVideo.setParseMode(ParseMode.HTML);
         }
+        sendVideo.setAllowSendingWithoutReply(true);
         telegramLocalBotApiService.sendVideo(sendVideo);
     }
 
     @Override
-    public void sendAudio(SendAudio sendAudio) {
+    public SendFileResult sendAudio(SendAudio sendAudio) {
         if (StringUtils.isNotBlank(sendAudio.getCaption())) {
             sendAudio.setParseMode(ParseMode.HTML);
         }
 
-        telegramLocalBotApiService.sendAudio(sendAudio);
+        sendAudio.setAllowSendingWithoutReply(true);
+        Message message = telegramLocalBotApiService.sendAudio(sendAudio);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
 
     @Override
     public SendFileResult sendSticker(SendSticker sendSticker) {
+        sendSticker.setAllowSendingWithoutReply(true);
         Message message = telegramLocalBotApiService.sendSticker(sendSticker);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));

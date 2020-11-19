@@ -85,8 +85,8 @@ public class ForceMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public void sendAudio(SendAudio sendAudio) {
-        mediaMessageService.sendAudio(sendAudio);
+    public SendFileResult sendAudio(SendAudio sendAudio) {
+        return mediaMessageService.sendAudio(sendAudio);
     }
 
     private boolean shouldTryToUploadAgain(Throwable ex) {
