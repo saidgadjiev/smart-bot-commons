@@ -104,7 +104,9 @@ public enum Format {
     MP3(FormatCategory.AUDIO),
     OGG(FormatCategory.AUDIO),
     WAV(FormatCategory.AUDIO),
-    WMA(FormatCategory.AUDIO);
+    WMA(FormatCategory.AUDIO),
+    M4A(FormatCategory.AUDIO),
+    M4B(FormatCategory.AUDIO);
 
     private FormatCategory category;
 

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.Close;
 import org.telegram.telegrambots.meta.api.methods.updates.LogOut;
@@ -88,6 +89,7 @@ public class SmartBot extends TelegramLongPollingBot {
                 LOGGER.error(ex.getMessage(), ex);
             }
             messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(TgMessage.getChatId(update)))
+                    .parseMode(ParseMode.HTML)
                     .text(ex.getHumanMessage()).replyToMessageId(ex.getReplyToMessageId()).build());
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);

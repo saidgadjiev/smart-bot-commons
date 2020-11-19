@@ -1,5 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <mime-info>
+    <mime-type type="audio/mp4">
+        <alias type="audio/x-m4a"/>
+        <alias type="audio/x-mp4a"/>
+        <alias type="audio/x-m4b"/>
+        <magic priority="60">
+            <match value="ftypM4A " type="string" offset="4"/>
+            <match value="ftypM4B " type="string" offset="4"/>
+            <match value="ftypF4A " type="string" offset="4"/>
+            <match value="ftypF4B " type="string" offset="4"/>
+        </magic>
+        <glob pattern="*.mp4a"/>
+        <glob pattern="*.m4a"/>
+        <glob pattern="*.m4b"/>
+        <sub-class-of type="application/quicktime" />
+    </mime-type>
     <mime-type type="audio/x-aac">
         <alias type="audio/aac" />
         <glob pattern="*.aac"/>
