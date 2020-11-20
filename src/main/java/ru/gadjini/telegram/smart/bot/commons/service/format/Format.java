@@ -138,7 +138,8 @@ public enum Format {
             return true;
         }
     },
-    SPX(FormatCategory.AUDIO);
+    SPX(FormatCategory.AUDIO),
+    MID(FormatCategory.AUDIO);
 
     private FormatCategory category;
 
