@@ -135,9 +135,13 @@ public class QueueJob {
         }
         ThreadPoolExecutor heavyExecutor = executor.getExecutor(SmartExecutorService.JobWeight.HEAVY);
         if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.HEAVY, heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount());
+            int limit = heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount();
+            if (enableJobsLogging) {
+                LOGGER.debug("Heavy threads free({})", limit);
+            }
+            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.HEAVY, limit);
 
-            if (enableJobsLogging && items.size() > 0) {
+            if (enableJobsLogging) {
                 LOGGER.debug("Push heavy jobs({})", items.size());
             }
             items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
@@ -146,9 +150,13 @@ public class QueueJob {
         }
         ThreadPoolExecutor lightExecutor = executor.getExecutor(SmartExecutorService.JobWeight.LIGHT);
         if (lightExecutor.getActiveCount() < lightExecutor.getCorePoolSize()) {
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, lightExecutor.getCorePoolSize() - lightExecutor.getActiveCount());
+            int limit = lightExecutor.getCorePoolSize() - lightExecutor.getActiveCount();
+            if (enableJobsLogging) {
+                LOGGER.debug("Light threads free({})", limit);
+            }
+            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
 
-            if (enableJobsLogging && items.size() > 0) {
+            if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs({})", items.size());
             }
             items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
@@ -156,9 +164,13 @@ public class QueueJob {
             LOGGER.debug("Light threads busy");
         }
         if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount());
+            int limit = heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount();
+            if (enableJobsLogging) {
+                LOGGER.debug("Heavy threads for light free({})", limit);
+            }
+            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
 
-            if (enableJobsLogging && items.size() > 0) {
+            if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs to heavy threads({})", items.size());
             }
             items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
