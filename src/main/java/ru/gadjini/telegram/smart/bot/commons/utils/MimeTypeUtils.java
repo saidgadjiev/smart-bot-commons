@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.utils;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
@@ -11,7 +10,7 @@ public class MimeTypeUtils {
     private MimeTypeUtils() {
     }
 
-    public static String getExtension(String fileName, String mimeType) {
+    public static String getExtension(String fileNameExtension, String mimeType) {
         if (mimeType == null) {
             return null;
         }
@@ -23,12 +22,11 @@ public class MimeTypeUtils {
             return null;
         }
 
-        String ext = FilenameUtils.getExtension(fileName);
-        if (StringUtils.isBlank(ext)) {
+        if (StringUtils.isBlank(fileNameExtension)) {
             return parsedMimeType.getExtension();
         } else {
-            ext = "." + ext;
-            return parsedMimeType.getExtensions().contains(ext) ? ext : parsedMimeType.getExtension();
+            fileNameExtension = "." + fileNameExtension;
+            return parsedMimeType.getExtensions().contains(fileNameExtension) ? fileNameExtension : parsedMimeType.getExtension();
         }
     }
 }
