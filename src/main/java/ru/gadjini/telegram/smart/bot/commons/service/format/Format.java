@@ -131,7 +131,14 @@ public enum Format {
     },
     WMA(FormatCategory.AUDIO),
     M4A(FormatCategory.AUDIO),
-    M4B(FormatCategory.AUDIO);
+    M4B(FormatCategory.AUDIO),
+    OPUS(FormatCategory.AUDIO) {
+        @Override
+        public boolean canBeSentAsAudio() {
+            return true;
+        }
+    },
+    SPX(FormatCategory.AUDIO);
 
     private FormatCategory category;
 

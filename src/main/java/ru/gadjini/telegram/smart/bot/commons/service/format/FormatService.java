@@ -6,6 +6,8 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.utils.MimeTypeUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.UrlUtils;
 
+import java.util.Objects;
+
 import static ru.gadjini.telegram.smart.bot.commons.service.format.Format.TEXT;
 import static ru.gadjini.telegram.smart.bot.commons.service.format.Format.URL;
 
@@ -27,6 +29,7 @@ public class FormatService {
     }
 
     public String getExt(String fileName, String mimeType) {
+        mimeType = normalizeMimeType(fileName, mimeType);
         String extension = MimeTypeUtils.getExtension(fileName, mimeType);
 
         if (StringUtils.isNotBlank(extension) && !".bin".equals(extension)) {
@@ -43,6 +46,7 @@ public class FormatService {
     }
 
     public Format getFormat(String fileName, String mimeType) {
+        mimeType = normalizeMimeType(fileName, mimeType);
         String extension = getExt(fileName, mimeType);
         if (StringUtils.isBlank(extension)) {
             return null;
@@ -55,6 +59,14 @@ public class FormatService {
         }
 
         return null;
+    }
+
+    private String normalizeMimeType(String fileName, String mimeType) {
+        if (StringUtils.isNotBlank(fileName) && fileName.endsWith(".opus") && Objects.equals(mimeType, "audio/mpeg")) {
+            return "audio/opus";
+        }
+
+        return mimeType;
     }
 
     public Format getFormat(String text) {
