@@ -49,6 +49,10 @@ public class FormatService {
     private Format tryGetFormatByFileName(String fileName) {
         String extension = getExtension(fileName);
 
+        return findFormat(extension);
+    }
+
+    private Format findFormat(String extension) {
         for (Format format : Format.values()) {
             if (format.getExt().equals(extension)) {
                 return format;
@@ -61,13 +65,7 @@ public class FormatService {
     private Format tryGetFormatByMimeType(String fileName, String mimeType) {
         String extension = MimeTypeUtils.getExtension(getExtension(fileName), mimeType);
 
-        for (Format format : Format.values()) {
-            if (format.getExt().equals(extension)) {
-                return format;
-            }
-        }
-
-        return null;
+        return findFormat(extension);
     }
 
     private String getExtension(String fileName) {
