@@ -44,7 +44,7 @@ public class FloodWaitController {
         AtomicLong sleepTime = new AtomicLong(10);
         if (!isThereAnyFreeDownloadingChannel() || isSleeping(sleepTime)) {
             if (floodWaitProperties.isEnableLogging()) {
-                LOGGER.debug("Flood wait " + fileId);
+                LOGGER.debug(Thread.currentThread().getName() + " flood wait " + fileId);
             }
             throw new FloodControlException(sleepTime.get());
         } else {
