@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
@@ -63,7 +64,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
 
     @Override
     public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
-        if (validate(sendDocument)) {
+        if (validate(sendDocument.getChatId(), sendDocument.getDocument(), sendDocument.getReplyMarkup(), sendDocument.getReplyToMessageId())) {
             return mediaMessageService.sendDocument(sendDocument, progress);
         }
 
@@ -81,42 +82,57 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public void sendVideo(SendVideo sendVideo) {
-        mediaMessageService.sendVideo(sendVideo);
+    public SendFileResult sendVideo(SendVideo sendVideo, Progress progress) {
+        if (validate(sendVideo.getChatId(), sendVideo.getVideo(), sendVideo.getReplyMarkup(), sendVideo.getReplyToMessageId())) {
+            return mediaMessageService.sendVideo(sendVideo, progress);
+        }
+        return null;
     }
 
     @Override
-    public SendFileResult sendAudio(SendAudio sendAudio) {
-        return mediaMessageService.sendAudio(sendAudio);
+    public SendFileResult sendAudio(SendAudio sendAudio, Progress progress) {
+        if (validate(sendAudio.getChatId(), sendAudio.getAudio(), sendAudio.getReplyMarkup(), sendAudio.getReplyToMessageId())) {
+            return mediaMessageService.sendAudio(sendAudio, progress);
+        }
+
+        return null;
     }
 
-    private boolean validate(SendDocument sendDocument) {
-        InputFile document = sendDocument.getDocument();
-        if (!document.isNew()) {
+    @Override
+    public SendFileResult sendVoice(SendVoice sendVoice, Progress progress) {
+        if (validate(sendVoice.getChatId(), sendVoice.getVoice(), sendVoice.getReplyMarkup(), sendVoice.getReplyToMessageId())) {
+            return mediaMessageService.sendVoice(sendVoice, progress);
+        }
+
+        return null;
+    }
+
+    private boolean validate(String chatId, InputFile inputFile, ReplyKeyboard replyKeyboard, Integer replyMessageId) {
+        if (!inputFile.isNew()) {
             return true;
         }
-        File file = document.getNewMediaFile();
+        File file = inputFile.getNewMediaFile();
         if (file.length() == 0) {
             LOGGER.error("Zero file\n{}", Arrays.toString(Thread.currentThread().getStackTrace()));
-            messageService.sendMessage(SendMessage.builder().chatId(sendDocument.getChatId())
+            messageService.sendMessage(SendMessage.builder().chatId(chatId)
                     .text(localisationService.getMessage(MessagesProperties.MESSAGE_ZERO_LENGTH_FILE,
-                            new Object[]{StringUtils.defaultIfBlank(sendDocument.getDocument().getMediaName(), "")},
-                            userService.getLocaleOrDefault(Integer.parseInt(sendDocument.getChatId()))))
-                    .replyMarkup(sendDocument.getReplyMarkup())
-                    .replyToMessageId(sendDocument.getReplyToMessageId())
+                            new Object[]{StringUtils.defaultIfBlank(inputFile.getMediaName(), "")},
+                            userService.getLocaleOrDefault(Integer.parseInt(chatId))))
+                    .replyMarkup(replyKeyboard)
+                    .replyToMessageId(replyMessageId)
                     .build());
 
             return false;
         }
         if (file.length() > TgConstants.LARGE_FILE_SIZE) {
-            LOGGER.debug("Large out file({}, {})", sendDocument.getChatId(), MemoryUtils.humanReadableByteCount(file.length()));
+            LOGGER.debug("Large out file({}, {})", chatId, MemoryUtils.humanReadableByteCount(file.length()));
             String text = localisationService.getMessage(MessagesProperties.MESSAGE_TOO_LARGE_OUT_FILE,
-                    new Object[]{sendDocument.getDocument().getMediaName(), MemoryUtils.humanReadableByteCount(file.length())},
-                    userService.getLocaleOrDefault(Integer.parseInt(sendDocument.getChatId())));
+                    new Object[]{inputFile.getMediaName(), MemoryUtils.humanReadableByteCount(file.length())},
+                    userService.getLocaleOrDefault(Integer.parseInt(chatId)));
 
-            messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(sendDocument.getChatId())).text(text)
-                    .replyMarkup(sendDocument.getReplyMarkup())
-                    .replyToMessageId(sendDocument.getReplyToMessageId())
+            messageService.sendMessage(SendMessage.builder().chatId(chatId).text(text)
+                    .replyMarkup(replyKeyboard)
+                    .replyToMessageId(replyMessageId)
                     .build());
 
             return false;

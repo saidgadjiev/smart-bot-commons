@@ -35,7 +35,7 @@ public enum Format {
     STICKER(FormatCategory.IMAGES) {
         @Override
         public String getExt() {
-            return "webp";
+            return WEBP.getExt();
         }
     },
     HTML(FormatCategory.WEB),
@@ -139,7 +139,13 @@ public enum Format {
         }
     },
     SPX(FormatCategory.AUDIO),
-    MID(FormatCategory.AUDIO);
+    MID(FormatCategory.AUDIO),
+    VOICE(FormatCategory.AUDIO) {
+        @Override
+        public String getExt() {
+            return OGG.getExt();
+        }
+    };
 
     private FormatCategory category;
 

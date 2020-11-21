@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMem
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.*;
 import org.telegram.telegrambots.meta.api.objects.ChatMember;
+import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.gadjini.telegram.smart.bot.commons.exception.DownloadCanceledException;
@@ -152,42 +153,34 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public Message sendDocument(SendDocument sendDocument, Progress progress) {
-        if (sendDocument.getDocument().isNew()) {
-            uploading.put(sendDocument.getDocument().getNewMediaFile().getAbsolutePath(), new SmartTempFile(sendDocument.getDocument().getNewMediaFile()));
-        }
-
-        try {
-            return executeWithResult(sendDocument.getChatId(), () -> {
-                updateProgressBeforeStart(progress);
-                Message execute = execute(sendDocument);
-
-                updateProgressAfterComplete(progress);
-
-                return objectMapper.convertValue(execute, Message.class);
-            });
-        } finally {
-            if (sendDocument.getDocument().isNew()) {
-                uploading.remove(sendDocument.getDocument().getNewMediaFile().getAbsolutePath());
-            }
-        }
+        return uploadFile(sendDocument.getChatId(), () -> {
+            Message execute = execute(sendDocument);
+            return objectMapper.convertValue(execute, Message.class);
+        }, sendDocument.getDocument(), progress);
     }
 
     @Override
-    public Message sendVideo(SendVideo sendVideo) {
-        return executeWithResult(sendVideo.getChatId(), () -> {
+    public Message sendVideo(SendVideo sendVideo, Progress progress) {
+        return uploadFile(sendVideo.getChatId(), () -> {
             Message execute = execute(sendVideo);
-
             return objectMapper.convertValue(execute, Message.class);
-        });
+        }, sendVideo.getVideo(), progress);
     }
 
     @Override
-    public Message sendAudio(SendAudio sendAudio) {
-        return executeWithResult(sendAudio.getChatId(), () -> {
+    public Message sendAudio(SendAudio sendAudio, Progress progress) {
+        return uploadFile(sendAudio.getChatId(), () -> {
             Message execute = execute(sendAudio);
-
             return objectMapper.convertValue(execute, Message.class);
-        });
+        }, sendAudio.getAudio(), progress);
+    }
+
+    @Override
+    public Message sendVoice(SendVoice sendVoice, Progress progress) {
+        return uploadFile(sendVoice.getChatId(), () -> {
+            Message execute = execute(sendVoice);
+            return objectMapper.convertValue(execute, Message.class);
+        }, sendVoice.getVoice(), progress);
     }
 
     @Override
@@ -384,6 +377,24 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             executable.executeWithException();
         } catch (Exception e) {
             throw catchException(chatId, e);
+        }
+    }
+
+    private <V> V uploadFile(String chatId, Callable<V> executable, InputFile inputFile, Progress progress) {
+        if (inputFile.isNew()) {
+            uploading.put(inputFile.getNewMediaFile().getAbsolutePath(), new SmartTempFile(inputFile.getNewMediaFile()));
+        }
+
+        try {
+            updateProgressBeforeStart(progress);
+            V result = executeWithResult(chatId, executable);
+            updateProgressAfterComplete(progress);
+
+            return result;
+        } finally {
+            if (inputFile.isNew()) {
+                uploading.remove(inputFile.getNewMediaFile().getAbsolutePath());
+            }
         }
     }
 

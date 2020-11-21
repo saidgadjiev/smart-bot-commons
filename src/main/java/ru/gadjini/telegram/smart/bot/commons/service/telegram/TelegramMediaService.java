@@ -13,9 +13,11 @@ public interface TelegramMediaService {
 
     Message sendDocument(SendDocument sendDocument, Progress progress);
 
-    Message sendVideo(SendVideo sendVideo);
+    Message sendVideo(SendVideo sendVideo, Progress progress);
 
-    Message sendAudio(SendAudio sendAudio);
+    Message sendAudio(SendAudio sendAudio, Progress progress);
+
+    Message sendVoice(SendVoice sendVoice, Progress progress);
 
     Message sendPhoto(SendPhoto sendPhoto);
 

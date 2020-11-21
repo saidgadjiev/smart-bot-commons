@@ -90,22 +90,36 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
-    public void sendVideo(SendVideo sendVideo) {
+    public SendFileResult sendVideo(SendVideo sendVideo, Progress progress) {
         if (StringUtils.isNotBlank(sendVideo.getCaption())) {
             sendVideo.setParseMode(ParseMode.HTML);
         }
         sendVideo.setAllowSendingWithoutReply(true);
-        telegramLocalBotApiService.sendVideo(sendVideo);
+        Message message = telegramLocalBotApiService.sendVideo(sendVideo, progress);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
 
     @Override
-    public SendFileResult sendAudio(SendAudio sendAudio) {
+    public SendFileResult sendAudio(SendAudio sendAudio, Progress progress) {
         if (StringUtils.isNotBlank(sendAudio.getCaption())) {
             sendAudio.setParseMode(ParseMode.HTML);
         }
 
         sendAudio.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendAudio(sendAudio);
+        Message message = telegramLocalBotApiService.sendAudio(sendAudio, progress);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
+    }
+
+    @Override
+    public SendFileResult sendVoice(SendVoice sendVoice, Progress progress) {
+        if (StringUtils.isNotBlank(sendVoice.getCaption())) {
+            sendVoice.setParseMode(ParseMode.HTML);
+        }
+
+        sendVoice.setAllowSendingWithoutReply(true);
+        Message message = telegramLocalBotApiService.sendVoice(sendVoice, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }

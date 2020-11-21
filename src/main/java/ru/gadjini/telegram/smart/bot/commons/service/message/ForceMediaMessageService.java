@@ -16,6 +16,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.utils.ThreadUtils;
 
 import java.net.SocketException;
+import java.util.function.Supplier;
 
 @Component
 @Qualifier("forceMedia")
@@ -46,13 +47,42 @@ public class ForceMediaMessageService implements MediaMessageService {
 
     @Override
     public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
+        return forceSend(() -> mediaMessageService.sendDocument(sendDocument, progress));
+    }
+
+    @Override
+    public void sendFile(long chatId, String fileId) {
+        mediaMessageService.sendFile(chatId, fileId);
+    }
+
+    @Override
+    public SendFileResult sendPhoto(SendPhoto sendPhoto) {
+        return mediaMessageService.sendPhoto(sendPhoto);
+    }
+
+    @Override
+    public SendFileResult sendVideo(SendVideo sendVideo, Progress progress) {
+        return mediaMessageService.sendVideo(sendVideo, progress);
+    }
+
+    @Override
+    public SendFileResult sendAudio(SendAudio sendAudio, Progress progress) {
+        return mediaMessageService.sendAudio(sendAudio, progress);
+    }
+
+    @Override
+    public SendFileResult sendVoice(SendVoice sendVoice, Progress progress) {
+        return mediaMessageService.sendVoice(sendVoice, progress);
+    }
+
+    private SendFileResult forceSend(Supplier<SendFileResult> sender) {
         int attempts = 1;
         int sleepTime = SLEEP_TIME_BEFORE_ATTEMPT;
         Throwable lastEx = null;
         while (attempts <= MAX_ATTEMPTS) {
             ++attempts;
             try {
-                return mediaMessageService.sendDocument(sendDocument, progress);
+                return sender.get();
             } catch (Throwable ex) {
                 lastEx = ex;
                 if (shouldTryToUploadAgain(ex)) {
@@ -67,26 +97,6 @@ public class ForceMediaMessageService implements MediaMessageService {
         }
 
         throw new TelegramApiException(lastEx);
-    }
-
-    @Override
-    public void sendFile(long chatId, String fileId) {
-        mediaMessageService.sendFile(chatId, fileId);
-    }
-
-    @Override
-    public SendFileResult sendPhoto(SendPhoto sendPhoto) {
-        return mediaMessageService.sendPhoto(sendPhoto);
-    }
-
-    @Override
-    public void sendVideo(SendVideo sendVideo) {
-        mediaMessageService.sendVideo(sendVideo);
-    }
-
-    @Override
-    public SendFileResult sendAudio(SendAudio sendAudio) {
-        return mediaMessageService.sendAudio(sendAudio);
     }
 
     private boolean shouldTryToUploadAgain(Throwable ex) {

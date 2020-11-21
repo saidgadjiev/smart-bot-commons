@@ -11,18 +11,32 @@ public interface MediaMessageService {
 
     SendFileResult sendSticker(SendSticker sendSticker);
 
-    SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
-
-    void sendFile(long chatId, String fileId);
-
     default SendFileResult sendDocument(SendDocument sendDocumentContext) {
         return sendDocument(sendDocumentContext, null);
     }
 
+    SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
+
+    void sendFile(long chatId, String fileId);
+
     SendFileResult sendPhoto(SendPhoto sendPhoto);
 
-    void sendVideo(SendVideo sendVideo);
+    default SendFileResult sendVideo(SendVideo sendVideo) {
+        return sendVideo(sendVideo, null);
+    }
 
-    SendFileResult sendAudio(SendAudio sendAudio);
+    SendFileResult sendVideo(SendVideo sendVideo, Progress progress);
+
+    default SendFileResult sendAudio(SendAudio sendAudio) {
+        return sendAudio(sendAudio, null);
+    }
+
+    SendFileResult sendAudio(SendAudio sendAudio, Progress progress);
+
+    default SendFileResult sendVoice(SendVoice sendVoice) {
+        return sendVoice(sendVoice, null);
+    }
+
+    SendFileResult sendVoice(SendVoice sendVoice, Progress progress);
 
 }
