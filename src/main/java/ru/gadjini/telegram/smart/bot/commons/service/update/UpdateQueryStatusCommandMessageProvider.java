@@ -6,5 +6,5 @@ import java.util.Locale;
 
 public interface UpdateQueryStatusCommandMessageProvider {
 
-    String getWaitingMessage(QueueItem queueItem, Locale locale);
+    String getUpdateStatusMessage(QueueItem queueItem, Locale locale);
 }

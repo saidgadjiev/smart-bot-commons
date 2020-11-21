@@ -74,7 +74,7 @@ public class UpdateQueryStatusCommand implements CallbackBotCommand {
                             .showAlert(true)
                             .build());
         } else {
-            String queuedMessage = messageProvider.getWaitingMessage(queueItem, locale);
+            String queuedMessage = messageProvider.getUpdateStatusMessage(queueItem, locale);
             if (!Objects.equals(TextUtils.removeHtmlTags(queuedMessage), callbackQuery.getMessage().getText())) {
                 messageService.editMessage(
                         EditMessageText.builder().chatId(String.valueOf(callbackQuery.getMessage().getChatId()))

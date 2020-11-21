@@ -76,12 +76,14 @@ public class MessageMediaService {
 
             return messageMedia;
         } else if (message.hasVideo()) {
-            String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
             Format format = formatService.getFormat(message.getVideo().getFileName(), message.getVideo().getMimeType());
             if (format == null) {
                 format = Format.MP4;
             }
-            fileName += format.getExt();
+            String fileName = message.getVideo().getFileName();
+            if (StringUtils.isBlank(fileName)) {
+                fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
+            }
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getVideo().getFileId());
             messageMedia.setFileSize(message.getVideo().getFileSize());
@@ -93,12 +95,14 @@ public class MessageMediaService {
 
             return messageMedia;
         } else if (message.hasAudio()) {
-            String fileName = message.getAudio().getFileName();
             Format format = formatService.getFormat(message.getAudio().getFileName(), message.getAudio().getMimeType());
 
+            if (format == null) {
+                format = Format.MP3;
+            }
+            String fileName = message.getAudio().getFileName();
             if (StringUtils.isBlank(fileName)) {
-                fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
-                fileName += format.getExt();
+                fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
             }
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getAudio().getFileId());
@@ -115,8 +119,7 @@ public class MessageMediaService {
         } else if (message.hasSticker()) {
             Sticker sticker = message.getSticker();
             messageMedia.setFileId(sticker.getFileId());
-            String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + ".";
-            fileName += sticker.getIsAnimated() ? "tgs" : "webp";
+            String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + (sticker.getIsAnimated() ? "tgs" : "webp");
             messageMedia.setFileName(fileName);
             messageMedia.setMimeType(sticker.getIsAnimated() ? null : "image/webp");
             messageMedia.setFileSize(message.getSticker().getFileSize());
