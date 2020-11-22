@@ -36,7 +36,7 @@ public class DownloadingQueueDao extends QueueDao {
 
     public void create(DownloadingQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO downloading_queue (user_id, file, producer, progress, status, file_path)\n" +
+                "INSERT INTO downloading_queue (user_id, file, producer, progress, status, file_path, delete_parent_dir)\n" +
                         "    VALUES (?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
@@ -55,6 +55,7 @@ public class DownloadingQueueDao extends QueueDao {
                     } else {
                         ps.setNull(6, Types.VARCHAR);
                     }
+                    ps.setBoolean(7, queueItem.isDeleteParentDir());
                 }
         );
     }
