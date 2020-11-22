@@ -17,6 +17,8 @@ public class FloodControlProperties {
 
     private boolean enableLogging = false;
 
+    private long sleepOnDownloadingFloodWait = 70000;
+
     public int getMaxSleepTime() {
         return maxSleepTime;
     }
@@ -55,5 +57,13 @@ public class FloodControlProperties {
 
     public void setMinSleepTime(int minSleepTime) {
         this.minSleepTime = minSleepTime;
+    }
+
+    public long getSleepOnDownloadingFloodWait() {
+        return sleepOnDownloadingFloodWait;
+    }
+
+    public void setSleepOnDownloadingFloodWait(long sleepOnDownloadingFloodWait) {
+        this.sleepOnDownloadingFloodWait = sleepOnDownloadingFloodWait;
     }
 }

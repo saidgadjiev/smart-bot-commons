@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
-import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -29,8 +28,8 @@ public class DownloadingQueueDao extends QueueDao {
     private ObjectMapper objectMapper;
 
     @Autowired
-    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, QueueProperties queueProperties, ObjectMapper objectMapper) {
-        super(jdbcTemplate, () -> DownloadingQueueItem.NAME, queueProperties);
+    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+        super(jdbcTemplate, () -> DownloadingQueueItem.NAME);
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
     }

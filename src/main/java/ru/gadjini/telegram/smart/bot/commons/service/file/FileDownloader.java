@@ -1,12 +1,10 @@
 package ru.gadjini.telegram.smart.bot.commons.service.file;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NoHttpResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
-import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
@@ -37,7 +35,15 @@ public class FileDownloader {
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         floodWaitController.startDownloading(fileId);
         try {
-            telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
+            try {
+                telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
+            } catch (ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException ex) {
+                if (isWrongFileIdException(ex)) {
+                    floodWaitController.downloadingFloodWait(fileSize);
+                } else {
+                    throw ex;
+                }
+            }
         } finally {
             floodWaitController.finishDownloading(fileId, fileSize);
         }
@@ -58,26 +64,21 @@ public class FileDownloader {
     }
 
     public static boolean isNoneCriticalDownloadingException(Throwable ex) {
-        int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
         int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
         int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
-        int floodWaitException = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
+
+        return indexOfNoResponseException != -1 || socketException != -1;
+    }
+
+    private boolean isWrongFileIdException(ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException ex) {
+        int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
+
         if (telegramApiRequestExceptionIndexOf != -1) {
             TelegramApiRequestException apiRequestException = (TelegramApiRequestException) ExceptionUtils.getThrowables(ex)[telegramApiRequestExceptionIndexOf];
 
             return Objects.equals(apiRequestException.getApiResponse(), FILE_ID_TEMPORARILY_UNAVAILABLE);
-        } else {
-            return indexOfNoResponseException != -1 || socketException != -1 || floodWaitException != -1;
         }
-    }
 
-    public static boolean isNoneCriticalDownloadingException(String exception) {
-        if (StringUtils.isBlank(exception)) {
-            return false;
-        }
-        return exception.contains(FloodWaitException.class.getSimpleName()) ||
-                exception.contains(NoHttpResponseException.class.getSimpleName()) ||
-                exception.contains(SocketException.class.getSimpleName()) ||
-                exception.contains(FILE_ID_TEMPORARILY_UNAVAILABLE);
+        return false;
     }
 }

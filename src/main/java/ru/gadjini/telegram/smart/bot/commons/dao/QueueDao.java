@@ -1,15 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
-import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 
-import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
@@ -19,8 +15,6 @@ import java.util.stream.Collectors;
 @Repository
 public class QueueDao {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueueDao.class);
-
     public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.id ";
 
     public static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()) ";
@@ -29,18 +23,10 @@ public class QueueDao {
 
     private QueueDaoDelegate queueDaoDelegate;
 
-    private QueueProperties queueProperties;
-
     @Autowired
-    public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate, QueueProperties queueProperties) {
+    public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate) {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
-        this.queueProperties = queueProperties;
-    }
-
-    @PostConstruct
-    public void init() {
-        LOGGER.debug("Max attempts({})", queueProperties.getMaxAttempts());
     }
 
     public final void setExceptionStatus(int id, String exception) {
@@ -77,17 +63,6 @@ public class QueueDao {
                     ps.setString(2, exception);
                     ps.setInt(3, id);
                 });
-    }
-
-    public final void setWaitingIfThereAreAttemptsElseException(int id, String exception) {
-        jdbcTemplate.update(
-                "UPDATE " + getQueueName() + " SET exception = ?, status = case when attempts < ? then 0 else 2 end WHERE id = ?",
-                ps -> {
-                    ps.setString(1, exception);
-                    ps.setInt(2, queueProperties.getMaxAttempts());
-                    ps.setInt(3, id);
-                }
-        );
     }
 
     public final void resetProcessing() {

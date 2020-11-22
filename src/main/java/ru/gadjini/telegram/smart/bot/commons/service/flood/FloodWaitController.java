@@ -63,13 +63,30 @@ public class FloodWaitController {
                     ++finishedDownloadingCounter;
                     if (finishedDownloadingCounter % floodWaitProperties.getSleepAfterXDownloads() == 0) {
                         finishedDownloadingCounter = 0;
-                        sleep = new SleepTime(LocalDateTime.now(), getSleepTime(fileSize));
+                        sleep(fileSize);
                     }
                 } finally {
                     releaseDownloadingChannel(fileId);
                 }
             }
         }
+    }
+
+    public synchronized void downloadingFloodWait(long fileSize) {
+        long sleep = sleep(fileSize);
+
+        throw new FloodControlException(sleep);
+    }
+
+    private synchronized long sleep(long fileSize) {
+        long sleepT = getSleepTime(fileSize);
+        AtomicLong sleeping = new AtomicLong();
+
+        if (isSleeping(sleeping) && sleeping.get() < sleepT) {
+            sleep = new SleepTime(LocalDateTime.now(), sleepT);
+        }
+
+        return Math.max(sleeping.get(), sleepT);
     }
 
     private synchronized void releaseDownloadingChannel(String fileId) {

@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
-import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.util.List;
@@ -15,8 +14,8 @@ public class WorkQueueDao extends QueueDao {
     private WorkQueueDaoDelegate queueDaoDelegate;
 
     @Autowired
-    public WorkQueueDao(JdbcTemplate jdbcTemplate, WorkQueueDaoDelegate queueDaoDelegate, QueueProperties queueProperties) {
-        super(jdbcTemplate, queueDaoDelegate, queueProperties);
+    public WorkQueueDao(JdbcTemplate jdbcTemplate, WorkQueueDaoDelegate queueDaoDelegate) {
+        super(jdbcTemplate, queueDaoDelegate);
         this.queueDaoDelegate = queueDaoDelegate;
     }
 
