@@ -59,13 +59,15 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> poll() {
+    public List<DownloadingQueueItem> poll(String producer) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
-                        "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST + " WHERE status = 0 AND next_run_at <= now() RETURNING *\n" +
+                        "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST +
+                        "WHERE status = 0 AND next_run_at <= now() and producer = ? RETURNING *\n" +
                         ")\n" +
                         "SELECT *, (file).*\n" +
                         "FROM r",
+                ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
     }
@@ -81,9 +83,11 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> getDownloads(Collection<String> filesIds) {
+    public List<DownloadingQueueItem> getDownloads(Collection<String> filesIds, String producer) {
         return jdbcTemplate.query(
-                "SELECT DISTINCT ON((file).file_id) *, (file).* FROM downloading_queue WHERE (file).file_id IN(" + filesIds.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) + ")",
+                "SELECT DISTINCT ON((file).file_id) *, (file).* FROM downloading_queue " +
+                        "WHERE (file).file_id IN(" + filesIds.stream().map(s -> "'" + s + "'").collect(Collectors.joining(",")) + ") AND producer = ?",
+                ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
     }
@@ -94,10 +98,13 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public void deleteByFileId(String fileId) {
+    public void deleteByFileId(String fileId, String producer) {
         jdbcTemplate.update(
-                "DELETE FROM downloading_queue WHERE id = (SELECT id from downloading_queue where (file).file_id = ?)",
-                ps -> ps.setString(1, fileId)
+                "DELETE FROM downloading_queue WHERE id = (SELECT id from downloading_queue where (file).file_id = ? AND producer = ?)",
+                ps -> {
+                    ps.setString(1, fileId);
+                    ps.setString(2, producer);
+                }
         );
     }
 
@@ -116,6 +123,7 @@ public class DownloadingQueueDao extends QueueDao {
         item.setUserId(rs.getInt(DownloadingQueueItem.USER_ID));
         item.setProducer(rs.getString(DownloadingQueueItem.PRODUCER));
         item.setFilePath(rs.getString(DownloadingQueueItem.FILE_PATH));
+        item.setDeleteParentDir(rs.getBoolean(DownloadingQueueItem.DELETE_PARENT_DIR));
 
         Timestamp nextRunAt = rs.getTimestamp(DownloadingQueueItem.NEXT_RUN_AT);
         if (nextRunAt != null) {

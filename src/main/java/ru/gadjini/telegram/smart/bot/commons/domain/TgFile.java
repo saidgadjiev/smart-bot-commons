@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
@@ -56,9 +57,14 @@ public class TgFile {
 
     private Integer duration;
 
+    @JsonIgnore
     private Progress progress;
 
+    @JsonIgnore
     private String filePath;
+
+    @JsonIgnore
+    private boolean deleteParentDir;
 
     public String getFileId() {
         return fileId;
@@ -154,6 +160,14 @@ public class TgFile {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public boolean isDeleteParentDir() {
+        return deleteParentDir;
+    }
+
+    public void setDeleteParentDir(boolean deleteParentDir) {
+        this.deleteParentDir = deleteParentDir;
     }
 
     public String sql() {

@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
@@ -34,18 +35,21 @@ public class DownloadingJob {
 
     private FileManagerProperties fileManagerProperties;
 
+    private WorkQueueDao workQueueDao;
+
     @Autowired
     public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
-                          TempFileService tempFileService, FileManagerProperties fileManagerProperties) {
+                          TempFileService tempFileService, FileManagerProperties fileManagerProperties, WorkQueueDao workQueueDao) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
         this.fileManagerProperties = fileManagerProperties;
+        this.workQueueDao = workQueueDao;
     }
 
     @Scheduled(fixedDelay = 5000)
     public void doDownloads() {
-        List<DownloadingQueueItem> poll = downloadingQueueService.poll();
+        List<DownloadingQueueItem> poll = downloadingQueueService.poll(workQueueDao.getQueueName());
 
         for (DownloadingQueueItem queueItem : poll) {
             doDownload(queueItem);

@@ -21,8 +21,8 @@ public class DownloadingQueueService extends QueueService {
         this.downloadingQueueDao = downloadingQueueDao;
     }
 
-    public List<DownloadingQueueItem> poll() {
-        return downloadingQueueDao.poll();
+    public List<DownloadingQueueItem> poll(String producer) {
+        return downloadingQueueDao.poll(producer);
     }
 
     @Transactional
@@ -32,21 +32,23 @@ public class DownloadingQueueService extends QueueService {
             queueItem.setFile(file);
             queueItem.setProducer(producer);
             queueItem.setProgress(file.getProgress());
+            queueItem.setFilePath(file.getFilePath());
+            queueItem.setDeleteParentDir(file.isDeleteParentDir());
 
             downloadingQueueDao.create(queueItem);
         }
     }
 
-    public List<DownloadingQueueItem> getDownloads(Collection<String> filesIds) {
-        return downloadingQueueDao.getDownloads(filesIds);
+    public List<DownloadingQueueItem> getDownloads(Collection<String> filesIds, String producer) {
+        return downloadingQueueDao.getDownloads(filesIds, producer);
     }
 
     public void setCompleted(int id, String filePath) {
         downloadingQueueDao.setCompleted(id, filePath);
     }
 
-    public void deleteByFileId(String fileId) {
-        downloadingQueueDao.deleteByFileId(fileId);
+    public void deleteByFileId(String fileId, String producer) {
+        downloadingQueueDao.deleteByFileId(fileId, producer);
     }
 
     public void deleteByIds(Collection<Integer> ids) {

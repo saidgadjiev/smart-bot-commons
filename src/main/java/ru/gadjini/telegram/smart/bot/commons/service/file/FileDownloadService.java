@@ -2,12 +2,12 @@ package ru.gadjini.telegram.smart.bot.commons.service.file;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
+import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 import java.util.Collection;
@@ -23,15 +23,15 @@ public class FileDownloadService {
 
     private DownloadingQueueService queueService;
 
-    private QueueDao queueDao;
+    private WorkQueueDao workQueueDao;
 
     @Autowired
     public FileDownloadService(TelegramBotApiService telegramLocalBotApiService, FloodWaitController floodWaitController,
-                               DownloadingQueueService queueService, QueueDao queueDao) {
+                               DownloadingQueueService queueService, WorkQueueDao workQueueDao) {
         this.telegramLocalBotApiService = telegramLocalBotApiService;
         this.floodWaitController = floodWaitController;
         this.queueService = queueService;
-        this.queueDao = queueDao;
+        this.workQueueDao = workQueueDao;
     }
 
     public void createDownload(TgFile file) {
@@ -39,18 +39,18 @@ public class FileDownloadService {
     }
 
     public void createDownloads(Collection<TgFile> files) {
-        queueService.create(files, queueDao.getQueueName());
+        queueService.create(files, workQueueDao.getQueueName());
     }
 
     public List<DownloadingQueueItem> getDownloadsIfReadyElseNull(Collection<String> filesIds) {
-        List<DownloadingQueueItem> downloads = queueService.getDownloads(filesIds);
+        List<DownloadingQueueItem> downloads = queueService.getDownloads(filesIds, workQueueDao.getQueueName());
 
         return downloads.stream().allMatch(downloadingQueueItem -> downloadingQueueItem.getStatus().equals(QueueItem.Status.COMPLETED)) ? downloads : null;
     }
 
     public boolean cancelDownload(String fileId, long fileSize) {
         floodWaitController.cancelDownloading(fileId, fileSize);
-        queueService.deleteByFileId(fileId);
+        queueService.deleteByFileId(fileId, workQueueDao.getQueueName());
 
         return telegramLocalBotApiService.cancelDownloading(fileId);
     }
