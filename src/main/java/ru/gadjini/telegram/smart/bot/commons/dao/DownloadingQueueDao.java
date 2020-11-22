@@ -62,9 +62,9 @@ public class DownloadingQueueDao extends QueueDao {
     public List<DownloadingQueueItem> poll() {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
-                        "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST + " WHERE status = 0 RETURNING *\n" +
+                        "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST + " WHERE status = 0 AND next_run_at <= now() RETURNING *\n" +
                         ")\n" +
-                        "SELECT *, 1 as queue_position, (file).*\n" +
+                        "SELECT *, (file).*\n" +
                         "FROM r",
                 (rs, rowNum) -> map(rs)
         );
