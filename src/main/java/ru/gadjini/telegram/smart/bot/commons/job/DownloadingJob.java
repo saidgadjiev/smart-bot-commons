@@ -7,15 +7,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
-import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.DownloadingQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 
 import java.io.File;
 import java.time.ZonedDateTime;
@@ -28,8 +26,6 @@ public class DownloadingJob {
 
     private static final String TAG = "down";
 
-    private QueueService queueService;
-
     private DownloadingQueueService downloadingQueueService;
 
     private FileDownloader fileDownloader;
@@ -39,9 +35,8 @@ public class DownloadingJob {
     private FileManagerProperties fileManagerProperties;
 
     @Autowired
-    public DownloadingJob(QueueService queueService, DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
+    public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
                           TempFileService tempFileService, FileManagerProperties fileManagerProperties) {
-        this.queueService = queueService;
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -50,17 +45,17 @@ public class DownloadingJob {
 
     @Scheduled(fixedDelay = 5000)
     public void doDownloads() {
-        List<QueueItem> poll = queueService.poll();
+        List<DownloadingQueueItem> poll = downloadingQueueService.poll();
 
-        for (QueueItem queueItem : poll) {
-            doDownload((DownloadingQueueItem) queueItem);
+        for (DownloadingQueueItem queueItem : poll) {
+            doDownload(queueItem);
         }
     }
 
     private void doDownload(DownloadingQueueItem downloadingQueueItem) {
         SmartTempFile tempFile;
-        if ( StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
-            tempFile =tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
+        if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
+            tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
         } else {
             tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
         }
@@ -78,23 +73,23 @@ public class DownloadingJob {
                 noneCriticalException(downloadingQueueItem, e);
             } else {
                 LOGGER.error(e.getMessage(), e);
-                queueService.setExceptionStatus(downloadingQueueItem.getId(), e);
+                downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
             }
         }
     }
 
     private void noneCriticalException(DownloadingQueueItem downloadingQueueItem, Throwable e) {
         ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(fileManagerProperties.getSleepTimeBeforeDownloadAttempt());
-        queueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
     }
 
     private void floodControlException(DownloadingQueueItem downloadingQueueItem, FloodControlException e) {
         ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(e.getSleepTime());
-        queueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
     }
 
     private void floodWaitException(DownloadingQueueItem downloadingQueueItem, FloodWaitException e) {
         ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(e.getSleepTime());
-        queueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
     }
 }

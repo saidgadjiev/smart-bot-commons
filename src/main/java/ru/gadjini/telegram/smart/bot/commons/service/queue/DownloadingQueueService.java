@@ -1,4 +1,4 @@
-package ru.gadjini.telegram.smart.bot.commons.service;
+package ru.gadjini.telegram.smart.bot.commons.service.queue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,13 +11,18 @@ import java.util.Collection;
 import java.util.List;
 
 @Service
-public class DownloadingQueueService {
+public class DownloadingQueueService extends QueueService {
 
     private DownloadingQueueDao downloadingQueueDao;
 
     @Autowired
     public DownloadingQueueService(DownloadingQueueDao downloadingQueueDao) {
+        super(downloadingQueueDao);
         this.downloadingQueueDao = downloadingQueueDao;
+    }
+
+    public List<DownloadingQueueItem> poll() {
+        return downloadingQueueDao.poll();
     }
 
     @Transactional

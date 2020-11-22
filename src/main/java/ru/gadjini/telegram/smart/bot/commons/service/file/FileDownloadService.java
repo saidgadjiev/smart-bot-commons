@@ -6,7 +6,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
-import ru.gadjini.telegram.smart.bot.commons.service.DownloadingQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 

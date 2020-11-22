@@ -8,13 +8,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.ZonedDateTime;
-import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -45,7 +43,7 @@ public class QueueDao {
         LOGGER.debug("Max attempts({})", queueProperties.getMaxAttempts());
     }
 
-    public void setExceptionStatus(int id, String exception) {
+    public final void setExceptionStatus(int id, String exception) {
         jdbcTemplate.update(
                 "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
                 ps -> {
@@ -56,7 +54,7 @@ public class QueueDao {
         );
     }
 
-    public void setCompleted(int id) {
+    public final void setCompleted(int id) {
         jdbcTemplate.update(
                 "UPDATE " + getQueueName() + " SET status = ?, completed_at = now() WHERE id = ?",
                 ps -> {
@@ -66,13 +64,13 @@ public class QueueDao {
         );
     }
 
-    public void setWaitingAndDecrementAttempts(int id) {
+    public final void setWaitingAndDecrementAttempts(int id) {
         jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE id = ?",
                 ps -> ps.setInt(1, id));
     }
 
 
-    public void setWaiting(int id, ZonedDateTime nextRunAt, String exception) {
+    public final void setWaiting(int id, ZonedDateTime nextRunAt, String exception) {
         jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0, next_run_at = ?, exception = ? WHERE id = ?",
                 ps -> {
                     ps.setTimestamp(1, Timestamp.valueOf(nextRunAt.toLocalDateTime()));
@@ -81,7 +79,7 @@ public class QueueDao {
                 });
     }
 
-    public void setWaitingIfThereAreAttemptsElseException(int id, String exception) {
+    public final void setWaitingIfThereAreAttemptsElseException(int id, String exception) {
         jdbcTemplate.update(
                 "UPDATE " + getQueueName() + " SET exception = ?, status = case when attempts < ? then 0 else 2 end WHERE id = ?",
                 ps -> {
@@ -92,20 +90,20 @@ public class QueueDao {
         );
     }
 
-    public void resetProcessing() {
+    public final void resetProcessing() {
         jdbcTemplate.update(
                 "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE status = 1"
         );
     }
 
-    public void deleteById(int id) {
+    public final void deleteById(int id) {
         jdbcTemplate.update(
                 "DELETE FROM " + getQueueName() + " WHERE id = ?",
                 ps -> ps.setInt(1, id)
         );
     }
 
-    public String getException(int id) {
+    public final String getException(int id) {
         return jdbcTemplate.query(
                 "SELECT exception FROM " + getQueueName() + " WHERE id = ?",
                 ps -> {
@@ -115,7 +113,7 @@ public class QueueDao {
         );
     }
 
-    public boolean exists(int id) {
+    public final boolean exists(int id) {
         return BooleanUtils.toBoolean(jdbcTemplate.query(
                 "SELECT TRUE FROM " + getQueueName() + " WHERE id =?",
                 ps -> {
@@ -125,7 +123,7 @@ public class QueueDao {
         ));
     }
 
-    public void setProgressMessageId(int id, int progressMessageId) {
+    public final void setProgressMessageId(int id, int progressMessageId) {
         jdbcTemplate.update("UPDATE " + getQueueName() + " SET progress_message_id = ? WHERE id = ?",
                 ps -> {
                     ps.setInt(1, progressMessageId);
@@ -133,7 +131,7 @@ public class QueueDao {
                 });
     }
 
-    public long countByStatusForToday(QueueItem.Status status) {
+    public final long countByStatusForToday(QueueItem.Status status) {
         return jdbcTemplate.query(
                 "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND created_at::date = current_date",
                 ps -> ps.setInt(1, status.getCode()),
@@ -141,7 +139,7 @@ public class QueueDao {
         );
     }
 
-    public long countByStatusAllTime(QueueItem.Status status) {
+    public final long countByStatusAllTime(QueueItem.Status status) {
         return jdbcTemplate.query(
                 "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ?",
                 ps -> ps.setInt(1, status.getCode()),
@@ -149,14 +147,14 @@ public class QueueDao {
         );
     }
 
-    public Long countActiveUsersForToday() {
+    public final Long countActiveUsersForToday() {
         return jdbcTemplate.query(
                 "SELECT count(DISTINCT user_id) as cnt FROM " + getQueueName() + " WHERE created_at::date = current_date",
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }
 
-    public void deleteByIdAndStatuses(int id, Set<QueueItem.Status> statuses) {
+    public final void deleteByIdAndStatuses(int id, Set<QueueItem.Status> statuses) {
         jdbcTemplate.update(
                 "DELETE FROM " + getQueueName() + " WHERE id = ? AND status IN(" + statuses.stream()
                         .map(s -> String.valueOf(s.getCode())).collect(Collectors.joining(",")) + ")",
@@ -164,31 +162,7 @@ public class QueueDao {
         );
     }
 
-    public List<QueueItem> poll() {
-        return queueDaoDelegate.poll();
-    }
-
-    public List<QueueItem> poll(int limit) {
-        return queueDaoDelegate.poll(null, limit);
-    }
-
-    public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {
-        return queueDaoDelegate.poll(weight, limit);
-    }
-
-    public QueueItem getById(int id) {
-        return queueDaoDelegate.getById(id);
-    }
-
-    public List<QueueItem> deleteAndGetProcessingOrWaitingByUserId(int userId) {
-        return queueDaoDelegate.deleteAndGetProcessingOrWaitingByUserId(userId);
-    }
-
-    public QueueItem deleteAndGetById(int id) {
-        return queueDaoDelegate.deleteAndGetById(id);
-    }
-
-    public String getQueueName() {
+    public final String getQueueName() {
         return queueDaoDelegate.getQueueName();
     }
 }

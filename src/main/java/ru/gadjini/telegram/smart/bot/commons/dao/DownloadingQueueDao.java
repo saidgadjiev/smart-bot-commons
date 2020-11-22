@@ -10,6 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.property.QueueProperties;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -21,14 +22,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Repository
-public class DownloadingQueueDao implements QueueDaoDelegate<DownloadingQueueItem> {
+public class DownloadingQueueDao extends QueueDao {
 
     private JdbcTemplate jdbcTemplate;
 
     private ObjectMapper objectMapper;
 
     @Autowired
-    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, QueueProperties queueProperties, ObjectMapper objectMapper) {
+        super(jdbcTemplate, () -> DownloadingQueueItem.NAME, queueProperties);
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
     }
@@ -58,7 +60,6 @@ public class DownloadingQueueDao implements QueueDaoDelegate<DownloadingQueueIte
         );
     }
 
-    @Override
     public List<DownloadingQueueItem> poll() {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
@@ -68,11 +69,6 @@ public class DownloadingQueueDao implements QueueDaoDelegate<DownloadingQueueIte
                         "FROM r",
                 (rs, rowNum) -> map(rs)
         );
-    }
-
-    @Override
-    public String getQueueName() {
-        return DownloadingQueueItem.NAME;
     }
 
     public void setCompleted(int id, String filePath) {

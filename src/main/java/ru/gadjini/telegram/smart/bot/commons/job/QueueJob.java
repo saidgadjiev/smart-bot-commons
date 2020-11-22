@@ -21,9 +21,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorker;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorkerFactory;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.CurrentTasksCanceled;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.QueueJobInitialization;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.QueueJobShuttingDown;
@@ -42,7 +42,7 @@ public class QueueJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueJob.class);
 
-    private QueueService queueService;
+    private WorkQueueService workQueueService;
 
     private SmartExecutorService executor;
 
@@ -87,8 +87,8 @@ public class QueueJob {
     }
 
     @Autowired
-    public void setQueueService(QueueService queueService) {
-        this.queueService = queueService;
+    public void setWorkQueueService(WorkQueueService workQueueService) {
+        this.workQueueService = workQueueService;
     }
 
     @Autowired
@@ -117,7 +117,7 @@ public class QueueJob {
         LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
         applicationEventPublisher.publishEvent(new QueueJobInitialization(this));
         try {
-            queueService.resetProcessing();
+            workQueueService.resetProcessing();
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
@@ -138,7 +138,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Heavy threads free({})", limit);
             }
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.HEAVY, limit);
+            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.HEAVY, limit);
 
             if (enableJobsLogging) {
                 LOGGER.debug("Push heavy jobs({})", items.size());
@@ -153,7 +153,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Light threads free({})", limit);
             }
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
 
             if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs({})", items.size());
@@ -167,7 +167,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Heavy threads for light free({})", limit);
             }
-            Collection<QueueItem> items = queueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
 
             if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs to heavy threads({})", items.size());
@@ -179,12 +179,12 @@ public class QueueJob {
     }
 
     public final void rejectTask(SmartExecutorService.Job job) {
-        queueService.setWaitingAndDecrementAttempts(job.getId());
+        workQueueService.setWaitingAndDecrementAttempts(job.getId());
         LOGGER.debug("Rejected({}, {})", job.getId(), job.getWeight());
     }
 
     public final int removeAndCancelCurrentTasks(long chatId) {
-        List<QueueItem> conversionQueueItems = queueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
+        List<QueueItem> conversionQueueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         for (QueueItem item : conversionQueueItems) {
             executor.cancelAndComplete(item.getId(), true);
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
@@ -195,7 +195,7 @@ public class QueueJob {
     }
 
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
-        QueueItem queueItem = queueService.getById(jobId);
+        QueueItem queueItem = workQueueService.getById(jobId);
         if (queueItem == null) {
             messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder()
                     .callbackQueryId(queryId)
@@ -209,7 +209,7 @@ public class QueueJob {
                     .build()
             );
             if (!executor.cancelAndComplete(jobId, true)) {
-                queueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
+                workQueueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
@@ -258,14 +258,14 @@ public class QueueJob {
             try {
                 queueWorker.execute();
                 if (!queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
-                    queueService.setCompleted(queueItem.getId());
+                    workQueueService.setCompleted(queueItem.getId());
                 }
                 success = true;
             } catch (BusyWorkerException | FloodControlException ex) {
-                queueService.setWaitingAndDecrementAttempts(queueItem.getId());
+                workQueueService.setWaitingAndDecrementAttempts(queueItem.getId());
             } catch (Throwable ex) {
                 if (checker == null || !checker.get()) {
-                    queueService.setExceptionStatus(queueItem.getId(), ex);
+                    workQueueService.setExceptionStatus(queueItem.getId(), ex);
                     queueWorker.unhandledException(ex);
 
                     throw ex;
@@ -275,7 +275,7 @@ public class QueueJob {
                     executor.complete(queueItem.getId());
                     queueWorker.finish();
                     if (success && queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
-                        queueService.deleteById(queueItem.getId());
+                        workQueueService.deleteById(queueItem.getId());
                     }
                 }
             }
@@ -284,7 +284,7 @@ public class QueueJob {
         @Override
         public void cancel() {
             if (canceledByUser) {
-                queueService.deleteById(queueItem.getId());
+                workQueueService.deleteById(queueItem.getId());
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
             executor.complete(queueItem.getId());

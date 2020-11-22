@@ -15,7 +15,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 import ru.gadjini.telegram.smart.bot.commons.service.update.UpdateQueryStatusCommandMessageProvider;
 import ru.gadjini.telegram.smart.bot.commons.utils.TextUtils;
@@ -28,7 +28,7 @@ public class UpdateQueryStatusCommand implements CallbackBotCommand {
 
     private UpdateQueryStatusCommandMessageProvider messageProvider;
 
-    private QueueService queueService;
+    private WorkQueueService queueService;
 
     private UserService userService;
 
@@ -40,7 +40,7 @@ public class UpdateQueryStatusCommand implements CallbackBotCommand {
 
     @Autowired
     public UpdateQueryStatusCommand(UpdateQueryStatusCommandMessageProvider messageProvider,
-                                    QueueService queueService, UserService userService,
+                                    WorkQueueService queueService, UserService userService,
                                     @Qualifier("messageLimits") MessageService messageService,
                                     LocalisationService localisationService, SmartInlineKeyboardService inlineKeyboardService) {
         this.messageProvider = messageProvider;
