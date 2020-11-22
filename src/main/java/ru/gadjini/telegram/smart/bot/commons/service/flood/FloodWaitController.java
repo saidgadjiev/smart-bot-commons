@@ -7,7 +7,7 @@ import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
+import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 
 import javax.annotation.PostConstruct;
 import java.time.Duration;
@@ -19,7 +19,7 @@ import java.util.concurrent.atomic.AtomicLong;
 @Component
 public class FloodWaitController {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileManager.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadService.class);
 
     private int finishedDownloadingCounter = 0;
 

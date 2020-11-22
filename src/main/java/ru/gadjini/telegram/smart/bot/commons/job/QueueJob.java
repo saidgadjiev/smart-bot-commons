@@ -12,13 +12,13 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.WorkQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.BusyWorkerException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
@@ -33,7 +33,6 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 import javax.annotation.PostConstruct;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
@@ -144,7 +143,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Push heavy jobs({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
+            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem))));
         } else if (enableJobsLogging) {
             LOGGER.debug("Heavy threads busy");
         }
@@ -159,7 +158,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem))));
+            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem))));
         } else if (enableJobsLogging) {
             LOGGER.debug("Light threads busy");
         }
@@ -173,7 +172,7 @@ public class QueueJob {
             if (enableJobsLogging) {
                 LOGGER.debug("Push light jobs to heavy threads({})", items.size());
             }
-            items.forEach(queueItem -> executor.execute(new QueueTask(queueItem, queueWorkerFactory.createWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
+            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
         } else if (enableJobsLogging) {
             LOGGER.debug("Heavy threads for light tasks busy");
         }
@@ -230,7 +229,7 @@ public class QueueJob {
 
     public class QueueTask implements SmartExecutorService.Job {
 
-        private final QueueItem queueItem;
+        private final WorkQueueItem queueItem;
 
         private volatile Supplier<Boolean> checker;
 
@@ -238,7 +237,7 @@ public class QueueJob {
 
         private QueueWorker queueWorker;
 
-        private QueueTask(QueueItem queueItem, QueueWorker queueWorker) {
+        private QueueTask(WorkQueueItem queueItem, QueueWorker queueWorker) {
             this.queueItem = queueItem;
             this.queueWorker = queueWorker;
         }
@@ -266,14 +265,10 @@ public class QueueJob {
                 queueService.setWaitingAndDecrementAttempts(queueItem.getId());
             } catch (Throwable ex) {
                 if (checker == null || !checker.get()) {
-                    if (FileManager.isNoneCriticalDownloadingException(ex)) {
-                        handleNoneCriticalDownloadingException(ex);
-                    } else {
-                        queueService.setExceptionStatus(queueItem.getId(), ex);
-                        queueWorker.unhandledException(ex);
+                    queueService.setExceptionStatus(queueItem.getId(), ex);
+                    queueWorker.unhandledException(ex);
 
-                        throw ex;
-                    }
+                    throw ex;
                 }
             } finally {
                 if (checker == null || !checker.get()) {
@@ -339,30 +334,6 @@ public class QueueJob {
         @Override
         public int getProgressMessageId() {
             return queueItem.getProgressMessageId();
-        }
-
-        private void handleNoneCriticalDownloadingException(Throwable ex) {
-            queueService.setWaitingIfThereAreAttemptsElseException(queueItem.getId(), ex);
-            if (!FileManager.isNoneCriticalDownloadingException(queueItem.getException())) {
-                updateProgressMessageAfterNoneCriticalException(queueItem.getId());
-            }
-        }
-
-        private void updateProgressMessageAfterNoneCriticalException(int id) {
-            QueueItem queueItem = queueService.getById(id);
-
-            if (queueItem == null) {
-                return;
-            }
-            Locale locale = userService.getLocaleOrDefault(queueItem.getUserId());
-            String message = queueJobConfigurator.getWaitingMessage(queueItem, locale);
-
-            messageService.editMessage(EditMessageText.builder()
-                    .chatId(String.valueOf(queueItem.getUserId()))
-                    .messageId(queueItem.getProgressMessageId())
-                    .text(message)
-                    .replyMarkup(queueJobConfigurator.getWaitingKeyboard(queueItem, locale))
-                    .build());
         }
     }
 }

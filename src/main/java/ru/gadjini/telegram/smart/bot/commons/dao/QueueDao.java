@@ -12,6 +12,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 
 import javax.annotation.PostConstruct;
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -21,7 +23,7 @@ public class QueueDao {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueDao.class);
 
-    public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.created_at ";
+    public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.id ";
 
     public static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()) ";
 
@@ -67,6 +69,16 @@ public class QueueDao {
     public void setWaitingAndDecrementAttempts(int id) {
         jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE id = ?",
                 ps -> ps.setInt(1, id));
+    }
+
+
+    public void setWaiting(int id, ZonedDateTime nextRunAt, String exception) {
+        jdbcTemplate.update("UPDATE " + getQueueName() + " SET status = 0, next_run_at = ?, exception = ? WHERE id = ?",
+                ps -> {
+                    ps.setTimestamp(1, Timestamp.valueOf(nextRunAt.toLocalDateTime()));
+                    ps.setString(2, exception);
+                    ps.setInt(3, id);
+                });
     }
 
     public void setWaitingIfThereAreAttemptsElseException(int id, String exception) {
@@ -152,6 +164,14 @@ public class QueueDao {
         );
     }
 
+    public List<QueueItem> poll() {
+        return queueDaoDelegate.poll();
+    }
+
+    public List<QueueItem> poll(int limit) {
+        return queueDaoDelegate.poll(null, limit);
+    }
+
     public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {
         return queueDaoDelegate.poll(weight, limit);
     }
@@ -168,7 +188,7 @@ public class QueueDao {
         return queueDaoDelegate.deleteAndGetById(id);
     }
 
-    private String getQueueName() {
+    public String getQueueName() {
         return queueDaoDelegate.getQueueName();
     }
 }

@@ -43,15 +43,28 @@ public class TempFileService {
         }
     }
 
-    public SmartTempFile getTempFile(long chatId, String fileId, String tag, String ext) {
-        File file = new File(tempDir, generateFileName(chatId, fileId, tag, ext));
+    public String getTempDir(long chatId, String tag) {
+        File dir = new File(tempDir, generateDirName(chatId, tag));
 
-        LOGGER.debug("Get({})", file.getAbsolutePath());
-        return new SmartTempFile(file);
+        return dir.getAbsolutePath();
+    }
+
+    public SmartTempFile getTempFile(long chatId, String fileId, String tag, String ext) {
+        String filePath = getTempFile(tempDir, chatId, fileId, tag, ext);
+
+        LOGGER.debug("Get({})", filePath);
+        return new SmartTempFile(new File(filePath));
     }
 
     public SmartTempFile getTempFile(long chatId, String tag, String ext) {
         return getTempFile(chatId, null, tag, ext);
+    }
+
+    public String getTempFile(String parent, long chatId, String fileId, String tag, String ext) {
+        File file = new File(parent, generateFileName(chatId, fileId, tag, ext));
+
+        LOGGER.debug("Get({})", file.getAbsolutePath());
+        return file.getAbsolutePath();
     }
 
     public SmartTempFile createTempFile(SmartTempFile parent, long chatId, String fileName) {

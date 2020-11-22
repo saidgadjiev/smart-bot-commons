@@ -35,8 +35,6 @@ public class Progress {
     @JsonProperty(AFTER_PROGRESS_COMPLETION_REPLY_MARKUP)
     private InlineKeyboardMarkup afterProgressCompletionReplyMarkup;
 
-    private String locale;
-
     public String getChatId() {
         return chatId;
     }
@@ -83,13 +81,5 @@ public class Progress {
 
     public void setAfterProgressCompletionReplyMarkup(InlineKeyboardMarkup afterProgressCompletionReplyMarkup) {
         this.afterProgressCompletionReplyMarkup = afterProgressCompletionReplyMarkup;
-    }
-
-    public String getLocale() {
-        return locale;
-    }
-
-    public void setLocale(String locale) {
-        this.locale = locale;
     }
 }

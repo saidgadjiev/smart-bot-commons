@@ -2,7 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import java.time.ZonedDateTime;
 
-public abstract class QueueItem {
+public class QueueItem {
 
     public static final String EXCEPTION = "exception";
 
@@ -28,6 +28,8 @@ public abstract class QueueItem {
 
     public static final String SUPPRESS_USER_EXCEPTIONS = "suppress_user_exceptions";
 
+    public static final String NEXT_RUN_AT = "next_run_at";
+
     private int id;
 
     private int userId;
@@ -51,6 +53,8 @@ public abstract class QueueItem {
     private int queuePosition;
 
     private String exception;
+
+    private ZonedDateTime nextRunAt;
 
     public final int getId() {
         return id;
@@ -148,7 +152,13 @@ public abstract class QueueItem {
         this.exception = exception;
     }
 
-    public abstract long getSize();
+    public ZonedDateTime getNextRunAt() {
+        return nextRunAt;
+    }
+
+    public void setNextRunAt(ZonedDateTime nextRunAt) {
+        this.nextRunAt = nextRunAt;
+    }
 
     public enum Status {
 

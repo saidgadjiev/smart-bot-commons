@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.apache.commons.lang3.StringUtils;
 import org.postgresql.util.PGobject;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
 import java.sql.SQLException;
@@ -54,6 +55,10 @@ public class TgFile {
     private String audioTitle;
 
     private Integer duration;
+
+    private Progress progress;
+
+    private String filePath;
 
     public String getFileId() {
         return fileId;
@@ -133,6 +138,22 @@ public class TgFile {
 
     public void setDuration(Integer duration) {
         this.duration = duration;
+    }
+
+    public Progress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(Progress progress) {
+        this.progress = progress;
+    }
+
+    public String getFilePath() {
+        return filePath;
+    }
+
+    public void setFilePath(String filePath) {
+        this.filePath = filePath;
     }
 
     public String sql() {

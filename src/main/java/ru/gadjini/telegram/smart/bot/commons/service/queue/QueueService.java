@@ -7,6 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Set;
 
@@ -18,6 +19,14 @@ public class QueueService {
     @Autowired
     public QueueService(QueueDao queueDao) {
         this.queueDao = queueDao;
+    }
+
+    public List<QueueItem> poll() {
+        return queueDao.poll();
+    }
+
+    public List<QueueItem> poll(int limit) {
+        return queueDao.poll(limit);
     }
 
     public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {
@@ -48,6 +57,11 @@ public class QueueService {
 
     public void setWaitingAndDecrementAttempts(int id) {
         queueDao.setWaitingAndDecrementAttempts(id);
+    }
+
+    public void setWaiting(int id, ZonedDateTime nextRunAt, Throwable reason) {
+        String exception = ExceptionUtils.getMessage(reason) + "\n" + ExceptionUtils.getStackTrace(reason);
+        queueDao.setWaiting(id, nextRunAt, exception);
     }
 
     public QueueItem getById(int id) {

@@ -2,11 +2,12 @@ package ru.gadjini.telegram.smart.bot.commons.listener;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileManager;
+import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 
 @Component
 public class ContextCloseListener implements ApplicationListener<ContextClosedEvent> {
@@ -15,9 +16,10 @@ public class ContextCloseListener implements ApplicationListener<ContextClosedEv
 
     private QueueJob conversionJob;
 
-    private FileManager fileManager;
+    private FileDownloadService fileManager;
 
-    public ContextCloseListener(QueueJob conversionJob, FileManager fileManager) {
+    @Autowired
+    public ContextCloseListener(QueueJob conversionJob, FileDownloadService fileManager) {
         this.conversionJob = conversionJob;
         this.fileManager = fileManager;
     }

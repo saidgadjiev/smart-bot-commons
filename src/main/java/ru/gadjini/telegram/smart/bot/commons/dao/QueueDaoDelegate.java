@@ -3,17 +3,30 @@ package ru.gadjini.telegram.smart.bot.commons.dao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
+import java.util.Collections;
 import java.util.List;
 
 public interface QueueDaoDelegate<T extends QueueItem> {
-    
-     List<T> poll(SmartExecutorService.JobWeight weight, int limit);
 
-     T getById(int id);
+    default List<T> poll() {
+        return Collections.emptyList();
+    }
 
-     List<T> deleteAndGetProcessingOrWaitingByUserId(int userId);
+    default List<T> poll(SmartExecutorService.JobWeight weight, int limit) {
+        return Collections.emptyList();
+    }
 
-     T deleteAndGetById(int id);
+    default T getById(int id) {
+         return null;
+    }
 
-     String getQueueName();
+    default List<T> deleteAndGetProcessingOrWaitingByUserId(int userId) {
+         return Collections.emptyList();
+    }
+
+    default T deleteAndGetById(int id) {
+         return null;
+    }
+
+    String getQueueName();
 }
