@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
@@ -37,6 +38,12 @@ public class DownloadingJob {
 
     private WorkQueueDao workQueueDao;
 
+    @Value("${disable.jobs:false}")
+    private boolean disableJobs;
+
+    @Value("${enable.jobs.logging:false}")
+    private boolean enableJobsLogging;
+
     @Autowired
     public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
                           TempFileService tempFileService, FileManagerProperties fileManagerProperties, WorkQueueDao workQueueDao) {
@@ -49,6 +56,12 @@ public class DownloadingJob {
 
     @Scheduled(fixedDelay = 5000)
     public void doDownloads() {
+        if (disableJobs) {
+            if (enableJobsLogging) {
+                LOGGER.debug("Job disabled");
+            }
+            return;
+        }
         List<DownloadingQueueItem> poll = downloadingQueueService.poll(workQueueDao.getQueueName());
 
         for (DownloadingQueueItem queueItem : poll) {
@@ -57,6 +70,14 @@ public class DownloadingJob {
     }
 
     private void doDownload(DownloadingQueueItem downloadingQueueItem) {
+        if (downloadingQueueItem.getFile().getFormat().isDownloadable()) {
+            doDownloadFile(downloadingQueueItem);
+        } else {
+            downloadingQueueService.setCompleted(downloadingQueueItem.getId());
+        }
+    }
+
+    private void doDownloadFile(DownloadingQueueItem downloadingQueueItem) {
         SmartTempFile tempFile;
         if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
             tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());

@@ -6,6 +6,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.gadjini.telegram.smart.bot.commons.dao.DownloadingQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 
 import java.util.Collection;
@@ -35,6 +36,7 @@ public class DownloadingQueueService extends QueueService {
             queueItem.setFilePath(file.getFilePath());
             queueItem.setDeleteParentDir(file.isDeleteParentDir());
             queueItem.setProducerId(producerId);
+            queueItem.setStatus(QueueItem.Status.WAITING);
 
             downloadingQueueDao.create(queueItem);
         }

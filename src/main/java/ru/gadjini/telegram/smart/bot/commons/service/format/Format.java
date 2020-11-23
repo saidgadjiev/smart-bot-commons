@@ -40,8 +40,18 @@ public enum Format {
     },
     HTML(FormatCategory.WEB),
     HTMLZ(FormatCategory.WEB),
-    URL(FormatCategory.WEB),
-    TEXT(FormatCategory.DOCUMENTS),
+    URL(FormatCategory.WEB) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
+    TEXT(FormatCategory.DOCUMENTS) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     ZIP(FormatCategory.ARCHIVE),
     RAR(FormatCategory.ARCHIVE),
     AZW(FormatCategory.DOCUMENTS),
@@ -167,5 +177,9 @@ public enum Format {
 
     public boolean canBeSentAsAudio() {
         return false;
+    }
+
+    public boolean isDownloadable() {
+        return true;
     }
 }

@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.TaskScheduler;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -59,5 +61,20 @@ public class SchedulerConfiguration {
         executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> conversionJob.rejectTask(job));
 
         return executorService;
+    }
+
+    @Bean
+    public TaskScheduler jobsThreadPoolTaskScheduler(UserService userService) {
+        ThreadPoolTaskScheduler threadPoolTaskScheduler = new ThreadPoolTaskScheduler();
+        threadPoolTaskScheduler.setPoolSize(Runtime.getRuntime().availableProcessors());
+        threadPoolTaskScheduler.setThreadNamePrefix("JobsThreadPoolTaskScheduler");
+        threadPoolTaskScheduler.setErrorHandler(throwable -> {
+            LOGGER.error(throwable.getMessage(), throwable);
+            userService.handleBotBlockedByUser(throwable);
+        });
+
+        LOGGER.debug("Jobs thread pool scheduler initialized with pool size: {}", threadPoolTaskScheduler.getPoolSize());
+
+        return threadPoolTaskScheduler;
     }
 }

@@ -10,11 +10,13 @@ import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.sql.Types;
+import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.List;
 
@@ -34,7 +36,7 @@ public class DownloadingQueueDao extends QueueDao {
     public void create(DownloadingQueueItem queueItem) {
         jdbcTemplate.update(
                 "INSERT INTO downloading_queue (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id)\n" +
-                        "    VALUES (?, ?, ?, ?, ?)",
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
 
@@ -95,7 +97,7 @@ public class DownloadingQueueDao extends QueueDao {
 
     public void deleteByProducerId(String producer, int producerId) {
         jdbcTemplate.update(
-                "DELETE FROM downloading_queue WHERE producer = ? AND producer_od = ?",
+                "DELETE FROM downloading_queue WHERE producer = ? AND producer_id = ?",
                 ps -> {
                     ps.setString(1, producer);
                     ps.setInt(2, producerId);
@@ -114,6 +116,16 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
+    @Override
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    @Override
+    public QueueDaoDelegate getQueueDaoDelegate() {
+        return () -> DownloadingQueueItem.NAME;
+    }
+
     public DownloadingQueueItem map(ResultSet rs) throws SQLException {
         DownloadingQueueItem item = new DownloadingQueueItem();
         item.setId(rs.getInt(DownloadingQueueItem.ID));
@@ -124,6 +136,7 @@ public class DownloadingQueueDao extends QueueDao {
         tgFile.setMimeType(rs.getString(TgFile.MIME_TYPE));
         tgFile.setSize(rs.getLong(TgFile.SIZE));
         tgFile.setThumb(rs.getString(TgFile.THUMB));
+        tgFile.setFormat(Format.valueOf(rs.getString(TgFile.FORMAT)));
         item.setFile(tgFile);
 
         item.setUserId(rs.getInt(DownloadingQueueItem.USER_ID));
@@ -133,7 +146,7 @@ public class DownloadingQueueDao extends QueueDao {
 
         Timestamp nextRunAt = rs.getTimestamp(DownloadingQueueItem.NEXT_RUN_AT);
         if (nextRunAt != null) {
-            item.setNextRunAt(ZonedDateTime.from(nextRunAt.toLocalDateTime()));
+            item.setNextRunAt(ZonedDateTime.of(nextRunAt.toLocalDateTime(), ZoneOffset.UTC));
         }
         String progress = rs.getString(DownloadingQueueItem.PROGRESS);
         if (StringUtils.isNotBlank(progress)) {
@@ -145,15 +158,5 @@ public class DownloadingQueueDao extends QueueDao {
         }
 
         return item;
-    }
-
-    @Override
-    public JdbcTemplate getJdbcTemplate() {
-        return jdbcTemplate;
-    }
-
-    @Override
-    public QueueDaoDelegate getQueueDaoDelegate() {
-        return () -> DownloadingQueueItem.NAME;
     }
 }
