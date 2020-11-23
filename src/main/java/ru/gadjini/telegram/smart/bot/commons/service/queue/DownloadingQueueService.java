@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.gadjini.telegram.smart.bot.commons.dao.DownloadingQueueDao;
+import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 
@@ -17,7 +18,6 @@ public class DownloadingQueueService extends QueueService {
 
     @Autowired
     public DownloadingQueueService(DownloadingQueueDao downloadingQueueDao) {
-        super(downloadingQueueDao);
         this.downloadingQueueDao = downloadingQueueDao;
     }
 
@@ -54,5 +54,10 @@ public class DownloadingQueueService extends QueueService {
 
     public void deleteByProducer(String producer, int producerId) {
         downloadingQueueDao.deleteByProducerId(producer, producerId);
+    }
+
+    @Override
+    public QueueDao getQueueDao() {
+        return downloadingQueueDao;
     }
 }

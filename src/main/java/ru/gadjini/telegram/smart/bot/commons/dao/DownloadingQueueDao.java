@@ -27,7 +27,6 @@ public class DownloadingQueueDao extends QueueDao {
 
     @Autowired
     public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
-        super(jdbcTemplate, () -> DownloadingQueueItem.NAME);
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
     }
@@ -146,5 +145,15 @@ public class DownloadingQueueDao extends QueueDao {
         }
 
         return item;
+    }
+
+    @Override
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    @Override
+    public QueueDaoDelegate getQueueDaoDelegate() {
+        return () -> DownloadingQueueItem.NAME;
     }
 }

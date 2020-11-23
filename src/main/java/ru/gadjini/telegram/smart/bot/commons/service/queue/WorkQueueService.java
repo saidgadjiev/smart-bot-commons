@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.queue;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -15,7 +16,6 @@ public class WorkQueueService extends QueueService {
 
     @Autowired
     public WorkQueueService(WorkQueueDao workQueueDao) {
-        super(workQueueDao);
         this.queueDao = workQueueDao;
     }
 
@@ -41,5 +41,10 @@ public class WorkQueueService extends QueueService {
 
     public QueueItem deleteAndGetById(int id) {
         return queueDao.deleteAndGetById(id);
+    }
+
+    @Override
+    public QueueDao getQueueDao() {
+        return queueDao;
     }
 }

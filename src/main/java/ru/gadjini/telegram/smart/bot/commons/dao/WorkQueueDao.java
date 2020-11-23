@@ -11,11 +11,12 @@ import java.util.List;
 @Repository
 public class WorkQueueDao extends QueueDao {
 
+    private final JdbcTemplate jdbcTemplate;
     private WorkQueueDaoDelegate queueDaoDelegate;
 
     @Autowired
     public WorkQueueDao(JdbcTemplate jdbcTemplate, WorkQueueDaoDelegate queueDaoDelegate) {
-        super(jdbcTemplate, queueDaoDelegate);
+        this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
     }
 
@@ -41,5 +42,16 @@ public class WorkQueueDao extends QueueDao {
 
     public QueueItem deleteAndGetById(int id) {
         return queueDaoDelegate.deleteAndGetById(id);
+    }
+
+
+    @Override
+    public JdbcTemplate getJdbcTemplate() {
+        return jdbcTemplate;
+    }
+
+    @Override
+    public QueueDaoDelegate getQueueDaoDelegate() {
+        return queueDaoDelegate;
     }
 }
