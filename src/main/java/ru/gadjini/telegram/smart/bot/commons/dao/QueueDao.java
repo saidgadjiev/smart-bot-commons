@@ -1,9 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.apache.commons.lang3.BooleanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
 import java.sql.ResultSet;
@@ -12,7 +10,6 @@ import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@Repository
 public class QueueDao {
 
     public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.id ";
@@ -23,7 +20,6 @@ public class QueueDao {
 
     private QueueDaoDelegate queueDaoDelegate;
 
-    @Autowired
     public QueueDao(JdbcTemplate jdbcTemplate, QueueDaoDelegate queueDaoDelegate) {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;

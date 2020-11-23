@@ -34,23 +34,23 @@ public class FileDownloadService {
         this.workQueueDao = workQueueDao;
     }
 
-    public void createDownload(TgFile file) {
-        createDownloads(Collections.singletonList(file));
+    public void createDownload(TgFile file, int producerId) {
+        createDownloads(Collections.singletonList(file), producerId);
     }
 
-    public void createDownloads(Collection<TgFile> files) {
-        queueService.create(files, workQueueDao.getQueueName());
+    public void createDownloads(Collection<TgFile> files, int producerId) {
+        queueService.create(files, workQueueDao.getQueueName(), producerId);
     }
 
-    public List<DownloadingQueueItem> getDownloadsIfReadyElseNull(Collection<String> filesIds) {
-        List<DownloadingQueueItem> downloads = queueService.getDownloads(filesIds, workQueueDao.getQueueName());
+    public List<DownloadingQueueItem> getDownloadsIfReadyElseNull(int producerId) {
+        List<DownloadingQueueItem> downloads = queueService.getDownloads(workQueueDao.getQueueName(), producerId);
 
         return downloads.stream().allMatch(downloadingQueueItem -> downloadingQueueItem.getStatus().equals(QueueItem.Status.COMPLETED)) ? downloads : null;
     }
 
-    public boolean cancelDownload(String fileId, long fileSize) {
+    public boolean cancelDownload(String fileId, long fileSize, int producerId) {
         floodWaitController.cancelDownloading(fileId, fileSize);
-        queueService.deleteByFileId(fileId, workQueueDao.getQueueName());
+        queueService.deleteByFileId(fileId, workQueueDao.getQueueName(), producerId);
 
         return telegramLocalBotApiService.cancelDownloading(fileId);
     }
@@ -63,7 +63,7 @@ public class FileDownloadService {
         telegramLocalBotApiService.cancelDownloads();
     }
 
-    public void deleteDownloads(Collection<Integer> ids) {
-        queueService.deleteByIds(ids);
+    public void deleteDownloads(int producerId) {
+        queueService.deleteByProducer(workQueueDao.getQueueName(), producerId);
     }
 }

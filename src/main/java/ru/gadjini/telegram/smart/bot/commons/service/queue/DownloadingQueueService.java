@@ -26,7 +26,7 @@ public class DownloadingQueueService extends QueueService {
     }
 
     @Transactional
-    public void create(Collection<TgFile> files, String producer) {
+    public void create(Collection<TgFile> files, String producer, int producerId) {
         for (TgFile file : files) {
             DownloadingQueueItem queueItem = new DownloadingQueueItem();
             queueItem.setFile(file);
@@ -34,24 +34,25 @@ public class DownloadingQueueService extends QueueService {
             queueItem.setProgress(file.getProgress());
             queueItem.setFilePath(file.getFilePath());
             queueItem.setDeleteParentDir(file.isDeleteParentDir());
+            queueItem.setProducerId(producerId);
 
             downloadingQueueDao.create(queueItem);
         }
     }
 
-    public List<DownloadingQueueItem> getDownloads(Collection<String> filesIds, String producer) {
-        return downloadingQueueDao.getDownloads(filesIds, producer);
+    public List<DownloadingQueueItem> getDownloads(String producer, int producerId) {
+        return downloadingQueueDao.getDownloads(producer, producerId);
     }
 
     public void setCompleted(int id, String filePath) {
         downloadingQueueDao.setCompleted(id, filePath);
     }
 
-    public void deleteByFileId(String fileId, String producer) {
-        downloadingQueueDao.deleteByFileId(fileId, producer);
+    public void deleteByFileId(String fileId, String producer, int producerId) {
+        downloadingQueueDao.deleteByFileId(fileId, producer, producerId);
     }
 
-    public void deleteByIds(Collection<Integer> ids) {
-        downloadingQueueDao.deleteByIds(ids);
+    public void deleteByProducer(String producer, int producerId) {
+        downloadingQueueDao.deleteByProducerId(producer, producerId);
     }
 }

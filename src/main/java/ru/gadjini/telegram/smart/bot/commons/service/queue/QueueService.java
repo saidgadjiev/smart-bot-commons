@@ -1,14 +1,12 @@
 package ru.gadjini.telegram.smart.bot.commons.service.queue;
 
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
 import java.time.ZonedDateTime;
 import java.util.Set;
 
-@Service
 public class QueueService {
 
     private QueueDao queueDao;

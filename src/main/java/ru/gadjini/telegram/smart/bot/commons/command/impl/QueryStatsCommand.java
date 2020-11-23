@@ -13,14 +13,14 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
 import java.util.Locale;
 
 @Component
 public class QueryStatsCommand implements BotCommand {
 
-    private QueueService queueService;
+    private WorkQueueService queueService;
 
     private LocalisationService localisationService;
 
@@ -29,7 +29,7 @@ public class QueryStatsCommand implements BotCommand {
     private MessageService messageService;
 
     @Autowired
-    public QueryStatsCommand(QueueService queueService, LocalisationService localisationService,
+    public QueryStatsCommand(WorkQueueService queueService, LocalisationService localisationService,
                              UserService userService, @Qualifier("messageLimits") MessageService messageService) {
         this.queueService = queueService;
         this.localisationService = localisationService;

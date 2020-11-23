@@ -10,6 +10,8 @@ public class DownloadingQueueItem extends QueueItem {
 
     public static final String PRODUCER = "producer";
 
+    public static final String PRODUCER_ID = "producer_id";
+
     public static final String PROGRESS = "progress";
 
     public static final String FILE_PATH = "file_path";
@@ -21,6 +23,8 @@ public class DownloadingQueueItem extends QueueItem {
     private String producer;
 
     private Progress progress;
+
+    private int producerId;
 
     private String filePath;
 
@@ -64,5 +68,13 @@ public class DownloadingQueueItem extends QueueItem {
 
     public void setDeleteParentDir(boolean deleteParentDir) {
         this.deleteParentDir = deleteParentDir;
+    }
+
+    public int getProducerId() {
+        return producerId;
+    }
+
+    public void setProducerId(int producerId) {
+        this.producerId = producerId;
     }
 }
