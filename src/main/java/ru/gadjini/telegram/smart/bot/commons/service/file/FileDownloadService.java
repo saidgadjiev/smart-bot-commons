@@ -34,12 +34,12 @@ public class FileDownloadService {
         this.workQueueDao = workQueueDao;
     }
 
-    public void createDownload(TgFile file, int producerId) {
-        createDownloads(Collections.singletonList(file), producerId);
+    public void createDownload(TgFile file, int producerId, int userId) {
+        createDownloads(Collections.singletonList(file), producerId, userId);
     }
 
-    public void createDownloads(Collection<TgFile> files, int producerId) {
-        queueService.create(files, workQueueDao.getQueueName(), producerId);
+    public void createDownloads(Collection<TgFile> files, int producerId, int userId) {
+        queueService.create(files, workQueueDao.getQueueName(), producerId, userId);
     }
 
     public List<DownloadingQueueItem> getDownloadsIfReadyElseNull(int producerId) {

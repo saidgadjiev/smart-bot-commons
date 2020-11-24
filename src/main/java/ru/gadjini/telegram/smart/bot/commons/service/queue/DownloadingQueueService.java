@@ -27,7 +27,7 @@ public class DownloadingQueueService extends QueueService {
     }
 
     @Transactional
-    public void create(Collection<TgFile> files, String producer, int producerId) {
+    public void create(Collection<TgFile> files, String producer, int producerId, int userId) {
         for (TgFile file : files) {
             DownloadingQueueItem queueItem = new DownloadingQueueItem();
             queueItem.setFile(file);
@@ -37,6 +37,7 @@ public class DownloadingQueueService extends QueueService {
             queueItem.setDeleteParentDir(file.isDeleteParentDir());
             queueItem.setProducerId(producerId);
             queueItem.setStatus(QueueItem.Status.WAITING);
+            queueItem.setUserId(userId);
 
             downloadingQueueDao.create(queueItem);
         }
