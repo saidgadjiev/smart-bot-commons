@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
-import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
@@ -18,7 +18,7 @@ import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -34,7 +34,7 @@ public class DownloadingJob extends JobPusher {
 
     private static final String TAG = "down";
 
-    private DownloadingQueueService downloadingQueueService;
+    private DownloadQueueService downloadingQueueService;
 
     private FileDownloader fileDownloader;
 
@@ -46,7 +46,7 @@ public class DownloadingJob extends JobPusher {
 
     private SmartExecutorService downloadTasksExecutor;
 
-    private final List<DownloadingQueueItem> currentDownloads = new ArrayList<>();
+    private final List<DownloadQueueItem> currentDownloads = new ArrayList<>();
 
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
@@ -55,7 +55,7 @@ public class DownloadingJob extends JobPusher {
     private boolean enableJobsLogging;
 
     @Autowired
-    public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
+    public DownloadingJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                           TempFileService tempFileService, FileManagerProperties fileManagerProperties,
                           WorkQueueDao workQueueDao) {
         this.downloadingQueueService = downloadingQueueService;
@@ -107,7 +107,7 @@ public class DownloadingJob extends JobPusher {
 
     @Override
     public SmartExecutorService.Job createJob(QueueItem item) {
-        return new DownloadTask((DownloadingQueueItem) item);
+        return new DownloadTask((DownloadQueueItem) item);
     }
 
     public void cancelDownloads(String producer, int producerId) {
@@ -115,14 +115,14 @@ public class DownloadingJob extends JobPusher {
     }
 
     public void cancelDownloads(String producer, Set<Integer> producerIds) {
-        List<DownloadingQueueItem> downloads = downloadingQueueService.getDownloads(producer, producerIds);
+        List<DownloadQueueItem> downloads = downloadingQueueService.getDownloads(producer, producerIds);
 
-        downloadTasksExecutor.cancelAndComplete(downloads.stream().map(DownloadingQueueItem::getId).collect(Collectors.toList()), true);
+        downloadTasksExecutor.cancelAndComplete(downloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
         downloadingQueueService.deleteByProducer(producer, producerIds);
     }
 
     public void cancelDownloads() {
-        downloadTasksExecutor.cancelAndComplete(currentDownloads.stream().map(DownloadingQueueItem::getId).collect(Collectors.toList()), false);
+        downloadTasksExecutor.cancelAndComplete(currentDownloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), false);
     }
 
     public final void shutdown() {
@@ -131,7 +131,7 @@ public class DownloadingJob extends JobPusher {
 
     private class DownloadTask implements SmartExecutorService.Job {
 
-        private DownloadingQueueItem downloadingQueueItem;
+        private DownloadQueueItem downloadingQueueItem;
 
         private volatile Supplier<Boolean> checker;
 
@@ -139,7 +139,7 @@ public class DownloadingJob extends JobPusher {
 
         private volatile SmartTempFile tempFile;
 
-        private DownloadTask(DownloadingQueueItem downloadingQueueItem) {
+        private DownloadTask(DownloadQueueItem downloadingQueueItem) {
             this.downloadingQueueItem = downloadingQueueItem;
         }
 
@@ -204,7 +204,7 @@ public class DownloadingJob extends JobPusher {
             }
         }
 
-        private void doDownloadFile(DownloadingQueueItem downloadingQueueItem) {
+        private void doDownloadFile(DownloadQueueItem downloadingQueueItem) {
             if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
                 tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
             } else {
@@ -224,21 +224,22 @@ public class DownloadingJob extends JobPusher {
                     } else if (FileDownloader.isNoneCriticalDownloadingException(e)) {
                         noneCriticalException(downloadingQueueItem, e);
                     } else {
-                        throw e;
+                        LOGGER.error(e.getMessage(), e);
+                        downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
                     }
                 }
             }
         }
 
-        private void noneCriticalException(DownloadingQueueItem downloadingQueueItem, Throwable e) {
+        private void noneCriticalException(DownloadQueueItem downloadingQueueItem, Throwable e) {
             downloadingQueueService.setWaiting(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
         }
 
-        private void floodControlException(DownloadingQueueItem downloadingQueueItem, FloodControlException e) {
+        private void floodControlException(DownloadQueueItem downloadingQueueItem, FloodControlException e) {
             downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
         }
 
-        private void floodWaitException(DownloadingQueueItem downloadingQueueItem, FloodWaitException e) {
+        private void floodWaitException(DownloadQueueItem downloadingQueueItem, FloodWaitException e) {
             downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
         }
     }

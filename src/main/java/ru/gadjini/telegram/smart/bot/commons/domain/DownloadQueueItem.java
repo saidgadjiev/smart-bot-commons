@@ -2,7 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 
-public class DownloadingQueueItem extends QueueItem {
+public class DownloadQueueItem extends QueueItem {
 
     public static final String NAME = "downloading_queue";
 

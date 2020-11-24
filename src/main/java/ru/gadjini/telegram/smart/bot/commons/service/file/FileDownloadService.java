@@ -3,33 +3,25 @@ package ru.gadjini.telegram.smart.bot.commons.service.file;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
-import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
-import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 
 @Service
 public class FileDownloadService {
 
-    private TelegramBotApiService telegramLocalBotApiService;
-
-    private DownloadingQueueService queueService;
+    private DownloadQueueService queueService;
 
     private WorkQueueDao workQueueDao;
 
     private DownloadingJob downloadingJob;
 
     @Autowired
-    public FileDownloadService(TelegramBotApiService telegramLocalBotApiService,
-                               DownloadingQueueService queueService, WorkQueueDao workQueueDao) {
-        this.telegramLocalBotApiService = telegramLocalBotApiService;
+    public FileDownloadService(DownloadQueueService queueService, WorkQueueDao workQueueDao) {
         this.queueService = queueService;
         this.workQueueDao = workQueueDao;
     }
@@ -47,22 +39,12 @@ public class FileDownloadService {
         queueService.create(files, workQueueDao.getQueueName(), producerId, userId);
     }
 
-    public List<DownloadingQueueItem> getDownloadsIfReadyElseNull(int producerId) {
-        List<DownloadingQueueItem> downloads = queueService.getDownloads(workQueueDao.getQueueName(), producerId);
-
-        return downloads.stream().allMatch(downloadingQueueItem -> downloadingQueueItem.getStatus().equals(QueueItem.Status.COMPLETED)) ? downloads : null;
-    }
-
     public void cancelDownloads(int producerId) {
         downloadingJob.cancelDownloads(workQueueDao.getQueueName(), producerId);
     }
 
     public void cancelDownloads(Set<Integer> producerIds) {
         downloadingJob.cancelDownloads(workQueueDao.getQueueName(), producerIds);
-    }
-
-    public boolean cancelUpload(String filePath) {
-        return telegramLocalBotApiService.cancelUploading(filePath);
     }
 
     public void cancelDownloads() {

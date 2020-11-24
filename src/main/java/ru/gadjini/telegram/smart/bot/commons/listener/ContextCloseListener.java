@@ -8,6 +8,7 @@ import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
+import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 
 @Component
@@ -19,12 +20,16 @@ public class ContextCloseListener implements ApplicationListener<ContextClosedEv
 
     private DownloadingJob downloadingJob;
 
+    private UploadJob uploadJob;
+
     private FileDownloadService fileManager;
 
     @Autowired
-    public ContextCloseListener(QueueJob conversionJob, DownloadingJob downloadingJob, FileDownloadService fileManager) {
+    public ContextCloseListener(QueueJob conversionJob, DownloadingJob downloadingJob,
+                                UploadJob uploadJob, FileDownloadService fileManager) {
         this.conversionJob = conversionJob;
         this.downloadingJob = downloadingJob;
+        this.uploadJob = uploadJob;
         this.fileManager = fileManager;
     }
 
@@ -39,6 +44,11 @@ public class ContextCloseListener implements ApplicationListener<ContextClosedEv
             downloadingJob.shutdown();
         } catch (Throwable e) {
             LOGGER.error("Error cancel downloading job. " + e.getMessage(), e);
+        }
+        try {
+            uploadJob.shutdown();
+        } catch (Throwable e) {
+            LOGGER.error("Error cancel upload job. " + e.getMessage(), e);
         }
         try {
             fileManager.cancelDownloads();

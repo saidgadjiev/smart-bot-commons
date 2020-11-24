@@ -99,7 +99,7 @@ public class ForceMediaMessageService implements MediaMessageService {
         throw new TelegramApiException(lastEx);
     }
 
-    private boolean shouldTryToUploadAgain(Throwable ex) {
+    public static boolean shouldTryToUploadAgain(Throwable ex) {
         int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
         int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, FloodWaitException.class);
 

@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.gadjini.telegram.smart.bot.commons.dao.DownloadingQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
-import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 
@@ -14,23 +14,23 @@ import java.util.List;
 import java.util.Set;
 
 @Service
-public class DownloadingQueueService extends QueueService {
+public class DownloadQueueService extends QueueService {
 
     private DownloadingQueueDao downloadingQueueDao;
 
     @Autowired
-    public DownloadingQueueService(DownloadingQueueDao downloadingQueueDao) {
+    public DownloadQueueService(DownloadingQueueDao downloadingQueueDao) {
         this.downloadingQueueDao = downloadingQueueDao;
     }
 
-    public List<DownloadingQueueItem> poll(String producer, int limit) {
+    public List<DownloadQueueItem> poll(String producer, int limit) {
         return downloadingQueueDao.poll(producer, limit);
     }
 
     @Transactional
     public void create(Collection<TgFile> files, String producer, int producerId, int userId) {
         for (TgFile file : files) {
-            DownloadingQueueItem queueItem = new DownloadingQueueItem();
+            DownloadQueueItem queueItem = new DownloadQueueItem();
             queueItem.setFile(file);
             queueItem.setProducer(producer);
             queueItem.setProgress(file.getProgress());
@@ -44,11 +44,11 @@ public class DownloadingQueueService extends QueueService {
         }
     }
 
-    public List<DownloadingQueueItem> getDownloads(String producer, int producerId) {
+    public List<DownloadQueueItem> getDownloads(String producer, int producerId) {
         return downloadingQueueDao.getDownloads(producer, Set.of(producerId));
     }
 
-    public List<DownloadingQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
+    public List<DownloadQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
         return downloadingQueueDao.getDownloads(producer, producerIds);
     }
 

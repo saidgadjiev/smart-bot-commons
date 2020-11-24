@@ -11,6 +11,7 @@ import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
+import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -32,6 +33,8 @@ public class SchedulerConfiguration {
 
     private DownloadingJob downloadingJob;
 
+    private UploadJob uploadJob;
+
     @Value("${light.threads:2}")
     private int lightThreads;
 
@@ -52,6 +55,11 @@ public class SchedulerConfiguration {
     @Autowired
     public void setDownloadingJob(DownloadingJob downloadingJob) {
         this.downloadingJob = downloadingJob;
+    }
+
+    @Autowired
+    public void setUploadJob(UploadJob uploadJob) {
+        this.uploadJob = uploadJob;
     }
 
     @Bean
@@ -98,6 +106,21 @@ public class SchedulerConfiguration {
         executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
         executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> downloadingJob.rejectTask(job));
         executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> downloadingJob.rejectTask(job));
+
+        return executorService;
+    }
+
+    @Bean
+    @Qualifier("uploadTasksExecutor")
+    public SmartExecutorService uploadTasksExecutor(UserService userService,
+                                                      @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+        SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
+
+        LOGGER.debug("Download threads initialized with pool size: {}", heavyTaskExecutor.getCorePoolSize());
+        executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> uploadJob.rejectTask(job));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> uploadJob.rejectTask(job));
 
         return executorService;
     }

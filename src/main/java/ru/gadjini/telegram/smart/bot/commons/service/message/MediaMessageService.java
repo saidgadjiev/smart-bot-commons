@@ -11,15 +11,15 @@ public interface MediaMessageService {
 
     SendFileResult sendSticker(SendSticker sendSticker);
 
+    void sendFile(long chatId, String fileId);
+
+    SendFileResult sendPhoto(SendPhoto sendPhoto);
+
     default SendFileResult sendDocument(SendDocument sendDocumentContext) {
         return sendDocument(sendDocumentContext, null);
     }
 
     SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
-
-    void sendFile(long chatId, String fileId);
-
-    SendFileResult sendPhoto(SendPhoto sendPhoto);
 
     default SendFileResult sendVideo(SendVideo sendVideo) {
         return sendVideo(sendVideo, null);

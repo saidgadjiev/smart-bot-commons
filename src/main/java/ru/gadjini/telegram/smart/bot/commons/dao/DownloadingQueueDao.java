@@ -6,7 +6,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
@@ -36,7 +36,7 @@ public class DownloadingQueueDao extends QueueDao {
         this.objectMapper = objectMapper;
     }
 
-    public void create(DownloadingQueueItem queueItem) {
+    public void create(DownloadQueueItem queueItem) {
         jdbcTemplate.update(
                 "INSERT INTO downloading_queue (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id)\n" +
                         "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
@@ -63,7 +63,7 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> poll(String producer, int limit) {
+    public List<DownloadQueueItem> poll(String producer, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
                         "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST +
@@ -89,7 +89,7 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
+    public List<DownloadQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
         if (producerIds.isEmpty()) {
             return Collections.emptyList();
         }
@@ -132,12 +132,12 @@ public class DownloadingQueueDao extends QueueDao {
 
     @Override
     public QueueDaoDelegate getQueueDaoDelegate() {
-        return () -> DownloadingQueueItem.NAME;
+        return () -> DownloadQueueItem.NAME;
     }
 
-    public DownloadingQueueItem map(ResultSet rs) throws SQLException {
-        DownloadingQueueItem item = new DownloadingQueueItem();
-        item.setId(rs.getInt(DownloadingQueueItem.ID));
+    public DownloadQueueItem map(ResultSet rs) throws SQLException {
+        DownloadQueueItem item = new DownloadQueueItem();
+        item.setId(rs.getInt(DownloadQueueItem.ID));
 
         TgFile tgFile = new TgFile();
         tgFile.setFileId(rs.getString(TgFile.FILE_ID));
@@ -148,16 +148,16 @@ public class DownloadingQueueDao extends QueueDao {
         tgFile.setFormat(Format.valueOf(rs.getString(TgFile.FORMAT)));
         item.setFile(tgFile);
 
-        item.setUserId(rs.getInt(DownloadingQueueItem.USER_ID));
-        item.setProducer(rs.getString(DownloadingQueueItem.PRODUCER));
-        item.setFilePath(rs.getString(DownloadingQueueItem.FILE_PATH));
-        item.setDeleteParentDir(rs.getBoolean(DownloadingQueueItem.DELETE_PARENT_DIR));
+        item.setUserId(rs.getInt(DownloadQueueItem.USER_ID));
+        item.setProducer(rs.getString(DownloadQueueItem.PRODUCER));
+        item.setFilePath(rs.getString(DownloadQueueItem.FILE_PATH));
+        item.setDeleteParentDir(rs.getBoolean(DownloadQueueItem.DELETE_PARENT_DIR));
 
-        Timestamp nextRunAt = rs.getTimestamp(DownloadingQueueItem.NEXT_RUN_AT);
+        Timestamp nextRunAt = rs.getTimestamp(DownloadQueueItem.NEXT_RUN_AT);
         if (nextRunAt != null) {
             item.setNextRunAt(ZonedDateTime.of(nextRunAt.toLocalDateTime(), ZoneOffset.UTC));
         }
-        String progress = rs.getString(DownloadingQueueItem.PROGRESS);
+        String progress = rs.getString(DownloadQueueItem.PROGRESS);
         if (StringUtils.isNotBlank(progress)) {
             try {
                 item.setProgress(objectMapper.readValue(progress, Progress.class));

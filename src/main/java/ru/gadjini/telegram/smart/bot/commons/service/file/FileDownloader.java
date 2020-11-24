@@ -55,10 +55,6 @@ public class FileDownloader {
         return telegramLocalBotApiService.cancelDownloading(fileId);
     }
 
-    public boolean cancelUploading(String filePath) {
-        return telegramLocalBotApiService.cancelUploading(filePath);
-    }
-
     public void cancelDownloads() {
         telegramLocalBotApiService.cancelDownloads();
     }
