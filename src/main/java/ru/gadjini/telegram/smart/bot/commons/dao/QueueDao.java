@@ -40,6 +40,11 @@ public abstract class QueueDao {
                 ps -> ps.setInt(1, id));
     }
 
+    public final void setWaiting(int id) {
+        getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0 WHERE id = ?",
+                ps -> ps.setInt(1, id));
+    }
+
     public final void setWaiting(int id, long seconds, String exception) {
         getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0, " +
                         "next_run_at = now() + interval '" + seconds + " seconds', exception = ? WHERE id = ?",

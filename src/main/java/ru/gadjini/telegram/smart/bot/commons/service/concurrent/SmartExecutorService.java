@@ -160,8 +160,6 @@ public class SmartExecutorService {
 
         long getChatId();
 
-        int getProgressMessageId();
-
         default Integer getReplyToMessageId() {
             return null;
         }

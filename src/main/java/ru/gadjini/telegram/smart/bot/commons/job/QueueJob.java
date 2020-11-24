@@ -18,6 +18,7 @@ import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
+import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorker;
@@ -30,14 +31,13 @@ import ru.gadjini.telegram.smart.bot.commons.service.queue.event.TaskCanceled;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
-import java.util.Collection;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ThreadPoolExecutor;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Component
-public class QueueJob {
+public class QueueJob extends JobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(QueueJob.class);
 
@@ -59,11 +59,18 @@ public class QueueJob {
 
     private QueueJobConfigurator queueJobConfigurator;
 
+    private FileDownloadService fileDownloadService;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
     @Value("${enable.jobs.logging:false}")
     private boolean enableJobsLogging;
+
+    @Autowired
+    public void setFileDownloadService(FileDownloadService fileDownloadService) {
+        this.fileDownloadService = fileDownloadService;
+    }
 
     @Autowired
     public void setQueueJobConfigurator(QueueJobConfigurator queueJobConfigurator) {
@@ -125,56 +132,37 @@ public class QueueJob {
 
     @Scheduled(fixedDelay = 5000)
     public final void pushJobs() {
-        if (disableJobs) {
-            if (enableJobsLogging) {
-                LOGGER.debug("Job disabled");
-            }
-            return;
-        }
-        ThreadPoolExecutor heavyExecutor = executor.getExecutor(SmartExecutorService.JobWeight.HEAVY);
-        if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
-            int limit = heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount();
-            if (enableJobsLogging) {
-                LOGGER.debug("Heavy threads free({})", limit);
-            }
-            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.HEAVY, limit);
+        super.push();
+    }
 
-            if (enableJobsLogging) {
-                LOGGER.debug("Push heavy jobs({})", items.size());
-            }
-            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem))));
-        } else if (enableJobsLogging) {
-            LOGGER.debug("Heavy threads busy");
-        }
-        ThreadPoolExecutor lightExecutor = executor.getExecutor(SmartExecutorService.JobWeight.LIGHT);
-        if (lightExecutor.getActiveCount() < lightExecutor.getCorePoolSize()) {
-            int limit = lightExecutor.getCorePoolSize() - lightExecutor.getActiveCount();
-            if (enableJobsLogging) {
-                LOGGER.debug("Light threads free({})", limit);
-            }
-            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+    @Override
+    public SmartExecutorService getExecutor() {
+        return executor;
+    }
 
-            if (enableJobsLogging) {
-                LOGGER.debug("Push light jobs({})", items.size());
-            }
-            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem))));
-        } else if (enableJobsLogging) {
-            LOGGER.debug("Light threads busy");
-        }
-        if (heavyExecutor.getActiveCount() < heavyExecutor.getCorePoolSize()) {
-            int limit = heavyExecutor.getCorePoolSize() - heavyExecutor.getActiveCount();
-            if (enableJobsLogging) {
-                LOGGER.debug("Heavy threads for light free({})", limit);
-            }
-            Collection<QueueItem> items = workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+    @Override
+    public boolean enableJobsLogging() {
+        return enableJobsLogging;
+    }
 
-            if (enableJobsLogging) {
-                LOGGER.debug("Push light jobs to heavy threads({})", items.size());
-            }
-            items.forEach(queueItem -> executor.execute(new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem)), SmartExecutorService.JobWeight.HEAVY));
-        } else if (enableJobsLogging) {
-            LOGGER.debug("Heavy threads for light tasks busy");
-        }
+    @Override
+    public boolean disableJobs() {
+        return disableJobs;
+    }
+
+    @Override
+    public Class<?> getLoggerClass() {
+        return getClass();
+    }
+
+    @Override
+    public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
+        return workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+    }
+
+    @Override
+    public SmartExecutorService.Job createJob(QueueItem queueItem) {
+        return new QueueTask((WorkQueueItem) queueItem, queueWorkerFactory.createWorker(queueItem));
     }
 
     public final void rejectTask(SmartExecutorService.Job job) {
@@ -188,6 +176,7 @@ public class QueueJob {
             executor.cancelAndComplete(item.getId(), true);
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
+        fileDownloadService.cancelDownloads(conversionQueueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
         applicationEventPublisher.publishEvent(new CurrentTasksCanceled((int) chatId));
 
         return conversionQueueItems.size();
@@ -209,6 +198,7 @@ public class QueueJob {
             );
             if (!executor.cancelAndComplete(jobId, true)) {
                 workQueueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
+                fileDownloadService.cancelDownloads(jobId);
             }
             applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
         }
@@ -284,9 +274,9 @@ public class QueueJob {
         public void cancel() {
             if (canceledByUser) {
                 workQueueService.deleteById(queueItem.getId());
+                fileDownloadService.cancelDownloads(queueItem.getId());
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
-            executor.complete(queueItem.getId());
             queueWorker.cancel();
         }
 
@@ -330,9 +320,5 @@ public class QueueJob {
             return queueItem.getUserId();
         }
 
-        @Override
-        public int getProgressMessageId() {
-            return queueItem.getProgressMessageId();
-        }
     }
 }

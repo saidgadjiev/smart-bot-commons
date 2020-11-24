@@ -18,7 +18,10 @@ import java.sql.Timestamp;
 import java.sql.Types;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Repository
 public class DownloadingQueueDao extends QueueDao {
@@ -60,11 +63,13 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> poll(String producer) {
+    public List<DownloadingQueueItem> poll(String producer, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
                         "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST +
-                        "WHERE status = 0 AND next_run_at <= now() and producer = ? RETURNING *\n" +
+                        "WHERE id IN(SELECT id FROM downloading_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
+                        QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
+                        "RETURNING *\n" +
                         ")\n" +
                         "SELECT *, (file).*\n" +
                         "FROM r",
@@ -84,23 +89,27 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public List<DownloadingQueueItem> getDownloads(String producer, int producerId) {
+    public List<DownloadingQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
+        if (producerIds.isEmpty()) {
+            return Collections.emptyList();
+        }
         return jdbcTemplate.query(
-                "SELECT DISTINCT ON((file).file_id) *, (file).* FROM downloading_queue WHERE producer = ? AND producer_id = ?",
-                ps -> {
-                    ps.setString(1, producer);
-                    ps.setInt(2, producerId);
-                },
+                "SELECT *, (file).* FROM downloading_queue WHERE producer = ? AND producer_id IN("
+                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
+                ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
     }
 
-    public void deleteByProducerId(String producer, int producerId) {
+    public void deleteByProducerIds(String producer, Set<Integer> producerIds) {
+        if (producerIds.isEmpty()) {
+            return;
+        }
         jdbcTemplate.update(
-                "DELETE FROM downloading_queue WHERE producer = ? AND producer_id = ?",
+                "DELETE FROM downloading_queue WHERE producer = ? AND producer_id IN("
+                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
                 ps -> {
                     ps.setString(1, producer);
-                    ps.setInt(2, producerId);
                 }
         );
     }

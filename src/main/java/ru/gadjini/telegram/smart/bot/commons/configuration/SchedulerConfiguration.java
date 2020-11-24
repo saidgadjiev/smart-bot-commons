@@ -9,7 +9,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
+import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -28,6 +30,8 @@ public class SchedulerConfiguration {
 
     private QueueJob conversionJob;
 
+    private DownloadingJob downloadingJob;
+
     @Value("${light.threads:2}")
     private int lightThreads;
 
@@ -43,6 +47,11 @@ public class SchedulerConfiguration {
     @Autowired
     public void setConversionJob(QueueJob conversionJob) {
         this.conversionJob = conversionJob;
+    }
+
+    @Autowired
+    public void setDownloadingJob(DownloadingJob downloadingJob) {
+        this.downloadingJob = downloadingJob;
     }
 
     @Bean
@@ -76,5 +85,20 @@ public class SchedulerConfiguration {
         LOGGER.debug("Jobs thread pool scheduler initialized with pool size: {}", threadPoolTaskScheduler.getPoolSize());
 
         return threadPoolTaskScheduler;
+    }
+
+    @Bean
+    @Qualifier("downloadTasksExecutor")
+    public SmartExecutorService downloadTasksExecutor(FloodControlProperties floodControlProperties, UserService userService,
+                                                      @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+        SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
+
+        LOGGER.debug("Download threads initialized with pool size: {}", floodControlProperties.getSleepOnDownloadingFloodWait());
+        executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> downloadingJob.rejectTask(job));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> downloadingJob.rejectTask(job));
+
+        return executorService;
     }
 }

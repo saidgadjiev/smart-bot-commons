@@ -6,32 +6,37 @@ import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
-import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
+import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class FileDownloadService {
 
     private TelegramBotApiService telegramLocalBotApiService;
 
-    private FloodWaitController floodWaitController;
-
     private DownloadingQueueService queueService;
 
     private WorkQueueDao workQueueDao;
 
+    private DownloadingJob downloadingJob;
+
     @Autowired
-    public FileDownloadService(TelegramBotApiService telegramLocalBotApiService, FloodWaitController floodWaitController,
+    public FileDownloadService(TelegramBotApiService telegramLocalBotApiService,
                                DownloadingQueueService queueService, WorkQueueDao workQueueDao) {
         this.telegramLocalBotApiService = telegramLocalBotApiService;
-        this.floodWaitController = floodWaitController;
         this.queueService = queueService;
         this.workQueueDao = workQueueDao;
+    }
+
+    @Autowired
+    public void setDownloadingJob(DownloadingJob downloadingJob) {
+        this.downloadingJob = downloadingJob;
     }
 
     public void createDownload(TgFile file, int producerId, int userId) {
@@ -48,11 +53,12 @@ public class FileDownloadService {
         return downloads.stream().allMatch(downloadingQueueItem -> downloadingQueueItem.getStatus().equals(QueueItem.Status.COMPLETED)) ? downloads : null;
     }
 
-    public boolean cancelDownload(String fileId, long fileSize, int producerId) {
-        floodWaitController.cancelDownloading(fileId, fileSize);
-        queueService.deleteByFileId(fileId, workQueueDao.getQueueName(), producerId);
+    public void cancelDownloads(int producerId) {
+        downloadingJob.cancelDownloads(workQueueDao.getQueueName(), producerId);
+    }
 
-        return telegramLocalBotApiService.cancelDownloading(fileId);
+    public void cancelDownloads(Set<Integer> producerIds) {
+        downloadingJob.cancelDownloads(workQueueDao.getQueueName(), producerIds);
     }
 
     public boolean cancelUpload(String filePath) {
@@ -60,7 +66,7 @@ public class FileDownloadService {
     }
 
     public void cancelDownloads() {
-        telegramLocalBotApiService.cancelDownloads();
+        downloadingJob.cancelDownloads();
     }
 
     public void deleteDownloads(int producerId) {

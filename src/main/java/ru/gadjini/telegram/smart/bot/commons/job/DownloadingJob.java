@@ -10,21 +10,25 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadingQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
-import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
-import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Component
-public class DownloadingJob {
+public class DownloadingJob extends JobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadingJob.class);
 
@@ -40,9 +44,9 @@ public class DownloadingJob {
 
     private WorkQueueDao workQueueDao;
 
-    private MessageService messageService;
+    private SmartExecutorService downloadTasksExecutor;
 
-    private UserService userService;
+    private final List<DownloadingQueueItem> currentDownloads = new ArrayList<>();
 
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
@@ -53,75 +57,189 @@ public class DownloadingJob {
     @Autowired
     public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
                           TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                          WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
+                          WorkQueueDao workQueueDao) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
         this.fileManagerProperties = fileManagerProperties;
         this.workQueueDao = workQueueDao;
-        this.messageService = messageService;
-        this.userService = userService;
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Autowired
+    public void setDownloadTasksExecutor(@Qualifier("downloadTasksExecutor") SmartExecutorService downloadTasksExecutor) {
+        this.downloadTasksExecutor = downloadTasksExecutor;
+    }
+
+    public void rejectTask(SmartExecutorService.Job job) {
+        downloadingQueueService.setWaitingAndDecrementAttempts(job.getId());
+        LOGGER.debug("Rejected({})", job.getId());
+    }
+
+    @Scheduled(fixedDelay = 1000)
     public void doDownloads() {
-        if (disableJobs) {
-            if (enableJobsLogging) {
-                LOGGER.debug("Job disabled");
+        super.push();
+    }
+
+    @Override
+    public SmartExecutorService getExecutor() {
+        return downloadTasksExecutor;
+    }
+
+    @Override
+    public boolean enableJobsLogging() {
+        return enableJobsLogging;
+    }
+
+    @Override
+    public boolean disableJobs() {
+        return disableJobs;
+    }
+
+    @Override
+    public Class<?> getLoggerClass() {
+        return getClass();
+    }
+
+    @Override
+    public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
+        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getQueueName(), limit);
+    }
+
+    @Override
+    public SmartExecutorService.Job createJob(QueueItem item) {
+        return new DownloadTask((DownloadingQueueItem) item);
+    }
+
+    public void cancelDownloads(String producer, int producerId) {
+        cancelDownloads(producer, Set.of(producerId));
+    }
+
+    public void cancelDownloads(String producer, Set<Integer> producerIds) {
+        List<DownloadingQueueItem> downloads = downloadingQueueService.getDownloads(producer, producerIds);
+
+        downloadTasksExecutor.cancelAndComplete(downloads.stream().map(DownloadingQueueItem::getId).collect(Collectors.toList()), true);
+        downloadingQueueService.deleteByProducer(producer, producerIds);
+    }
+
+    public void cancelDownloads() {
+        downloadTasksExecutor.cancelAndComplete(currentDownloads.stream().map(DownloadingQueueItem::getId).collect(Collectors.toList()), false);
+    }
+
+    public final void shutdown() {
+        downloadTasksExecutor.shutdown();
+    }
+
+    private class DownloadTask implements SmartExecutorService.Job {
+
+        private DownloadingQueueItem downloadingQueueItem;
+
+        private volatile Supplier<Boolean> checker;
+
+        private volatile boolean canceledByUser;
+
+        private volatile SmartTempFile tempFile;
+
+        private DownloadTask(DownloadingQueueItem downloadingQueueItem) {
+            this.downloadingQueueItem = downloadingQueueItem;
+        }
+
+        @Override
+        public void execute() {
+            currentDownloads.add(downloadingQueueItem);
+            try {
+                if (downloadingQueueItem.getFile().getFormat().isDownloadable()) {
+                    doDownloadFile(downloadingQueueItem);
+                } else {
+                    downloadingQueueService.setCompleted(downloadingQueueItem.getId());
+                }
+            } finally {
+                currentDownloads.remove(downloadingQueueItem);
             }
-            return;
         }
-        List<DownloadingQueueItem> poll = downloadingQueueService.poll(workQueueDao.getQueueName());
 
-        for (DownloadingQueueItem queueItem : poll) {
-            doDownload(queueItem);
+        @Override
+        public int getId() {
+            return downloadingQueueItem.getId();
         }
-    }
 
-    private void doDownload(DownloadingQueueItem downloadingQueueItem) {
-        if (downloadingQueueItem.getFile().getFormat().isDownloadable()) {
-            doDownloadFile(downloadingQueueItem);
-        } else {
-            downloadingQueueService.setCompleted(downloadingQueueItem.getId());
+        @Override
+        public SmartExecutorService.JobWeight getWeight() {
+            return SmartExecutorService.JobWeight.HEAVY;
         }
-    }
 
-    private void doDownloadFile(DownloadingQueueItem downloadingQueueItem) {
-        SmartTempFile tempFile;
-        if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
-            tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
-        } else {
-            tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
+        @Override
+        public long getChatId() {
+            return downloadingQueueItem.getUserId();
         }
-        try {
-            fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(), downloadingQueueItem.getProgress(), tempFile);
-            downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
-        } catch (Exception e) {
-            tempFile.smartDelete();
 
-            if (e instanceof FloodControlException) {
-                floodControlException(downloadingQueueItem, (FloodControlException) e);
-            } else if (e instanceof FloodWaitException) {
-                floodWaitException(downloadingQueueItem, (FloodWaitException) e);
-            } else if (FileDownloader.isNoneCriticalDownloadingException(e)) {
-                noneCriticalException(downloadingQueueItem, e);
+        @Override
+        public void setCancelChecker(Supplier<Boolean> checker) {
+            this.checker = checker;
+        }
+
+        @Override
+        public Supplier<Boolean> getCancelChecker() {
+            return checker;
+        }
+
+        @Override
+        public void setCanceledByUser(boolean canceledByUser) {
+            this.canceledByUser = canceledByUser;
+        }
+
+        @Override
+        public boolean isCanceledByUser() {
+            return canceledByUser;
+        }
+
+        @Override
+        public void cancel() {
+            fileDownloader.cancelDownloading(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize());
+            if (canceledByUser) {
+                downloadingQueueService.deleteById(downloadingQueueItem.getId());
+                LOGGER.debug("Canceled downloading({}, {}, {})", downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getProducer(), downloadingQueueItem.getProducerId());
+            }
+            if (tempFile != null) {
+                tempFile.smartDelete();
+            }
+        }
+
+        private void doDownloadFile(DownloadingQueueItem downloadingQueueItem) {
+            if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
+                tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
             } else {
-                LOGGER.error(e.getMessage(), e);
-                downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
-                messageService.sendErrorMessage(downloadingQueueItem.getUserId(), userService.getLocaleOrDefault(downloadingQueueItem.getUserId()));
+                tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
+            }
+            try {
+                fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(), downloadingQueueItem.getProgress(), tempFile);
+                downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
+            } catch (Exception e) {
+                tempFile.smartDelete();
+
+                if (checker == null || !checker.get()) {
+                    if (e instanceof FloodControlException) {
+                        floodControlException(downloadingQueueItem, (FloodControlException) e);
+                    } else if (e instanceof FloodWaitException) {
+                        floodWaitException(downloadingQueueItem, (FloodWaitException) e);
+                    } else if (FileDownloader.isNoneCriticalDownloadingException(e)) {
+                        noneCriticalException(downloadingQueueItem, e);
+                    } else {
+                        throw e;
+                    }
+                }
             }
         }
-    }
 
-    private void noneCriticalException(DownloadingQueueItem downloadingQueueItem, Throwable e) {
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
-    }
+        private void noneCriticalException(DownloadingQueueItem downloadingQueueItem, Throwable e) {
+            downloadingQueueService.setWaiting(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
+        }
 
-    private void floodControlException(DownloadingQueueItem downloadingQueueItem, FloodControlException e) {
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
-    }
+        private void floodControlException(DownloadingQueueItem downloadingQueueItem, FloodControlException e) {
+            downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
+        }
 
-    private void floodWaitException(DownloadingQueueItem downloadingQueueItem, FloodWaitException e) {
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
+        private void floodWaitException(DownloadingQueueItem downloadingQueueItem, FloodWaitException e) {
+            downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
+        }
     }
 }

@@ -11,6 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class DownloadingQueueService extends QueueService {
@@ -22,8 +23,8 @@ public class DownloadingQueueService extends QueueService {
         this.downloadingQueueDao = downloadingQueueDao;
     }
 
-    public List<DownloadingQueueItem> poll(String producer) {
-        return downloadingQueueDao.poll(producer);
+    public List<DownloadingQueueItem> poll(String producer, int limit) {
+        return downloadingQueueDao.poll(producer, limit);
     }
 
     @Transactional
@@ -44,7 +45,11 @@ public class DownloadingQueueService extends QueueService {
     }
 
     public List<DownloadingQueueItem> getDownloads(String producer, int producerId) {
-        return downloadingQueueDao.getDownloads(producer, producerId);
+        return downloadingQueueDao.getDownloads(producer, Set.of(producerId));
+    }
+
+    public List<DownloadingQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
+        return downloadingQueueDao.getDownloads(producer, producerIds);
     }
 
     public void setCompleted(int id, String filePath) {
@@ -56,7 +61,11 @@ public class DownloadingQueueService extends QueueService {
     }
 
     public void deleteByProducer(String producer, int producerId) {
-        downloadingQueueDao.deleteByProducerId(producer, producerId);
+        downloadingQueueDao.deleteByProducerIds(producer, Set.of(producerId));
+    }
+
+    public void deleteByProducer(String producer, Set<Integer> producerIds) {
+        downloadingQueueDao.deleteByProducerIds(producer, producerIds);
     }
 
     @Override
