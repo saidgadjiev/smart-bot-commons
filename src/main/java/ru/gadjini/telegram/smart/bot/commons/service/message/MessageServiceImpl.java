@@ -129,6 +129,7 @@ public class MessageServiceImpl implements MessageService {
 
     private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {
         try {
+            sendMessage.disableWebPagePreview();
             sendMessage.setAllowSendingWithoutReply(true);
             Message message = telegramService.sendMessage(sendMessage);
 

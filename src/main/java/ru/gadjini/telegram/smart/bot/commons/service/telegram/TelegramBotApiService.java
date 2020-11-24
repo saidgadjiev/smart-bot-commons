@@ -199,6 +199,9 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     @Override
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        if (true) {
+            throw new TelegramApiRequestException(null, null, null, "Bad Request: wrong file_id or the file is temporarily unavailable", null);
+        }
         downloading.put(fileId, outputFile);
         try {
             StopWatch stopWatch = new StopWatch();

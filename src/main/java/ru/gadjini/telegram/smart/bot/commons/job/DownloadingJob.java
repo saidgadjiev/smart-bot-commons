@@ -4,6 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -14,11 +15,12 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
+import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadingQueueService;
 
 import java.io.File;
-import java.time.ZonedDateTime;
 import java.util.List;
 
 @Component
@@ -38,6 +40,10 @@ public class DownloadingJob {
 
     private WorkQueueDao workQueueDao;
 
+    private MessageService messageService;
+
+    private UserService userService;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -46,12 +52,15 @@ public class DownloadingJob {
 
     @Autowired
     public DownloadingJob(DownloadingQueueService downloadingQueueService, FileDownloader fileDownloader,
-                          TempFileService tempFileService, FileManagerProperties fileManagerProperties, WorkQueueDao workQueueDao) {
+                          TempFileService tempFileService, FileManagerProperties fileManagerProperties,
+                          WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
         this.fileManagerProperties = fileManagerProperties;
         this.workQueueDao = workQueueDao;
+        this.messageService = messageService;
+        this.userService = userService;
     }
 
     @Scheduled(fixedDelay = 5000)
@@ -99,22 +108,20 @@ public class DownloadingJob {
             } else {
                 LOGGER.error(e.getMessage(), e);
                 downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
+                messageService.sendErrorMessage(downloadingQueueItem.getUserId(), userService.getLocaleOrDefault(downloadingQueueItem.getUserId()));
             }
         }
     }
 
     private void noneCriticalException(DownloadingQueueItem downloadingQueueItem, Throwable e) {
-        ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(fileManagerProperties.getSleepTimeBeforeDownloadAttempt());
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
     }
 
     private void floodControlException(DownloadingQueueItem downloadingQueueItem, FloodControlException e) {
-        ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(e.getSleepTime());
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
     }
 
     private void floodWaitException(DownloadingQueueItem downloadingQueueItem, FloodWaitException e) {
-        ZonedDateTime nextRunAt = downloadingQueueItem.getNextRunAt().plusSeconds(e.getSleepTime());
-        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), nextRunAt, e);
+        downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
     }
 }

@@ -5,8 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
 import java.sql.ResultSet;
-import java.sql.Timestamp;
-import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -42,12 +40,12 @@ public abstract class QueueDao {
                 ps -> ps.setInt(1, id));
     }
 
-    public final void setWaiting(int id, ZonedDateTime nextRunAt, String exception) {
-        getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0, next_run_at = ?, exception = ? WHERE id = ?",
+    public final void setWaiting(int id, long seconds, String exception) {
+        getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0, " +
+                        "next_run_at = now() + interval '" + seconds + " seconds', exception = ? WHERE id = ?",
                 ps -> {
-                    ps.setTimestamp(1, Timestamp.valueOf(nextRunAt.toLocalDateTime()));
-                    ps.setString(2, exception);
-                    ps.setInt(3, id);
+                    ps.setString(1, exception);
+                    ps.setInt(2, id);
                 });
     }
 

@@ -17,7 +17,7 @@ public class FloodControlProperties {
 
     private boolean enableLogging = false;
 
-    private long sleepOnDownloadingFloodWait = 70000;
+    private long sleepOnDownloadingFloodWait = 70;
 
     public int getMaxSleepTime() {
         return maxSleepTime;

@@ -4,7 +4,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
-import java.time.ZonedDateTime;
 import java.util.Set;
 
 public abstract class QueueService {
@@ -30,9 +29,9 @@ public abstract class QueueService {
         getQueueDao().setWaitingAndDecrementAttempts(id);
     }
 
-    public final void setWaiting(int id, ZonedDateTime nextRunAt, Throwable reason) {
+    public final void setWaiting(int id, long seconds, Throwable reason) {
         String exception = ExceptionUtils.getMessage(reason) + "\n" + ExceptionUtils.getStackTrace(reason);
-        getQueueDao().setWaiting(id, nextRunAt, exception);
+        getQueueDao().setWaiting(id, seconds, exception);
     }
 
     public final long countByStatusAllTime(QueueItem.Status status) {

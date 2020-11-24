@@ -4,7 +4,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.http.NoHttpResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
+import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
@@ -37,9 +37,9 @@ public class FileDownloader {
         try {
             try {
                 telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
-            } catch (ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException ex) {
+            } catch (TelegramApiRequestException ex) {
                 if (isWrongFileIdException(ex)) {
-                    floodWaitController.downloadingFloodWait(fileSize);
+                    floodWaitController.downloadingFloodWait();
                 } else {
                     throw ex;
                 }
@@ -70,7 +70,7 @@ public class FileDownloader {
         return indexOfNoResponseException != -1 || socketException != -1;
     }
 
-    private boolean isWrongFileIdException(ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException ex) {
+    private boolean isWrongFileIdException(TelegramApiRequestException ex) {
         int telegramApiRequestExceptionIndexOf = ExceptionUtils.indexOfThrowable(ex, TelegramApiRequestException.class);
 
         if (telegramApiRequestExceptionIndexOf != -1) {
