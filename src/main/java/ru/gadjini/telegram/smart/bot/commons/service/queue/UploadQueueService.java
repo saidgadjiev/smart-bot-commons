@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.UploadQueueDao;
+import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 
@@ -28,6 +29,7 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setProducer(producer);
         uploadQueueItem.setProgress(progress);
         uploadQueueItem.setProducerId(producerId);
+        uploadQueueItem.setStatus(QueueItem.Status.WAITING);
 
         uploadQueueDao.create(uploadQueueItem);
     }

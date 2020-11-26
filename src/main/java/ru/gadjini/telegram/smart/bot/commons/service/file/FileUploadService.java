@@ -19,10 +19,14 @@ public class FileUploadService {
     private WorkQueueDao workQueueDao;
 
     @Autowired
-    public FileUploadService(UploadQueueService uploadQueueService, UploadJob uploadJob, WorkQueueDao workQueueDao) {
+    public FileUploadService(UploadQueueService uploadQueueService, WorkQueueDao workQueueDao) {
         this.uploadQueueService = uploadQueueService;
-        this.uploadJob = uploadJob;
         this.workQueueDao = workQueueDao;
+    }
+
+    @Autowired
+    public void setUploadJob(UploadJob uploadJob) {
+        this.uploadJob = uploadJob;
     }
 
     public void createUpload(int userId, String method, Object body, Progress progress, int producerId) {

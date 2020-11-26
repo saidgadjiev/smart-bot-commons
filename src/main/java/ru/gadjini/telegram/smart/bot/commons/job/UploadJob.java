@@ -18,12 +18,15 @@ import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.ForceMediaMessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.UploadCompleted;
 
@@ -54,6 +57,10 @@ public class UploadJob extends JobPusher {
 
     private FileUploader fileUploader;
 
+    private MessageService messageService;
+
+    private UserService userService;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -63,13 +70,16 @@ public class UploadJob extends JobPusher {
     @Autowired
     public UploadJob(@Qualifier("media") MediaMessageService mediaMessageService, UploadQueueService uploadQueueService,
                      FileManagerProperties fileManagerProperties,
-                     WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher, FileUploader fileUploader) {
+                     WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
+                     FileUploader fileUploader, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
         this.mediaMessageService = mediaMessageService;
         this.uploadQueueService = uploadQueueService;
         this.fileManagerProperties = fileManagerProperties;
         this.workQueueDao = workQueueDao;
         this.applicationEventPublisher = applicationEventPublisher;
         this.fileUploader = fileUploader;
+        this.messageService = messageService;
+        this.userService = userService;
     }
 
     @Autowired
@@ -154,6 +164,7 @@ public class UploadJob extends JobPusher {
             try {
                 doUpload();
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
+                deleteFiles();
             } catch (Exception e) {
                 if (checker == null || !checker.get()) {
                     if (e instanceof FloodWaitException) {
@@ -163,6 +174,7 @@ public class UploadJob extends JobPusher {
                     } else {
                         LOGGER.error(e.getMessage(), e);
                         uploadQueueService.setExceptionStatus(uploadQueueItem.getId(), e);
+                        messageService.sendErrorMessage(uploadQueueItem.getUserId(), userService.getLocaleOrDefault(uploadQueueItem.getUserId()));
                     }
                 }
             } finally {
@@ -214,6 +226,43 @@ public class UploadJob extends JobPusher {
             if (canceledByUser) {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
                 LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducer(), uploadQueueItem.getProducerId());
+            }
+        }
+
+        private void deleteFiles() {
+            InputFile inputFile = null;
+            InputFile thumb = null;
+            switch (uploadQueueItem.getMethod()) {
+                case SendDocument.PATH: {
+                    SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
+                    inputFile = sendDocument.getDocument();
+                    thumb = sendDocument.getThumb();
+                    break;
+                }
+                case SendAudio.PATH: {
+                    SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
+                    inputFile = sendAudio.getAudio();
+                    thumb = sendAudio.getThumb();
+                    break;
+                }
+                case SendVideo.PATH: {
+                    SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
+                    inputFile = sendVideo.getVideo();
+                    thumb = sendVideo.getThumb();
+                    break;
+                }
+                case SendVoice.PATH: {
+                    SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
+                    inputFile = sendVoice.getVoice();
+                    break;
+                }
+            }
+
+            if (inputFile != null && inputFile.isNew()) {
+                new SmartTempFile(inputFile.getNewMediaFile()).smartDelete();
+            }
+            if (thumb != null && thumb.isNew()) {
+                new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
             }
         }
 

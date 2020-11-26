@@ -16,8 +16,10 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
+import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 
 import java.io.File;
@@ -48,6 +50,10 @@ public class DownloadingJob extends JobPusher {
 
     private final List<DownloadQueueItem> currentDownloads = new ArrayList<>();
 
+    private MessageService messageService;
+
+    private UserService userService;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -57,12 +63,14 @@ public class DownloadingJob extends JobPusher {
     @Autowired
     public DownloadingJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                           TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                          WorkQueueDao workQueueDao) {
+                          WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
         this.fileManagerProperties = fileManagerProperties;
         this.workQueueDao = workQueueDao;
+        this.messageService = messageService;
+        this.userService = userService;
     }
 
     @Autowired
@@ -226,6 +234,7 @@ public class DownloadingJob extends JobPusher {
                     } else {
                         LOGGER.error(e.getMessage(), e);
                         downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
+                        messageService.sendErrorMessage(downloadingQueueItem.getUserId(), userService.getLocaleOrDefault(downloadingQueueItem.getUserId()));
                     }
                 }
             }

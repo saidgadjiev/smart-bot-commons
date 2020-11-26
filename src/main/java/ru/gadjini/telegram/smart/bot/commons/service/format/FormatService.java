@@ -69,7 +69,7 @@ public class FormatService {
     }
 
     private String getExtension(String fileName) {
-        String extension = FilenameUtils.getExtension(fileName);
+        String extension = StringUtils.defaultIfBlank(FilenameUtils.getExtension(fileName), "").toLowerCase();
 
         if ("jpeg".equals(extension)) {
             return "jpg";

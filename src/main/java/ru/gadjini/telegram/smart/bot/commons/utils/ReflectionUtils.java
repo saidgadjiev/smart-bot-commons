@@ -16,4 +16,12 @@ public class ReflectionUtils {
 
         return result;
     }
+
+    public static Class<?> getClass(String className) {
+        try {
+            return Class.forName(className);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

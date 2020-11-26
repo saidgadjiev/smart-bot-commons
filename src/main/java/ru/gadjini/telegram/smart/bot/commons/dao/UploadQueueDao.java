@@ -2,8 +2,10 @@ package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
@@ -28,26 +30,25 @@ public class UploadQueueDao extends QueueDao {
 
     private JdbcTemplate jdbcTemplate;
 
+    private Gson gson;
+
     private ObjectMapper objectMapper;
 
     @Autowired
-    public UploadQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper) {
+    public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper) {
         this.jdbcTemplate = jdbcTemplate;
+        this.gson = gson;
         this.objectMapper = objectMapper;
     }
 
     public void create(UploadQueueItem queueItem) {
         jdbcTemplate.update(
                 "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
-                    try {
-                        ps.setString(3, objectMapper.writeValueAsString(queueItem.getBody()));
-                    } catch (JsonProcessingException e) {
-                        throw new RuntimeException(e);
-                    }
+                    ps.setString(3, gson.toJson(queueItem.getBody()));
                     ps.setString(4, queueItem.getProducer());
                     try {
                         ps.setString(5, objectMapper.writeValueAsString(queueItem.getProgress()));
@@ -117,11 +118,7 @@ public class UploadQueueDao extends QueueDao {
         item.setUserId(rs.getInt(UploadQueueItem.USER_ID));
         item.setProducer(rs.getString(UploadQueueItem.PRODUCER));
         item.setMethod(rs.getString(UploadQueueItem.METHOD));
-        try {
-            item.setBody(deserializeBody(item.getMethod(), rs.getString(UploadQueueItem.BODY)));
-        } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
-        }
+        item.setBody(deserializeBody(item.getMethod(), rs.getString(UploadQueueItem.BODY)));
 
         Timestamp nextRunAt = rs.getTimestamp(UploadQueueItem.NEXT_RUN_AT);
         if (nextRunAt != null) {
@@ -139,16 +136,16 @@ public class UploadQueueDao extends QueueDao {
         return item;
     }
 
-    private Object deserializeBody(String method, String body) throws JsonProcessingException {
+    private Object deserializeBody(String method, String body) {
         switch (method) {
             case SendDocument.PATH:
-                return objectMapper.readValue(body, SendDocument.class);
+                return gson.fromJson(body, SendDocument.class);
             case SendAudio.PATH:
-                return objectMapper.readValue(body, SendAudio.class);
+                return gson.fromJson(body, SendAudio.class);
             case SendVideo.PATH:
-                return objectMapper.readValue(body, SendVideo.class);
+                return gson.fromJson(body, SendVideo.class);
             case SendVoice.PATH:
-                return objectMapper.readValue(body, SendVoice.class);
+                return gson.fromJson(body, SendVoice.class);
         }
 
         throw new IllegalArgumentException("Unsupported method " + method);
