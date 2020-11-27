@@ -13,6 +13,8 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
 import java.util.Locale;
@@ -28,13 +30,20 @@ public class QueryStatsCommand implements BotCommand {
 
     private MessageService messageService;
 
+    private DownloadQueueService downloadQueueService;
+
+    private UploadQueueService uploadQueueService;
+
     @Autowired
     public QueryStatsCommand(WorkQueueService queueService, LocalisationService localisationService,
-                             UserService userService, @Qualifier("messageLimits") MessageService messageService) {
+                             UserService userService, @Qualifier("messageLimits") MessageService messageService,
+                             DownloadQueueService downloadQueueService, UploadQueueService uploadQueueService) {
         this.queueService = queueService;
         this.localisationService = localisationService;
         this.userService = userService;
         this.messageService = messageService;
+        this.downloadQueueService = downloadQueueService;
+        this.uploadQueueService = uploadQueueService;
     }
 
     @Override
@@ -47,8 +56,23 @@ public class QueryStatsCommand implements BotCommand {
         long completed = queueService.countByStatusForToday(QueueItem.Status.COMPLETED);
         long activeUsers = queueService.countActiveUsersForToday();
 
+        long processingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
+        long waitingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.WAITING);
+        long errorForTodayDownloads = downloadQueueService.countByStatusForToday(QueueItem.Status.EXCEPTION);
+        long errorAllTimeDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
+        long wrongFileIdErrors = downloadQueueService.countWrongFileIdErrors();
+        long completedDownloads = downloadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
+
+        long processingUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
+        long waitingUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.WAITING);
+        long errorForTodayUploads = uploadQueueService.countByStatusForToday(QueueItem.Status.EXCEPTION);
+        long errorAllTimeUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
+        long completedUploads = uploadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
+
         String statsMessage = localisationService.getMessage(MessagesProperties.MESSAGE_QUEUE_STATS, new Object[]{
-                processing, waiting, errorForToday, completed, activeUsers, errorAllTime
+                processing, waiting, errorForToday, completed, activeUsers, errorAllTime,
+                processingDownloads, waitingDownloads, errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, wrongFileIdErrors,
+                processingUploads, waitingUploads, errorForTodayUploads, completedUploads, errorAllTimeUploads
         }, locale);
         messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(message.getChatId()))
                 .text(statsMessage).parseMode(ParseMode.HTML).build());

@@ -16,7 +16,7 @@ import java.util.Objects;
 @Service
 public class FileDownloader {
 
-    private static final String FILE_ID_TEMPORARILY_UNAVAILABLE = "Bad Request: wrong file_id or the file is temporarily unavailable";
+    public static final String FILE_ID_TEMPORARILY_UNAVAILABLE = "Bad Request: wrong file_id or the file is temporarily unavailable";
 
     private TelegramBotApiService telegramLocalBotApiService;
 

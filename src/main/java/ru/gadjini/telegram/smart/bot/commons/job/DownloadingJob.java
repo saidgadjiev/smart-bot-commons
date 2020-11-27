@@ -22,6 +22,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -76,6 +77,18 @@ public class DownloadingJob extends JobPusher {
     @Autowired
     public void setDownloadTasksExecutor(@Qualifier("downloadTasksExecutor") SmartExecutorService downloadTasksExecutor) {
         this.downloadTasksExecutor = downloadTasksExecutor;
+    }
+
+    @PostConstruct
+    public final void init() {
+        LOGGER.debug("Disable jobs {}", disableJobs);
+        LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        try {
+            downloadingQueueService.resetProcessing();
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+        }
+        doDownloads();
     }
 
     public void rejectTask(SmartExecutorService.Job job) {

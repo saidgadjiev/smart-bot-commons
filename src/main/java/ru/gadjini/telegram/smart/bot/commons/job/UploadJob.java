@@ -30,6 +30,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.UploadCompleted;
 
+import javax.annotation.PostConstruct;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -85,6 +86,18 @@ public class UploadJob extends JobPusher {
     @Autowired
     public void setUploadTasksExecutor(@Qualifier("uploadTasksExecutor") SmartExecutorService uploadTasksExecutor) {
         this.uploadTasksExecutor = uploadTasksExecutor;
+    }
+
+    @PostConstruct
+    public final void init() {
+        LOGGER.debug("Disable jobs {}", disableJobs);
+        LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        try {
+            uploadQueueService.resetProcessing();
+        } catch (Exception ex) {
+            LOGGER.error(ex.getMessage(), ex);
+        }
+        doUploads();
     }
 
     public void rejectTask(SmartExecutorService.Job job) {

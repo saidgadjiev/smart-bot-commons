@@ -68,6 +68,10 @@ public class DownloadQueueService extends QueueService {
         downloadingQueueDao.deleteByProducerIds(producer, producerIds);
     }
 
+    public long countWrongFileIdErrors() {
+        return downloadingQueueDao.countWrongFileIdErrors();
+    }
+
     @Override
     public QueueDao getQueueDao() {
         return downloadingQueueDao;
