@@ -126,6 +126,16 @@ public abstract class QueueDao {
         );
     }
 
+    public void setException(int id, String exception) {
+        getJdbcTemplate().update(
+                "UPDATE " + getQueueName() + " SET exception = ? WHERE id = ?",
+                ps -> {
+                    ps.setString(2, exception);
+                    ps.setInt(3, id);
+                }
+        );
+    }
+
     public final String getQueueName() {
         return getQueueDaoDelegate().getQueueName();
     }

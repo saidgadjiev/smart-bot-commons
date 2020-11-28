@@ -25,6 +25,11 @@ public abstract class QueueService {
         getQueueDao().setCompleted(id);
     }
 
+    public final void setException(int id, Throwable ex) {
+        String exception = ExceptionUtils.getMessage(ex) + "\n" + ExceptionUtils.getStackTrace(ex);
+        getQueueDao().setException(id, exception);
+    }
+
     public final void setWaitingAndDecrementAttempts(int id) {
         getQueueDao().setWaitingAndDecrementAttempts(id);
     }
