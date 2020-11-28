@@ -100,6 +100,7 @@ public enum Format {
     VOB(FormatCategory.VIDEO),
     WEBM(FormatCategory.VIDEO),
     WMV(FormatCategory.VIDEO),
+    TS(FormatCategory.VIDEO),
     IMAGES(FormatCategory.IMAGES),
     COMPRESS(FormatCategory.VIDEO) {
         @Override
