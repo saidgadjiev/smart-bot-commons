@@ -155,7 +155,8 @@ public enum Format {
         public String getExt() {
             return OGG.getExt();
         }
-    };
+    },
+    RA(FormatCategory.AUDIO);
 
     private FormatCategory category;
 
