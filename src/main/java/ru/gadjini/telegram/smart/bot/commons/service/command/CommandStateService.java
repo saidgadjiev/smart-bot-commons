@@ -5,11 +5,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.state.CommandStateDao;
+import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 
 import java.util.concurrent.TimeUnit;
 
@@ -41,6 +41,9 @@ public class CommandStateService {
     public <T> T getState(long chatId, String command, boolean expiredCheck, Class<T> tClass) {
         T state = commandStateDao.getState(chatId, command, tClass);
 
+        if (state != null) {
+            commandStateDao.expire(chatId, command, TTL_HOURS, TimeUnit.HOURS);
+        }
         if (expiredCheck && state == null) {
             LOGGER.warn("State not found({}, {})", chatId, command);
             throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_SESSION_EXPIRED, userService.getLocaleOrDefault((int) chatId)));

@@ -19,6 +19,11 @@ public class InMemoryCommandState implements CommandStateDao {
     }
 
     @Override
+    public void expire(long chatId, String command, long ttl, TimeUnit timeUnit) {
+
+    }
+
+    @Override
     public <T> T getState(long chatId, String command, Class<T> tClass) {
         return (T) states.get(chatId);
     }

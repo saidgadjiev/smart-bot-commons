@@ -34,6 +34,11 @@ public class RedisCommandStateDao implements CommandStateDao {
     }
 
     @Override
+    public void expire(long chatId, String command, long ttl, TimeUnit timeUnit) {
+        redisTemplate.expire(key(chatId, command), ttl, timeUnit);
+    }
+
+    @Override
     public <T> T getState(long chatId, String command, Class<T> tClass) {
         try {
             Object o = redisTemplate.opsForValue().get(key(chatId, command));
