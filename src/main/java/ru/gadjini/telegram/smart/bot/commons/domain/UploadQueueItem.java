@@ -16,6 +16,8 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String BODY = "body";
 
+    public static final String EXTRA = "extra";
+
     private String producer;
 
     private Progress progress;
@@ -25,6 +27,8 @@ public class UploadQueueItem extends QueueItem {
     private String method;
 
     private Object body;
+
+    private Object extra;
 
     public String getProducer() {
         return producer;
@@ -64,5 +68,13 @@ public class UploadQueueItem extends QueueItem {
 
     public void setBody(Object body) {
         this.body = body;
+    }
+
+    public Object getExtra() {
+        return extra;
+    }
+
+    public void setExtra(Object extra) {
+        this.extra = extra;
     }
 }

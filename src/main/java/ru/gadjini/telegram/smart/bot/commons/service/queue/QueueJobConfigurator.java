@@ -11,10 +11,6 @@ public interface QueueJobConfigurator<T extends QueueItem> {
         return true;
     }
 
-    default boolean shouldBeDeletedAfterCompleted(T queueItem) {
-        return true;
-    }
-
     String getWaitingMessage(T queueItem, Locale locale);
 
     InlineKeyboardMarkup getWaitingKeyboard(T queueItem, Locale locale);

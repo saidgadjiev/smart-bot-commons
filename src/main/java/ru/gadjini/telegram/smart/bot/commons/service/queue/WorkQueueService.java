@@ -43,6 +43,10 @@ public class WorkQueueService extends QueueService {
         return queueDao.deleteAndGetById(id);
     }
 
+    public List<QueueItem> deleteCompleted() {
+        return queueDao.deleteCompleted();
+    }
+
     @Override
     public QueueDao getQueueDao() {
         return queueDao;

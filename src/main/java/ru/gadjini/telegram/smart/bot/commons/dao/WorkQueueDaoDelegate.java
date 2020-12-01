@@ -28,5 +28,13 @@ public interface WorkQueueDaoDelegate<T extends QueueItem> extends QueueDaoDeleg
          return null;
     }
 
+    default boolean isDeleteCompletedShouldBeDelegated() {
+        return false;
+    }
+
+    default List<T> deleteCompleted() {
+        throw new UnsupportedOperationException();
+    }
+
     String getQueueName();
 }

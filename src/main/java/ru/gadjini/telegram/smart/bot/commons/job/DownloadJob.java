@@ -31,9 +31,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-public class DownloadingJob extends JobPusher {
+public class DownloadJob extends JobPusher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadingJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DownloadJob.class);
 
     private static final String TAG = "down";
 
@@ -62,9 +62,9 @@ public class DownloadingJob extends JobPusher {
     private boolean enableJobsLogging;
 
     @Autowired
-    public DownloadingJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
-                          TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                          WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
+    public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
+                       TempFileService tempFileService, FileManagerProperties fileManagerProperties,
+                       WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -136,10 +136,15 @@ public class DownloadingJob extends JobPusher {
     }
 
     public void cancelDownloads(String producer, Set<Integer> producerIds) {
+        deleteDownloads(producer, producerIds);
+    }
+
+    public void deleteDownloads(String producer, Set<Integer> producerIds) {
         List<DownloadQueueItem> downloads = downloadingQueueService.getDownloads(producer, producerIds);
 
         downloadTasksExecutor.cancelAndComplete(downloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
-        downloadingQueueService.deleteByProducer(producer, producerIds);
+        List<DownloadQueueItem> deleted = downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        releaseResources(deleted);
     }
 
     public void cancelDownloads() {
@@ -148,6 +153,12 @@ public class DownloadingJob extends JobPusher {
 
     public final void shutdown() {
         downloadTasksExecutor.shutdown();
+    }
+
+    private void releaseResources(List<DownloadQueueItem> downloadQueueItems) {
+        for (DownloadQueueItem downloadQueueItem : downloadQueueItems) {
+            new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
+        }
     }
 
     private class DownloadTask implements SmartExecutorService.Job {

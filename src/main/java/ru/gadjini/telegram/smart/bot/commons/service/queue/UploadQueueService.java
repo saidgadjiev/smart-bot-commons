@@ -21,7 +21,8 @@ public class UploadQueueService extends QueueService {
         this.uploadQueueDao = uploadQueueDao;
     }
 
-    public void createUpload(int userId, String method, Object body, Progress progress, String producer, int producerId) {
+    public void createUpload(int userId, String method, Object body, Progress progress, String producer,
+                             int producerId, Object extra) {
         UploadQueueItem uploadQueueItem = new UploadQueueItem();
         uploadQueueItem.setUserId(userId);
         uploadQueueItem.setMethod(method);
@@ -30,28 +31,25 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setProgress(progress);
         uploadQueueItem.setProducerId(producerId);
         uploadQueueItem.setStatus(QueueItem.Status.WAITING);
+        uploadQueueItem.setExtra(extra);
 
         uploadQueueDao.create(uploadQueueItem);
+    }
+
+    public void createUpload(int userId, String method, Object body, Progress progress, String producer, int producerId) {
+        createUpload(userId, method, body, progress, producer, producerId, null);
     }
 
     public List<UploadQueueItem> poll(String producer, int limit) {
         return uploadQueueDao.poll(producer, limit);
     }
 
-    public List<UploadQueueItem> getUploads(String producer, int producerId) {
-        return uploadQueueDao.getUploads(producer, Set.of(producerId));
-    }
-
     public List<UploadQueueItem> getUploads(String producer, Set<Integer> producerIds) {
         return uploadQueueDao.getUploads(producer, producerIds);
     }
 
-    public void deleteByProducer(String producer, int producerId) {
-        uploadQueueDao.deleteByProducerIds(producer, Set.of(producerId));
-    }
-
-    public void deleteByProducer(String producer, Set<Integer> producerIds) {
-        uploadQueueDao.deleteByProducerIds(producer, producerIds);
+    public List<UploadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
+        return uploadQueueDao.deleteByProducerIdsWithReturning(producer, producerIds);
     }
 
     @Override

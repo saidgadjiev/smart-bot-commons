@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextClosedEvent;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
+import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
@@ -18,14 +18,14 @@ public class ContextCloseListener implements ApplicationListener<ContextClosedEv
 
     private QueueJob conversionJob;
 
-    private DownloadingJob downloadingJob;
+    private DownloadJob downloadingJob;
 
     private UploadJob uploadJob;
 
     private FileDownloadService fileManager;
 
     @Autowired
-    public ContextCloseListener(QueueJob conversionJob, DownloadingJob downloadingJob,
+    public ContextCloseListener(QueueJob conversionJob, DownloadJob downloadingJob,
                                 UploadJob uploadJob, FileDownloadService fileManager) {
         this.conversionJob = conversionJob;
         this.downloadingJob = downloadingJob;

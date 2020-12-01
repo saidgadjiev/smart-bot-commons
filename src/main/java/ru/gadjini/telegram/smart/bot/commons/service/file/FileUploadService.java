@@ -29,8 +29,12 @@ public class FileUploadService {
         this.uploadJob = uploadJob;
     }
 
+    public void createUpload(int userId, String method, Object body, Progress progress, int producerId, Object extra) {
+        uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(), producerId, extra);
+    }
+
     public void createUpload(int userId, String method, Object body, Progress progress, int producerId) {
-        uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(), producerId);
+        createUpload(userId, method, body, progress, producerId, null);
     }
 
     public void cancelUploads(int producerId) {

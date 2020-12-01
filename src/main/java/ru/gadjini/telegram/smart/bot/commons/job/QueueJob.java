@@ -253,13 +253,9 @@ public class QueueJob extends JobPusher {
 
         @Override
         public void execute() throws Exception {
-            boolean success = false;
             try {
                 queueWorker.execute();
-                if (!queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
-                    workQueueService.setCompleted(queueItem.getId());
-                }
-                success = true;
+                workQueueService.setCompleted(queueItem.getId());
             } catch (BusyWorkerException e) {
                 workQueueService.setWaitingAndDecrementAttempts(queueItem.getId());
             } catch (Throwable ex) {
@@ -273,9 +269,6 @@ public class QueueJob extends JobPusher {
                 if (checker == null || !checker.get()) {
                     executor.complete(queueItem.getId());
                     queueWorker.finish();
-                    if (success && queueJobConfigurator.shouldBeDeletedAfterCompleted(queueItem)) {
-                        workQueueService.deleteById(queueItem.getId());
-                    }
                 }
             }
         }

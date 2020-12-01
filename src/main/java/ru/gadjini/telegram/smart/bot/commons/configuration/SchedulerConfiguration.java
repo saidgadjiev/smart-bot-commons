@@ -9,7 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
+import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
@@ -31,7 +31,7 @@ public class SchedulerConfiguration {
 
     private QueueJob conversionJob;
 
-    private DownloadingJob downloadingJob;
+    private DownloadJob downloadingJob;
 
     private UploadJob uploadJob;
 
@@ -53,7 +53,7 @@ public class SchedulerConfiguration {
     }
 
     @Autowired
-    public void setDownloadingJob(DownloadingJob downloadingJob) {
+    public void setDownloadingJob(DownloadJob downloadingJob) {
         this.downloadingJob = downloadingJob;
     }
 

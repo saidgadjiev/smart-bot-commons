@@ -4,7 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
-import ru.gadjini.telegram.smart.bot.commons.job.DownloadingJob;
+import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 
 import java.util.Collection;
@@ -18,7 +18,7 @@ public class FileDownloadService {
 
     private WorkQueueDao workQueueDao;
 
-    private DownloadingJob downloadingJob;
+    private DownloadJob downloadingJob;
 
     @Autowired
     public FileDownloadService(DownloadQueueService queueService, WorkQueueDao workQueueDao) {
@@ -27,7 +27,7 @@ public class FileDownloadService {
     }
 
     @Autowired
-    public void setDownloadingJob(DownloadingJob downloadingJob) {
+    public void setDownloadingJob(DownloadJob downloadingJob) {
         this.downloadingJob = downloadingJob;
     }
 
@@ -49,9 +49,5 @@ public class FileDownloadService {
 
     public void cancelDownloads() {
         downloadingJob.cancelDownloads();
-    }
-
-    public void deleteDownloads(int producerId) {
-        queueService.deleteByProducer(workQueueDao.getQueueName(), producerId);
     }
 }

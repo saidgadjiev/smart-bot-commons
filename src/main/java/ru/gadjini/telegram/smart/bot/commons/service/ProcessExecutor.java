@@ -56,6 +56,9 @@ public class ProcessExecutor {
     private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) {
         File errorFile = getErrorLogFile();
         try {
+            if (errorFile != null) {
+                FileUtils.writeStringToFile(errorFile, String.join(" ", command), StandardCharsets.UTF_8);
+            }
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             if (redirectOutput != null) {
                 processBuilder.redirectOutput(redirectOutput);

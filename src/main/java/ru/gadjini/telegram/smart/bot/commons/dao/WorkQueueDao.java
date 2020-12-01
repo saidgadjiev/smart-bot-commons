@@ -6,12 +6,15 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
 
 @Repository
 public class WorkQueueDao extends QueueDao {
 
     private final JdbcTemplate jdbcTemplate;
+
     private WorkQueueDaoDelegate queueDaoDelegate;
 
     @Autowired
@@ -44,6 +47,22 @@ public class WorkQueueDao extends QueueDao {
         return queueDaoDelegate.deleteAndGetById(id);
     }
 
+    public List<QueueItem> deleteCompleted() {
+        if (queueDaoDelegate.isDeleteCompletedShouldBeDelegated()) {
+            return queueDaoDelegate.deleteCompleted();
+        }
+
+        return doDeleteCompleted();
+    }
+
+    public List<QueueItem> doDeleteCompleted() {
+        return jdbcTemplate.query(
+                "WITH del AS(DELETE FROM " + getQueueName() + " WHERE status = ? AND completed_at + interval '2 days' < now() RETURNING *)" +
+                        "SELECT * FROM del",
+                ps -> ps.setInt(1, QueueItem.Status.COMPLETED.getCode()),
+                (rs, rowNum) -> map(rs)
+        );
+    }
 
     @Override
     public JdbcTemplate getJdbcTemplate() {
@@ -53,5 +72,13 @@ public class WorkQueueDao extends QueueDao {
     @Override
     public QueueDaoDelegate getQueueDaoDelegate() {
         return queueDaoDelegate;
+    }
+
+    private QueueItem map(ResultSet rs) throws SQLException {
+        QueueItem queueItem = new QueueItem();
+        queueItem.setId(rs.getInt(QueueItem.ID));
+        queueItem.setUserId(rs.getInt(QueueItem.USER_ID));
+
+        return queueItem;
     }
 }

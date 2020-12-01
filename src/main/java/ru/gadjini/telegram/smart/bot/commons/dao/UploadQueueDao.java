@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.dao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -18,6 +19,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.sql.Types;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -43,8 +45,8 @@ public class UploadQueueDao extends QueueDao {
 
     public void create(UploadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id, extra)\n" +
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
@@ -57,6 +59,11 @@ public class UploadQueueDao extends QueueDao {
                     }
                     ps.setInt(6, queueItem.getStatus().getCode());
                     ps.setInt(7, queueItem.getProducerId());
+                    if (queueItem.getExtra() != null) {
+                        ps.setString(8, gson.toJson(queueItem.getExtra()));
+                    } else {
+                        ps.setNull(8, Types.VARCHAR);
+                    }
                 }
         );
     }
@@ -73,16 +80,18 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
-    public void deleteByProducerIds(String producer, Set<Integer> producerIds) {
+    public List<UploadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
         if (producerIds.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
-        jdbcTemplate.update(
-                "DELETE FROM upload_queue WHERE producer = ? AND producer_id IN("
-                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
+        return jdbcTemplate.query(
+                "WITH del AS(DELETE FROM " + getQueueName() + " WHERE producer = ? AND producer_id IN("
+                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") RETURNING *) " +
+                        "SELECT * FROM del",
                 ps -> {
                     ps.setString(1, producer);
-                }
+                },
+                (rs, rowNum) -> map(rs)
         );
     }
 
@@ -131,6 +140,10 @@ public class UploadQueueDao extends QueueDao {
             } catch (JsonProcessingException e) {
                 throw new SQLException(e);
             }
+        }
+        String extra = rs.getString(UploadQueueItem.EXTRA);
+        if (StringUtils.isNotBlank(extra)) {
+            item.setExtra(gson.fromJson(extra, JsonElement.class));
         }
 
         return item;

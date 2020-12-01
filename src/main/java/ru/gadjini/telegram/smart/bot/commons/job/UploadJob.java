@@ -145,10 +145,15 @@ public class UploadJob extends JobPusher {
     }
 
     public void cancelUploads(String producer, Set<Integer> producerIds) {
+        deleteUploads(producer, producerIds);
+    }
+
+    public void deleteUploads(String producer, Set<Integer> producerIds) {
         List<UploadQueueItem> uploads = uploadQueueService.getUploads(producer, producerIds);
 
         uploadTasksExecutor.cancelAndComplete(uploads.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
-        uploadQueueService.deleteByProducer(producer, producerIds);
+        List<UploadQueueItem> uploadQueueItems = uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        releaseResources(uploadQueueItems);
     }
 
     public void cancelUploads() {
@@ -157,6 +162,52 @@ public class UploadJob extends JobPusher {
 
     public final void shutdown() {
         uploadTasksExecutor.shutdown();
+    }
+
+    private void releaseResources(List<UploadQueueItem> uploadQueueItems) {
+        for (UploadQueueItem uploadQueueItem : uploadQueueItems) {
+            releaseResources(uploadQueueItem);
+        }
+    }
+
+    private void releaseResources(UploadQueueItem uploadQueueItem) {
+        if (uploadQueueItem == null) {
+            return;
+        }
+        InputFile inputFile = null;
+        InputFile thumb = null;
+        switch (uploadQueueItem.getMethod()) {
+            case SendDocument.PATH: {
+                SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
+                inputFile = sendDocument.getDocument();
+                thumb = sendDocument.getThumb();
+                break;
+            }
+            case SendAudio.PATH: {
+                SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
+                inputFile = sendAudio.getAudio();
+                thumb = sendAudio.getThumb();
+                break;
+            }
+            case SendVideo.PATH: {
+                SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
+                inputFile = sendVideo.getVideo();
+                thumb = sendVideo.getThumb();
+                break;
+            }
+            case SendVoice.PATH: {
+                SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
+                inputFile = sendVoice.getVoice();
+                break;
+            }
+        }
+
+        if (inputFile != null && inputFile.isNew()) {
+            new SmartTempFile(inputFile.getNewMediaFile()).smartDelete();
+        }
+        if (thumb != null && thumb.isNew()) {
+            new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
+        }
     }
 
     private class UploadTask implements SmartExecutorService.Job {
@@ -177,7 +228,7 @@ public class UploadJob extends JobPusher {
             try {
                 doUpload();
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
-                deleteFiles();
+                releaseResources(uploadQueueItem);
             } catch (Exception e) {
                 if (checker == null || !checker.get()) {
                     if (e instanceof FloodWaitException) {
@@ -238,44 +289,8 @@ public class UploadJob extends JobPusher {
             }
             if (canceledByUser) {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
+                releaseResources(uploadQueueItem);
                 LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducer(), uploadQueueItem.getProducerId());
-            }
-        }
-
-        private void deleteFiles() {
-            InputFile inputFile = null;
-            InputFile thumb = null;
-            switch (uploadQueueItem.getMethod()) {
-                case SendDocument.PATH: {
-                    SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
-                    inputFile = sendDocument.getDocument();
-                    thumb = sendDocument.getThumb();
-                    break;
-                }
-                case SendAudio.PATH: {
-                    SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
-                    inputFile = sendAudio.getAudio();
-                    thumb = sendAudio.getThumb();
-                    break;
-                }
-                case SendVideo.PATH: {
-                    SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
-                    inputFile = sendVideo.getVideo();
-                    thumb = sendVideo.getThumb();
-                    break;
-                }
-                case SendVoice.PATH: {
-                    SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
-                    inputFile = sendVoice.getVoice();
-                    break;
-                }
-            }
-
-            if (inputFile != null && inputFile.isNew()) {
-                new SmartTempFile(inputFile.getNewMediaFile()).smartDelete();
-            }
-            if (thumb != null && thumb.isNew()) {
-                new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
             }
         }
 

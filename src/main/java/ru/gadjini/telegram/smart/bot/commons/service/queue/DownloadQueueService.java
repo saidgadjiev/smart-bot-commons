@@ -45,7 +45,7 @@ public class DownloadQueueService extends QueueService {
     }
 
     public List<DownloadQueueItem> getDownloads(String producer, int producerId) {
-        return downloadingQueueDao.getDownloads(producer, Set.of(producerId));
+        return getDownloads(producer, Set.of(producerId));
     }
 
     public List<DownloadQueueItem> getDownloads(String producer, Set<Integer> producerIds) {
@@ -56,16 +56,8 @@ public class DownloadQueueService extends QueueService {
         downloadingQueueDao.setCompleted(id, filePath);
     }
 
-    public void deleteByFileId(String fileId, String producer, int producerId) {
-        downloadingQueueDao.deleteByFileId(fileId, producer, producerId);
-    }
-
-    public void deleteByProducer(String producer, int producerId) {
-        downloadingQueueDao.deleteByProducerIds(producer, Set.of(producerId));
-    }
-
-    public void deleteByProducer(String producer, Set<Integer> producerIds) {
-        downloadingQueueDao.deleteByProducerIds(producer, producerIds);
+    public List<DownloadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
+        return downloadingQueueDao.deleteByProducerIdsWithReturning(producer, producerIds);
     }
 
     public long countWrongFileIdErrors() {

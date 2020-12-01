@@ -4,7 +4,9 @@ public interface QueueWorker {
 
     void execute() throws Exception;
 
-    void cancel();
+    default void cancel() {
+
+    }
 
     default void finish() {
 

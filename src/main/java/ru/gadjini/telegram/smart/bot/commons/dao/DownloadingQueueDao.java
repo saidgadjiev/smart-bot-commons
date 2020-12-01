@@ -39,7 +39,7 @@ public class DownloadingQueueDao extends QueueDao {
 
     public void create(DownloadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO downloading_queue (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id)\n" +
+                "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id)\n" +
                         "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
@@ -67,8 +67,8 @@ public class DownloadingQueueDao extends QueueDao {
     public List<DownloadQueueItem> poll(String producer, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
-                        "    UPDATE downloading_queue SET " + QueueDao.POLL_UPDATE_LIST +
-                        "WHERE id IN(SELECT id FROM downloading_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
+                        "    UPDATE " + DownloadQueueItem.NAME + " SET " + QueueDao.POLL_UPDATE_LIST +
+                        "WHERE id IN(SELECT id FROM " + DownloadQueueItem.NAME + " qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +
@@ -81,7 +81,7 @@ public class DownloadingQueueDao extends QueueDao {
 
     public void setCompleted(int id, String filePath) {
         jdbcTemplate.update(
-                "UPDATE downloading_queue SET status = ?, completed_at = now(), file_path = ? WHERE id = ?",
+                "UPDATE " + DownloadQueueItem.NAME + " SET status = ?, completed_at = now(), file_path = ? WHERE id = ?",
                 ps -> {
                     ps.setInt(1, QueueItem.Status.COMPLETED.getCode());
                     ps.setString(2, filePath);
@@ -95,34 +95,25 @@ public class DownloadingQueueDao extends QueueDao {
             return Collections.emptyList();
         }
         return jdbcTemplate.query(
-                "SELECT *, (file).* FROM downloading_queue WHERE producer = ? AND producer_id IN("
+                "SELECT *, (file).* FROM " + getQueueName() + " WHERE producer = ? AND producer_id IN("
                         + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
     }
 
-    public void deleteByProducerIds(String producer, Set<Integer> producerIds) {
+    public List<DownloadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
         if (producerIds.isEmpty()) {
-            return;
+            return Collections.emptyList();
         }
-        jdbcTemplate.update(
-                "DELETE FROM downloading_queue WHERE producer = ? AND producer_id IN("
-                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
-                ps -> {
-                    ps.setString(1, producer);
-                }
-        );
-    }
-
-    public void deleteByFileId(String fileId, String producer, int producerId) {
-        jdbcTemplate.update(
-                "DELETE FROM downloading_queue WHERE id = (SELECT id from downloading_queue where (file).file_id = ? AND producer = ? AND producer_id = ?)",
-                ps -> {
-                    ps.setString(1, fileId);
-                    ps.setString(2, producer);
-                    ps.setInt(3, producerId);
-                }
+        return jdbcTemplate.query(
+                "WITH del AS (DELETE\n" +
+                        "FROM " + DownloadQueueItem.NAME + "\n" +
+                        "WHERE producer = ? AND producer_id IN ("
+                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") RETURNING *)\n" +
+                        "SELECT *, (file).* FROM del",
+                ps -> ps.setString(1, producer),
+                (rs, rowNum) -> map(rs)
         );
     }
 
