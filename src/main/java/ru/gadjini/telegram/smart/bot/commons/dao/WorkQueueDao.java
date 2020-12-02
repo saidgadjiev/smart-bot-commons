@@ -57,7 +57,7 @@ public class WorkQueueDao extends QueueDao {
 
     public List<QueueItem> doDeleteCompleted() {
         return jdbcTemplate.query(
-                "WITH del AS(DELETE FROM " + getQueueName() + " WHERE status = ? AND completed_at + interval '2 days' < now() RETURNING *)" +
+                "WITH del AS(DELETE FROM " + getQueueName() + " WHERE status = ? AND completed_at + " + DELETE_COMPLETED_INTERVAL + " < now() RETURNING *)" +
                         "SELECT * FROM del",
                 ps -> ps.setInt(1, QueueItem.Status.COMPLETED.getCode()),
                 (rs, rowNum) -> map(rs)

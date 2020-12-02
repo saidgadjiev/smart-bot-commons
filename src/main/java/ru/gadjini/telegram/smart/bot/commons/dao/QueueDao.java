@@ -14,6 +14,8 @@ public abstract class QueueDao {
 
     public static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()) ";
 
+    public static final String DELETE_COMPLETED_INTERVAL = "interval '3 days'";
+
     public final void setExceptionStatus(int id, String exception) {
         getJdbcTemplate().update(
                 "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
