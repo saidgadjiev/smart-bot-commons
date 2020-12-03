@@ -9,11 +9,11 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ThreadPoolExecutor;
 
-public abstract class JobPusher {
+public abstract class WorkQueueJobPusher {
 
     private final Logger logger;
 
-    public JobPusher() {
+    public WorkQueueJobPusher() {
         logger = LoggerFactory.getLogger(getLoggerClass());
     }
 

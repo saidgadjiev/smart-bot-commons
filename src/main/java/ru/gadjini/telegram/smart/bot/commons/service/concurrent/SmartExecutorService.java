@@ -7,7 +7,10 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.lang.reflect.Field;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -45,7 +48,11 @@ public class SmartExecutorService {
     }
 
     public void execute(Job job, JobWeight jobWeight) {
-        Future<?> submit = executors.get(jobWeight).submit(new ExceptionHandlerJob(messageService, userService, localisationService, job));
+        ExceptionHandlerJob toExecute = new ExceptionHandlerJob(messageService, userService, localisationService, job);
+        Future<Job> submit = executors.get(jobWeight).submit(() -> {
+            toExecute.run();
+            return toExecute;
+        });
         job.setCancelChecker(submit::isCancelled);
         processing.put(job.getId(), submit);
         activeTasks.put(job.getId(), job);
@@ -55,22 +62,17 @@ public class SmartExecutorService {
         execute(job, job.getWeight());
     }
 
-    public void complete(int jobId) {
-        processing.remove(jobId);
-        activeTasks.remove(jobId);
+    public void complete(Runnable job) {
+        Job smartJob = getJob(job);
+        processing.remove(smartJob.getId());
+        activeTasks.remove(smartJob.getId());
     }
 
     public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
         executors.get(weight).setRejectedExecutionHandler((r, executor) -> {
             Job job = getJob(r);
-            complete(job.getId());
-
             rejectJobHandler.reject(job);
         });
-    }
-
-    public void complete(Collection<Integer> jobIds) {
-        jobIds.forEach(this::complete);
     }
 
     public boolean cancel(int jobId, boolean userOriginated) {
@@ -87,30 +89,8 @@ public class SmartExecutorService {
         return false;
     }
 
-    public boolean cancelAndComplete(int jobId, boolean userOriginated) {
-        boolean result = cancel(jobId, userOriginated);
-        complete(jobId);
-
-        return result;
-    }
-
-    public boolean isCanceled(int jobId) {
-        if (processing.containsKey(jobId)) {
-            return processing.get(jobId).isCancelled();
-        }
-
-        return false;
-    }
-
     public void cancel(List<Integer> ids, boolean userOriginated) {
         ids.forEach(jobId -> cancel(jobId, userOriginated));
-    }
-
-    public void cancelAndComplete(List<Integer> ids, boolean userOriginated) {
-        ids.forEach(integer -> {
-            cancel(integer, userOriginated);
-            complete(integer);
-        });
     }
 
     public ThreadPoolExecutor getExecutor(JobWeight jobWeight) {
@@ -124,7 +104,7 @@ public class SmartExecutorService {
             }
             Set<Integer> jobs = new HashSet<>(processing.keySet());
             for (Integer job : jobs) {
-                cancelAndComplete(job, false);
+                cancel(job, false);
             }
             for (Map.Entry<JobWeight, ThreadPoolExecutor> entry : executors.entrySet()) {
                 if (!entry.getValue().awaitTermination(10, TimeUnit.SECONDS)) {
@@ -138,13 +118,10 @@ public class SmartExecutorService {
 
     private SmartExecutorService.Job getJob(Runnable runnable) {
         try {
-            Field field = runnable.getClass().getDeclaredField("callable");
+            Field field = runnable.getClass().getDeclaredField("outcome");
             field.setAccessible(true);
-            Object callbable = field.get(runnable);
-            Field task = callbable.getClass().getDeclaredField("task");
-            task.setAccessible(true);
 
-            return (SmartExecutorService.Job) task.get(callbable);
+            return (Job) field.get(runnable);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }

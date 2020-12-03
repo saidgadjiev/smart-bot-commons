@@ -38,9 +38,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-public class QueueJob extends JobPusher {
+public class WorkQueueJob extends WorkQueueJobPusher {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(QueueJob.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(WorkQueueJob.class);
 
     private WorkQueueService workQueueService;
 
@@ -165,7 +165,7 @@ public class QueueJob extends JobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return workQueueService.poll(SmartExecutorService.JobWeight.LIGHT, limit);
+        return workQueueService.poll(weight, limit);
     }
 
     @Override
@@ -181,7 +181,7 @@ public class QueueJob extends JobPusher {
     public final int removeAndCancelCurrentTasks(long chatId) {
         List<QueueItem> conversionQueueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         for (QueueItem item : conversionQueueItems) {
-            executor.cancelAndComplete(item.getId(), true);
+            executor.cancel(item.getId(), true);
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
         fileDownloadService.cancelDownloads(conversionQueueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
@@ -205,7 +205,7 @@ public class QueueJob extends JobPusher {
                     .text(localisationService.getMessage(MessagesProperties.MESSAGE_QUERY_CANCELED, userService.getLocaleOrDefault((int) chatId)))
                     .build()
             );
-            if (!executor.cancelAndComplete(jobId, true)) {
+            if (!executor.cancel(jobId, true)) {
                 workQueueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
                 fileDownloadService.cancelDownloads(jobId);
                 fileUploadService.cancelUploads(jobId);
@@ -267,7 +267,6 @@ public class QueueJob extends JobPusher {
                 }
             } finally {
                 if (checker == null || !checker.get()) {
-                    executor.complete(queueItem.getId());
                     queueWorker.finish();
                 }
             }

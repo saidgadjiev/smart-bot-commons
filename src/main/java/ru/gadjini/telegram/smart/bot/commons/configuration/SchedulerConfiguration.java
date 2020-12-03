@@ -10,8 +10,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.TaskScheduler;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
-import ru.gadjini.telegram.smart.bot.commons.job.QueueJob;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
+import ru.gadjini.telegram.smart.bot.commons.job.WorkQueueJob;
 import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -29,7 +29,7 @@ public class SchedulerConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SchedulerConfiguration.class);
 
-    private QueueJob conversionJob;
+    private WorkQueueJob conversionJob;
 
     private DownloadJob downloadingJob;
 
@@ -48,7 +48,7 @@ public class SchedulerConfiguration {
     }
 
     @Autowired
-    public void setConversionJob(QueueJob conversionJob) {
+    public void setConversionJob(WorkQueueJob conversionJob) {
         this.conversionJob = conversionJob;
     }
 
@@ -67,8 +67,20 @@ public class SchedulerConfiguration {
     public SmartExecutorService conversionTaskExecutor(UserService userService,
                                                        @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
+        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                executorService.complete(r);
+            }
+        };
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                executorService.complete(r);
+            }
+        };
 
         LOGGER.debug("Conversion light thread pool({})", lightTaskExecutor.getCorePoolSize());
         LOGGER.debug("Conversion heavy thread pool({})", heavyTaskExecutor.getCorePoolSize());
@@ -100,7 +112,13 @@ public class SchedulerConfiguration {
     public SmartExecutorService downloadTasksExecutor(FloodControlProperties floodControlProperties, UserService userService,
                                                       @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                executorService.complete(r);
+            }
+        };
 
         LOGGER.debug("Download threads initialized with pool size: {}", floodControlProperties.getSleepOnDownloadingFloodWait());
         executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
@@ -113,9 +131,15 @@ public class SchedulerConfiguration {
     @Bean
     @Qualifier("uploadTasksExecutor")
     public SmartExecutorService uploadTasksExecutor(UserService userService,
-                                                      @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+                                                    @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>());
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                executorService.complete(r);
+            }
+        };
 
         LOGGER.debug("Download threads initialized with pool size: {}", heavyTaskExecutor.getCorePoolSize());
         executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));

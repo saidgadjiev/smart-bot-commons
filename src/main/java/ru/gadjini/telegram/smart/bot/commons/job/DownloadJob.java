@@ -31,7 +31,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-public class DownloadJob extends JobPusher {
+public class DownloadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadJob.class);
 
@@ -140,15 +140,13 @@ public class DownloadJob extends JobPusher {
     }
 
     public void deleteDownloads(String producer, Set<Integer> producerIds) {
-        List<DownloadQueueItem> downloads = downloadingQueueService.getDownloads(producer, producerIds);
-
-        downloadTasksExecutor.cancelAndComplete(downloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
         List<DownloadQueueItem> deleted = downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
         releaseResources(deleted);
     }
 
     public void cancelDownloads() {
-        downloadTasksExecutor.cancelAndComplete(currentDownloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), false);
+        downloadTasksExecutor.cancel(currentDownloads.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), false);
     }
 
     public final void shutdown() {

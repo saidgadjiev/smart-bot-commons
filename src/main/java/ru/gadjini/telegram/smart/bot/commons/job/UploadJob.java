@@ -38,7 +38,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-public class UploadJob extends JobPusher {
+public class UploadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadJob.class);
 
@@ -105,7 +105,7 @@ public class UploadJob extends JobPusher {
         LOGGER.debug("Rejected({})", job.getId());
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 4000)
     public void doUploads() {
         super.push();
     }
@@ -132,7 +132,7 @@ public class UploadJob extends JobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), limit);
+        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), 1);
     }
 
     @Override
@@ -149,15 +149,13 @@ public class UploadJob extends JobPusher {
     }
 
     public void deleteUploads(String producer, Set<Integer> producerIds) {
-        List<UploadQueueItem> uploads = uploadQueueService.getUploads(producer, producerIds);
-
-        uploadTasksExecutor.cancelAndComplete(uploads.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
-        List<UploadQueueItem> uploadQueueItems = uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
-        releaseResources(uploadQueueItems);
+        List<UploadQueueItem> deleted = uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        uploadTasksExecutor.cancel(deleted.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
+        releaseResources(deleted);
     }
 
     public void cancelUploads() {
-        uploadTasksExecutor.cancelAndComplete(currentUploads.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), false);
+        uploadTasksExecutor.cancel(currentUploads.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), false);
     }
 
     public final void shutdown() {
