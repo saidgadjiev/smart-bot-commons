@@ -55,7 +55,7 @@ public class WorkQueueDao extends QueueDao {
         return doDeleteCompleted();
     }
 
-    public List<QueueItem> doDeleteCompleted() {
+    private List<QueueItem> doDeleteCompleted() {
         return jdbcTemplate.query(
                 "WITH del AS(DELETE FROM " + getQueueName() + " WHERE status = ? AND completed_at + " + DELETE_COMPLETED_INTERVAL + " < now() RETURNING *)" +
                         "SELECT * FROM del",

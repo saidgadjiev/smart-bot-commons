@@ -106,7 +106,7 @@ public class UploadQueueDao extends QueueDao {
                 "WITH r AS (\n" +
                         "    UPDATE upload_queue SET " + QueueDao.POLL_UPDATE_LIST +
                         "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
-                        "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + " ?\n"+
+                        "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + " ?\n" +
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +
@@ -116,6 +116,18 @@ public class UploadQueueDao extends QueueDao {
                     ps.setString(1, producer);
                     ps.setLong(2, mediaLimitProperties.getLightFileMaxWeight());
                 },
+                (rs, rowNum) -> map(rs)
+        );
+    }
+
+    public List<UploadQueueItem> deleteOrphan(String producer) {
+        return jdbcTemplate.query(
+                "WITH del AS(delete\n" +
+                        "from upload_queue dq\n" +
+                        "where producer = ?\n" +
+                        "  and not exists(select 1 from " + producer + " uq where uq.id = dq.producer_id) RETURNING *) " +
+                        "SELECT * FROM del",
+                ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
     }

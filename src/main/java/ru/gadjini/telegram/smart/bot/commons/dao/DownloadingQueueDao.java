@@ -134,6 +134,18 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
+    public List<DownloadQueueItem> deleteOrphan(String producer) {
+        return jdbcTemplate.query(
+                "WITH del as (delete\n" +
+                        "from downloading_queue dq\n" +
+                        "where producer = ?\n" +
+                        "  and not exists(select 1 from " + producer + " uq where uq.id = dq.producer_id) RETURNING *) " +
+                        "SELECT * FROM del",
+                ps -> ps.setString(1, producer),
+                (rs, rowNum) -> map(rs)
+        );
+    }
+
     @Override
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;

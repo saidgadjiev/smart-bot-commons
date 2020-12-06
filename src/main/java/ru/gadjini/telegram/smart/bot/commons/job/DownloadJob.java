@@ -140,7 +140,9 @@ public class DownloadJob extends WorkQueueJobPusher {
     }
 
     public void deleteDownloads(String producer, Set<Integer> producerIds) {
-        List<DownloadQueueItem> deleted = downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        List<DownloadQueueItem> deleted = new ArrayList<>(downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds));
+        List<DownloadQueueItem> orphanDownloads = downloadingQueueService.deleteOrphanDownloads(producer);
+        deleted.addAll(orphanDownloads);
         downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
         releaseResources(deleted);
     }

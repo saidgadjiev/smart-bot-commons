@@ -61,6 +61,10 @@ public class DownloadQueueService extends QueueService {
         return downloadingQueueDao.deleteByProducerIdsWithReturning(producer, producerIds);
     }
 
+    public List<DownloadQueueItem> deleteOrphanDownloads(String producer) {
+        return downloadingQueueDao.deleteOrphan(producer);
+    }
+
     public long countWrongFileIdErrors() {
         return downloadingQueueDao.countWrongFileIdErrors();
     }

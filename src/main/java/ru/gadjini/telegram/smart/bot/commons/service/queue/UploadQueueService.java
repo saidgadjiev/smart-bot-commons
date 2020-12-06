@@ -62,6 +62,10 @@ public class UploadQueueService extends QueueService {
         return uploadQueueDao.deleteByProducerIdsWithReturning(producer, producerIds);
     }
 
+    public List<UploadQueueItem> deleteOrphanUploads(String producer) {
+        return uploadQueueDao.deleteOrphan(producer);
+    }
+
     @Override
     public QueueDao getQueueDao() {
         return uploadQueueDao;

@@ -72,5 +72,4 @@ public abstract class QueueService {
     }
 
     public abstract QueueDao getQueueDao();
-
 }
