@@ -12,7 +12,6 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.WorkQueueJob;
-import ru.gadjini.telegram.smart.bot.commons.property.DownloadFloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -36,16 +35,32 @@ public class ExecutorsConfiguration {
 
     private UploadJob uploadJob;
 
-    @Value("${light.threads:2}")
-    private int lightThreads;
+    @Value("${work.light.threads:2}")
+    private int workQueueLightThreads;
 
-    @Value("${heavy.threads:4}")
-    private int heavyThreads;
+    @Value("${work.heavy.threads:4}")
+    private int workQueueHeavyThreads;
+
+    @Value("${download.heavy.threads}:1")
+    private int downloadHeavyThreads;
+
+    @Value("${download.light.threads}:2")
+    private int downloadLightThreads;
+
+    @Value("${upload.heavy.threads}:4")
+    private int uploadHeavyThreads;
+
+    @Value("${upload.light.threads}:2")
+    private int uploadLightThreads;
 
     @PostConstruct
     public void init() {
-        LOGGER.debug("Light threads({})", lightThreads);
-        LOGGER.debug("Heavy threads({})", heavyThreads);
+        LOGGER.debug("Work queue light threads({})", workQueueLightThreads);
+        LOGGER.debug("Work queue heavy threads({})", workQueueHeavyThreads);
+        LOGGER.debug("Download heavy threads({})", downloadHeavyThreads);
+        LOGGER.debug("Download light threads({})", downloadLightThreads);
+        LOGGER.debug("Upload heavy threads({})", uploadHeavyThreads);
+        LOGGER.debug("Upload light threads({})", uploadLightThreads);
     }
 
     @Autowired
@@ -65,17 +80,17 @@ public class ExecutorsConfiguration {
 
     @Bean
     @Qualifier("queueTaskExecutor")
-    public SmartExecutorService conversionTaskExecutor(UserService userService,
-                                                       @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+    public SmartExecutorService queueTaskExecutor(UserService userService,
+                                                  @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(workQueueLightThreads, workQueueLightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
                 executorService.complete(r);
             }
         };
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(workQueueHeavyThreads, workQueueHeavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
@@ -110,10 +125,10 @@ public class ExecutorsConfiguration {
 
     @Bean
     @Qualifier("downloadTasksExecutor")
-    public SmartExecutorService downloadTasksExecutor(DownloadFloodControlProperties floodControlProperties, UserService userService,
-                                                      @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+    public SmartExecutorService downloadTasksExecutor(UserService userService, @Qualifier("messageLimits") MessageService messageService,
+                                                      LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(downloadHeavyThreads, downloadHeavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
@@ -121,7 +136,7 @@ public class ExecutorsConfiguration {
             }
         };
 
-        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(downloadLightThreads, downloadLightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
@@ -140,10 +155,10 @@ public class ExecutorsConfiguration {
 
     @Bean
     @Qualifier("uploadTasksExecutor")
-    public SmartExecutorService uploadTasksExecutor(UserService userService,
-                                                    @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+    public SmartExecutorService uploadTasksExecutor(UserService userService, @Qualifier("messageLimits") MessageService messageService,
+                                                    LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(uploadHeavyThreads, uploadHeavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
@@ -151,7 +166,7 @@ public class ExecutorsConfiguration {
             }
         };
 
-        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(uploadLightThreads, uploadLightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
