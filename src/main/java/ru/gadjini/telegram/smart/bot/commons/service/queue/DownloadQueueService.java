@@ -8,6 +8,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
+import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.util.Collection;
 import java.util.List;
@@ -23,8 +24,8 @@ public class DownloadQueueService extends QueueService {
         this.downloadingQueueDao = downloadingQueueDao;
     }
 
-    public List<DownloadQueueItem> poll(String producer, int limit) {
-        return downloadingQueueDao.poll(producer, limit);
+    public List<DownloadQueueItem> poll(String producer, SmartExecutorService.JobWeight weight, int limit) {
+        return downloadingQueueDao.poll(producer, weight, limit);
     }
 
     @Transactional

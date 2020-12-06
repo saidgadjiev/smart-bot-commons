@@ -123,7 +123,7 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getQueueName(), limit);
+        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getQueueName(), weight, limit);
     }
 
     @Override
