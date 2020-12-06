@@ -155,7 +155,9 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private void releaseResources(List<DownloadQueueItem> downloadQueueItems) {
         for (DownloadQueueItem downloadQueueItem : downloadQueueItems) {
-            new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
+            if (StringUtils.isNotBlank(downloadQueueItem.getFilePath())) {
+                new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
+            }
         }
     }
 
