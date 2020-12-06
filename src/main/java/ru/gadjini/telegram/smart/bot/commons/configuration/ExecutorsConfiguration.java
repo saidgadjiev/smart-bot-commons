@@ -41,16 +41,16 @@ public class ExecutorsConfiguration {
     @Value("${work.heavy.threads:4}")
     private int workQueueHeavyThreads;
 
-    @Value("${download.heavy.threads}:1")
+    @Value("${download.heavy.threads:1}")
     private int downloadHeavyThreads;
 
-    @Value("${download.light.threads}:2")
+    @Value("${download.light.threads:2}")
     private int downloadLightThreads;
 
-    @Value("${upload.heavy.threads}:4")
+    @Value("${upload.heavy.threads:4}")
     private int uploadHeavyThreads;
 
-    @Value("${upload.light.threads}:2")
+    @Value("${upload.light.threads:2}")
     private int uploadLightThreads;
 
     @PostConstruct

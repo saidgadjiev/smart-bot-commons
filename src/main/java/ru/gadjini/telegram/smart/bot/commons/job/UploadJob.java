@@ -101,7 +101,7 @@ public class UploadJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({})", job.getId());
     }
 
-    @Scheduled(fixedDelay = 4000)
+    @Scheduled(fixedDelay = 1000)
     public void doUploads() {
         super.push();
     }

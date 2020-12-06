@@ -50,8 +50,8 @@ public class UploadQueueDao extends QueueDao {
 
     public void create(UploadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id, extra)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id, extra, file_size)\n" +
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
@@ -69,6 +69,7 @@ public class UploadQueueDao extends QueueDao {
                     } else {
                         ps.setNull(8, Types.VARCHAR);
                     }
+                    ps.setLong(9, queueItem.getFileSize());
                 }
         );
     }
@@ -105,7 +106,7 @@ public class UploadQueueDao extends QueueDao {
                 "WITH r AS (\n" +
                         "    UPDATE upload_queue SET " + QueueDao.POLL_UPDATE_LIST +
                         "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
-                        "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : "> ?") +
+                        "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + " ?\n"+
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +

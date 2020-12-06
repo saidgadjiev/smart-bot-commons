@@ -74,7 +74,7 @@ public class DownloadingQueueDao extends QueueDao {
                 "WITH r AS (\n" +
                         "    UPDATE " + DownloadQueueItem.NAME + " SET " + QueueDao.POLL_UPDATE_LIST +
                         "WHERE id IN(SELECT id FROM " + DownloadQueueItem.NAME + " qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
-                        "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : "> ?") +
+                        "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n" +
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +
