@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.job;
 
-import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +14,10 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
+import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
@@ -25,7 +26,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.ForceMediaMessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.UploadCompleted;
@@ -42,21 +42,19 @@ public class UploadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadJob.class);
 
-    private MediaMessageService mediaMessageService;
-
     private UploadQueueService uploadQueueService;
 
     private FileManagerProperties fileManagerProperties;
 
     private WorkQueueDao workQueueDao;
 
+    private FileUploader fileUploader;
+
     private SmartExecutorService uploadTasksExecutor;
 
     private ApplicationEventPublisher applicationEventPublisher;
 
     private final List<UploadQueueItem> currentUploads = new ArrayList<>();
-
-    private FileUploader fileUploader;
 
     private MessageService messageService;
 
@@ -69,11 +67,10 @@ public class UploadJob extends WorkQueueJobPusher {
     private boolean enableJobsLogging;
 
     @Autowired
-    public UploadJob(@Qualifier("media") MediaMessageService mediaMessageService, UploadQueueService uploadQueueService,
+    public UploadJob(UploadQueueService uploadQueueService,
                      FileManagerProperties fileManagerProperties,
                      WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
                      FileUploader fileUploader, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
-        this.mediaMessageService = mediaMessageService;
         this.uploadQueueService = uploadQueueService;
         this.fileManagerProperties = fileManagerProperties;
         this.workQueueDao = workQueueDao;
@@ -132,7 +129,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), 1);
+        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), limit);
     }
 
     @Override
@@ -224,12 +221,16 @@ public class UploadJob extends WorkQueueJobPusher {
         public void execute() {
             currentUploads.add(uploadQueueItem);
             try {
-                doUpload();
+                SendFileResult sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
                 releaseResources(uploadQueueItem);
+
+                applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
             } catch (Exception e) {
                 if (checker == null || !checker.get()) {
-                    if (e instanceof FloodWaitException) {
+                    if (e instanceof FloodControlException) {
+                        floodControlException(uploadQueueItem, (FloodControlException) e);
+                    } else if (e instanceof FloodWaitException) {
                         floodWaitException(uploadQueueItem, (FloodWaitException) e);
                     } else if (ForceMediaMessageService.shouldTryToUploadAgain(e)) {
                         noneCriticalException(uploadQueueItem, e);
@@ -281,10 +282,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
         @Override
         public void cancel() {
-            String filePath = getFilePath();
-            if (StringUtils.isNotBlank(filePath)) {
-                fileUploader.cancelUploading(filePath);
-            }
+            fileUploader.cancelUploading(uploadQueueItem.getMethod(), uploadQueueItem.getBody());
             if (canceledByUser) {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
                 releaseResources(uploadQueueItem);
@@ -292,69 +290,12 @@ public class UploadJob extends WorkQueueJobPusher {
             }
         }
 
-        private String getFilePath() {
-            InputFile inputFile = null;
-            switch (uploadQueueItem.getMethod()) {
-                case SendDocument.PATH: {
-                    SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
-                    inputFile = sendDocument.getDocument();
-                    break;
-                }
-                case SendAudio.PATH: {
-                    SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
-                    inputFile = sendAudio.getAudio();
-                    break;
-                }
-                case SendVideo.PATH: {
-                    SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
-                    inputFile = sendVideo.getVideo();
-                    break;
-                }
-                case SendVoice.PATH: {
-                    SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
-                    inputFile = sendVoice.getVoice();
-                    break;
-                }
-            }
-
-            if (inputFile != null && inputFile.isNew()) {
-                return inputFile.getNewMediaFile().getAbsolutePath();
-            }
-
-            return null;
-        }
-
-        private void doUpload() {
-            switch (uploadQueueItem.getMethod()) {
-                case SendDocument.PATH: {
-                    SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
-                    SendFileResult sendFileResult = mediaMessageService.sendDocument(sendDocument, uploadQueueItem.getProgress());
-                    applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
-                    break;
-                }
-                case SendAudio.PATH: {
-                    SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
-                    SendFileResult sendFileResult = mediaMessageService.sendAudio(sendAudio, uploadQueueItem.getProgress());
-                    applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
-                    break;
-                }
-                case SendVideo.PATH: {
-                    SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
-                    SendFileResult sendFileResult = mediaMessageService.sendVideo(sendVideo, uploadQueueItem.getProgress());
-                    applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
-                    break;
-                }
-                case SendVoice.PATH: {
-                    SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
-                    SendFileResult sendFileResult = mediaMessageService.sendVoice(sendVoice, uploadQueueItem.getProgress());
-                    applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
-                    break;
-                }
-            }
-        }
-
         private void noneCriticalException(UploadQueueItem uploadQueueItem, Throwable e) {
             uploadQueueService.setWaiting(uploadQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeUploadAttempt(), e);
+        }
+
+        private void floodControlException(UploadQueueItem uploadQueueItem, FloodControlException e) {
+            uploadQueueService.setWaiting(uploadQueueItem.getId(), e.getSleepTime(), e);
         }
 
         private void floodWaitException(UploadQueueItem uploadQueueItem, FloodWaitException e) {

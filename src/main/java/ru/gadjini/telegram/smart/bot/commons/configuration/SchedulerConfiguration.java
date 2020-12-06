@@ -12,7 +12,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import ru.gadjini.telegram.smart.bot.commons.job.DownloadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.job.WorkQueueJob;
-import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.DownloadFloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -109,7 +109,7 @@ public class SchedulerConfiguration {
 
     @Bean
     @Qualifier("downloadTasksExecutor")
-    public SmartExecutorService downloadTasksExecutor(FloodControlProperties floodControlProperties, UserService userService,
+    public SmartExecutorService downloadTasksExecutor(DownloadFloodControlProperties floodControlProperties, UserService userService,
                                                       @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
         ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {

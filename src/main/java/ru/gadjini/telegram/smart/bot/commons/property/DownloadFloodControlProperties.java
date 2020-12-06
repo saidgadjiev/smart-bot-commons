@@ -2,8 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.property;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
 
-@ConfigurationProperties("flood.control")
-public class FloodControlProperties {
+@ConfigurationProperties("download.flood.control")
+public class DownloadFloodControlProperties {
 
     private int sleepAfterXDownloads = 1;
 

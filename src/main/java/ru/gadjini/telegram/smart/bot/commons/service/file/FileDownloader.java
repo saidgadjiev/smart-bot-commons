@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
-import ru.gadjini.telegram.smart.bot.commons.service.flood.FloodWaitController;
+import ru.gadjini.telegram.smart.bot.commons.service.flood.DownloadFloodWaitController;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 import java.net.SocketException;
@@ -20,10 +20,10 @@ public class FileDownloader {
 
     private TelegramBotApiService telegramLocalBotApiService;
 
-    private FloodWaitController floodWaitController;
+    private DownloadFloodWaitController floodWaitController;
 
     @Autowired
-    public FileDownloader(TelegramBotApiService telegramLocalBotApiService, FloodWaitController floodWaitController) {
+    public FileDownloader(TelegramBotApiService telegramLocalBotApiService, DownloadFloodWaitController floodWaitController) {
         this.telegramLocalBotApiService = telegramLocalBotApiService;
         this.floodWaitController = floodWaitController;
     }

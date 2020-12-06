@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
-import ru.gadjini.telegram.smart.bot.commons.property.FloodControlProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.DownloadFloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 
 import javax.annotation.PostConstruct;
@@ -17,7 +17,7 @@ import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
 
 @Component
-public class FloodWaitController {
+public class DownloadFloodWaitController {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FileDownloadService.class);
 
@@ -27,16 +27,16 @@ public class FloodWaitController {
 
     private SleepTime sleep = new SleepTime(LocalDateTime.now(), 0);
 
-    private FloodControlProperties floodWaitProperties;
+    private DownloadFloodControlProperties floodWaitProperties;
 
     @Autowired
-    public FloodWaitController(FloodControlProperties floodWaitProperties) {
+    public DownloadFloodWaitController(DownloadFloodControlProperties floodWaitProperties) {
         this.floodWaitProperties = floodWaitProperties;
     }
 
     @PostConstruct
     public void init() {
-        LOGGER.debug("Flood wait properties({}, {}, {}, {})", floodWaitProperties.getFileDownloadingConcurrencyLevel(),
+        LOGGER.debug("Download flood wait properties({}, {}, {}, {})", floodWaitProperties.getFileDownloadingConcurrencyLevel(),
                 floodWaitProperties.getSleepAfterXDownloads(), floodWaitProperties.getMaxSleepTime(), floodWaitProperties.isEnableLogging());
     }
 
@@ -57,17 +57,15 @@ public class FloodWaitController {
     }
 
     public synchronized void finishDownloading(String fileId, long fileSize) {
-        synchronized (this) {
-            if (currentDownloads.contains(fileId)) {
-                try {
-                    ++finishedDownloadingCounter;
-                    if (finishedDownloadingCounter % floodWaitProperties.getSleepAfterXDownloads() == 0) {
-                        finishedDownloadingCounter = 0;
-                        sleep(getSleepTime(fileSize));
-                    }
-                } finally {
-                    releaseDownloadingChannel(fileId);
+        if (currentDownloads.contains(fileId)) {
+            try {
+                ++finishedDownloadingCounter;
+                if (finishedDownloadingCounter % floodWaitProperties.getSleepAfterXDownloads() == 0) {
+                    finishedDownloadingCounter = 0;
+                    sleep(getSleepTime(fileSize));
                 }
+            } finally {
+                releaseDownloadingChannel(fileId);
             }
         }
     }
@@ -106,8 +104,8 @@ public class FloodWaitController {
     }
 
     private synchronized boolean isSleeping(AtomicLong sleepTime) {
-        long seconds = Duration.between(sleep.startedAt, LocalDateTime.now()).toSeconds();
-        long secondsLeft = sleep.sleepTime - seconds;
+        long seconds = Duration.between(sleep.getStartedAt(), LocalDateTime.now()).toSeconds();
+        long secondsLeft = sleep.getSleepTime() - seconds;
 
         if (secondsLeft > 0) {
             sleepTime.set(secondsLeft);
@@ -120,17 +118,5 @@ public class FloodWaitController {
         long sleepOnEverySize = TgConstants.LARGE_FILE_SIZE / floodWaitProperties.getMaxSleepTime();
 
         return floodWaitProperties.getMinSleepTime() + fileSize / sleepOnEverySize;
-    }
-
-    private static class SleepTime {
-
-        private final LocalDateTime startedAt;
-
-        private final long sleepTime;
-
-        private SleepTime(LocalDateTime startedAt, long sleepTime) {
-            this.startedAt = startedAt;
-            this.sleepTime = sleepTime;
-        }
     }
 }
