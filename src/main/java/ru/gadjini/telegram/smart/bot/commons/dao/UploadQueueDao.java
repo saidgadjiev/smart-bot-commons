@@ -15,6 +15,8 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -36,11 +38,14 @@ public class UploadQueueDao extends QueueDao {
 
     private ObjectMapper objectMapper;
 
+    private MediaLimitProperties mediaLimitProperties;
+
     @Autowired
-    public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper) {
+    public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties) {
         this.jdbcTemplate = jdbcTemplate;
         this.gson = gson;
         this.objectMapper = objectMapper;
+        this.mediaLimitProperties = mediaLimitProperties;
     }
 
     public void create(UploadQueueItem queueItem) {
@@ -95,17 +100,21 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
-    public List<UploadQueueItem> poll(String producer, int limit) {
+    public List<UploadQueueItem> poll(String producer, SmartExecutorService.JobWeight jobWeight, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
                         "    UPDATE upload_queue SET " + QueueDao.POLL_UPDATE_LIST +
                         "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
+                        "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : "> ?") +
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +
                         "SELECT *\n" +
                         "FROM r",
-                ps -> ps.setString(1, producer),
+                ps -> {
+                    ps.setString(1, producer);
+                    ps.setLong(2, mediaLimitProperties.getLightFileMaxWeight());
+                },
                 (rs, rowNum) -> map(rs)
         );
     }

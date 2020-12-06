@@ -25,6 +25,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
 @Configuration
+@SuppressWarnings("CPD-START")
 public class ExecutorsConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorsConfiguration.class);
@@ -142,7 +143,7 @@ public class ExecutorsConfiguration {
     public SmartExecutorService uploadTasksExecutor(UserService userService,
                                                     @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
         SmartExecutorService executorService = new SmartExecutorService(messageService, localisationService, userService);
-        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(4, 4, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+        ThreadPoolExecutor heavyTaskExecutor = new ThreadPoolExecutor(heavyThreads, heavyThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
             @Override
             protected void afterExecute(Runnable r, Throwable t) {
                 super.afterExecute(r, t);
@@ -150,8 +151,17 @@ public class ExecutorsConfiguration {
             }
         };
 
-        LOGGER.debug("Download threads initialized with pool size: {}", heavyTaskExecutor.getCorePoolSize());
-        executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, heavyTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
+        ThreadPoolExecutor lightTaskExecutor = new ThreadPoolExecutor(lightThreads, lightThreads, 0, TimeUnit.SECONDS, new SynchronousQueue<>()) {
+            @Override
+            protected void afterExecute(Runnable r, Throwable t) {
+                super.afterExecute(r, t);
+                executorService.complete(r);
+            }
+        };
+
+        LOGGER.debug("Heavy download threads initialized with pool size: {}", heavyTaskExecutor.getCorePoolSize());
+        LOGGER.debug("Light download threads initialized with pool size: {}", lightTaskExecutor.getCorePoolSize());
+        executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, lightTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
         executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> uploadJob.rejectTask(job));
         executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> uploadJob.rejectTask(job));
 

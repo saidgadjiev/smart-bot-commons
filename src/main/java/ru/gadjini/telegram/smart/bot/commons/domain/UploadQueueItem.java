@@ -18,6 +18,8 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String EXTRA = "extra";
 
+    public static final String FILE_SIZE = "file_size";
+
     private String producer;
 
     private Progress progress;
@@ -29,6 +31,8 @@ public class UploadQueueItem extends QueueItem {
     private Object body;
 
     private Object extra;
+
+    private long fileSize;
 
     public String getProducer() {
         return producer;
@@ -76,5 +80,13 @@ public class UploadQueueItem extends QueueItem {
 
     public void setExtra(Object extra) {
         this.extra = extra;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
+    }
+
+    public long getFileSize() {
+        return fileSize;
     }
 }

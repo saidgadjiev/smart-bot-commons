@@ -52,27 +52,7 @@ public class FileUploader {
         }
     }
 
-    private String getFilePath(String method, Object body) {
-        InputFile inputFile = getInputFile(method, body);
-
-        if (inputFile.isNew()) {
-            return inputFile.getNewMediaFile().getAbsolutePath();
-        }
-
-        return null;
-    }
-
-    private String getFilePathOrFileId(String method, Object body) {
-        InputFile inputFile = getInputFile(method, body);
-
-        if (inputFile.isNew()) {
-            return inputFile.getNewMediaFile().getAbsolutePath();
-        }
-
-        return inputFile.getAttachName();
-    }
-
-    private InputFile getInputFile(String method, Object body) {
+    public InputFile getInputFile(String method, Object body) {
         InputFile inputFile = null;
         switch (method) {
             case SendDocument.PATH: {
@@ -101,6 +81,26 @@ public class FileUploader {
         }
 
         return inputFile;
+    }
+
+    private String getFilePath(String method, Object body) {
+        InputFile inputFile = getInputFile(method, body);
+
+        if (inputFile.isNew()) {
+            return inputFile.getNewMediaFile().getAbsolutePath();
+        }
+
+        return null;
+    }
+
+    private String getFilePathOrFileId(String method, Object body) {
+        InputFile inputFile = getInputFile(method, body);
+
+        if (inputFile.isNew()) {
+            return inputFile.getNewMediaFile().getAbsolutePath();
+        }
+
+        return inputFile.getAttachName();
     }
 
     private SendFileResult doUpload(String method, Object body, Progress progress) {

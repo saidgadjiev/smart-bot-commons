@@ -7,6 +7,8 @@ import ru.gadjini.telegram.smart.bot.commons.dao.UploadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
+import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 
 import java.util.List;
 import java.util.Set;
@@ -16,9 +18,16 @@ public class UploadQueueService extends QueueService {
 
     private UploadQueueDao uploadQueueDao;
 
+    private FileUploader fileUploader;
+
     @Autowired
     public UploadQueueService(UploadQueueDao uploadQueueDao) {
         this.uploadQueueDao = uploadQueueDao;
+    }
+
+    @Autowired
+    public void setFileUploader(FileUploader fileUploader) {
+        this.fileUploader = fileUploader;
     }
 
     public void createUpload(int userId, String method, Object body, Progress progress, String producer,
@@ -32,6 +41,7 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setProducerId(producerId);
         uploadQueueItem.setStatus(QueueItem.Status.WAITING);
         uploadQueueItem.setExtra(extra);
+        uploadQueueItem.setFileSize(fileUploader.getInputFile(method, body).getNewMediaFile().length());
 
         uploadQueueDao.create(uploadQueueItem);
     }
@@ -40,8 +50,8 @@ public class UploadQueueService extends QueueService {
         createUpload(userId, method, body, progress, producer, producerId, null);
     }
 
-    public List<UploadQueueItem> poll(String producer, int limit) {
-        return uploadQueueDao.poll(producer, limit);
+    public List<UploadQueueItem> poll(String producer, SmartExecutorService.JobWeight jobWeight, int limit) {
+        return uploadQueueDao.poll(producer, jobWeight, limit);
     }
 
     public List<UploadQueueItem> getUploads(String producer, Set<Integer> producerIds) {

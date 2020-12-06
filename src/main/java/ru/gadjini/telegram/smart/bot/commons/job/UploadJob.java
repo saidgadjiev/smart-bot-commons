@@ -128,7 +128,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), limit);
+        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), weight, limit);
     }
 
     @Override
