@@ -2,6 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -35,17 +37,20 @@ public class DownloadingQueueDao extends QueueDao {
 
     private MediaLimitProperties mediaLimitProperties;
 
+    private Gson gson;
+
     @Autowired
-    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties) {
+    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties, Gson gson) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
+        this.gson = gson;
     }
 
     public void create(DownloadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id, extra)\n" +
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
 
@@ -65,6 +70,11 @@ public class DownloadingQueueDao extends QueueDao {
                     }
                     ps.setBoolean(7, queueItem.isDeleteParentDir());
                     ps.setInt(8, queueItem.getProducerId());
+                    if (queueItem.getExtra() == null) {
+                        ps.setNull(9, Types.VARCHAR);
+                    } else {
+                        ps.setString(9, gson.toJson(queueItem.getExtra()));
+                    }
                 }
         );
     }
@@ -140,7 +150,7 @@ public class DownloadingQueueDao extends QueueDao {
                         "from downloading_queue dq\n" +
                         "where producer = ?\n" +
                         "  and not exists(select 1 from " + producer + " uq where uq.id = dq.producer_id) RETURNING *) " +
-                        "SELECT * FROM del",
+                        "SELECT *, (file).* FROM del",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
         );
@@ -186,6 +196,7 @@ public class DownloadingQueueDao extends QueueDao {
                 throw new SQLException(e);
             }
         }
+        item.setExtra(gson.fromJson(rs.getString(DownloadQueueItem.EXTRA), JsonElement.class));
 
         return item;
     }

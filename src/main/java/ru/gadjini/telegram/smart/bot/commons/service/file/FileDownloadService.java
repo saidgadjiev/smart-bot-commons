@@ -31,12 +31,20 @@ public class FileDownloadService {
         this.downloadingJob = downloadingJob;
     }
 
+    public void createDownload(TgFile file, int producerId, int userId, Object extra) {
+        createDownloads(Collections.singletonList(file), producerId, userId, extra);
+    }
+
+    public void createDownloads(Collection<TgFile> files, int producerId, int userId, Object extra) {
+        queueService.create(files, workQueueDao.getQueueName(), producerId, userId, extra);
+    }
+
     public void createDownload(TgFile file, int producerId, int userId) {
-        createDownloads(Collections.singletonList(file), producerId, userId);
+        createDownloads(Collections.singletonList(file), producerId, userId, null);
     }
 
     public void createDownloads(Collection<TgFile> files, int producerId, int userId) {
-        queueService.create(files, workQueueDao.getQueueName(), producerId, userId);
+        createDownloads(files, producerId, userId, null);
     }
 
     public void cancelDownloads(int producerId) {

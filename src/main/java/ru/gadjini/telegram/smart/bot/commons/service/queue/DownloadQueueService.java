@@ -29,7 +29,7 @@ public class DownloadQueueService extends QueueService {
     }
 
     @Transactional
-    public void create(Collection<TgFile> files, String producer, int producerId, int userId) {
+    public void create(Collection<TgFile> files, String producer, int producerId, int userId, Object extra) {
         for (TgFile file : files) {
             DownloadQueueItem queueItem = new DownloadQueueItem();
             queueItem.setFile(file);
@@ -40,6 +40,7 @@ public class DownloadQueueService extends QueueService {
             queueItem.setProducerId(producerId);
             queueItem.setStatus(QueueItem.Status.WAITING);
             queueItem.setUserId(userId);
+            queueItem.setExtra(extra);
 
             downloadingQueueDao.create(queueItem);
         }

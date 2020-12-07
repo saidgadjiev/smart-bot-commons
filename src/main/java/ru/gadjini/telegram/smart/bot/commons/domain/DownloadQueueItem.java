@@ -18,6 +18,8 @@ public class DownloadQueueItem extends QueueItem {
 
     public static final String DELETE_PARENT_DIR = "delete_parent_dir";
 
+    public static final String EXTRA = "extra";
+
     private TgFile file;
 
     private String producer;
@@ -29,6 +31,8 @@ public class DownloadQueueItem extends QueueItem {
     private String filePath;
 
     private boolean deleteParentDir;
+
+    private Object extra;
 
     public TgFile getFile() {
         return file;
@@ -76,5 +80,13 @@ public class DownloadQueueItem extends QueueItem {
 
     public void setProducerId(int producerId) {
         this.producerId = producerId;
+    }
+
+    public Object getExtra() {
+        return extra;
+    }
+
+    public void setExtra(Object extra) {
+        this.extra = extra;
     }
 }

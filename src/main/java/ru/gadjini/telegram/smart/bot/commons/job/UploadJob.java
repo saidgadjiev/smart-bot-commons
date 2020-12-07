@@ -145,6 +145,12 @@ public class UploadJob extends WorkQueueJobPusher {
     }
 
     public void deleteUploads(String producer, Set<Integer> producerIds) {
+        List<UploadQueueItem> deleted = uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        uploadTasksExecutor.cancel(deleted.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
+        releaseResources(deleted);
+    }
+
+    public void cleanUpUploads(String producer, Set<Integer> producerIds) {
         List<UploadQueueItem> deleted = new ArrayList<>(uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds));
         List<UploadQueueItem> orphanUploads = uploadQueueService.deleteOrphanUploads(producer);
         deleted.addAll(orphanUploads);

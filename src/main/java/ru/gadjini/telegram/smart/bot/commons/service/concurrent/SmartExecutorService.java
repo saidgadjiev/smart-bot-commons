@@ -11,10 +11,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 public class SmartExecutorService {
@@ -49,10 +46,7 @@ public class SmartExecutorService {
 
     public void execute(Job job, JobWeight jobWeight) {
         ExceptionHandlerJob toExecute = new ExceptionHandlerJob(messageService, userService, localisationService, job);
-        Future<Job> submit = executors.get(jobWeight).submit(() -> {
-            toExecute.run();
-            return toExecute;
-        });
+        Future<Job> submit = executors.get(jobWeight).submit(new SmartCallable(toExecute));
         job.setCancelChecker(submit::isCancelled);
         processing.put(job.getId(), submit);
         activeTasks.put(job.getId(), job);
@@ -63,14 +57,14 @@ public class SmartExecutorService {
     }
 
     public void complete(Runnable job) {
-        Job smartJob = getJob(job);
+        Job smartJob = getJobFromFutureTaskResult(job);
         processing.remove(smartJob.getId());
         activeTasks.remove(smartJob.getId());
     }
 
     public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
         executors.get(weight).setRejectedExecutionHandler((r, executor) -> {
-            Job job = getJob(r);
+            Job job = getJobFromFutureTask(r);
             rejectJobHandler.reject(job);
         });
     }
@@ -116,12 +110,24 @@ public class SmartExecutorService {
         }
     }
 
-    private SmartExecutorService.Job getJob(Runnable runnable) {
+    private SmartExecutorService.Job getJobFromFutureTaskResult(Runnable runnable) {
         try {
             Field field = runnable.getClass().getDeclaredField("outcome");
             field.setAccessible(true);
 
             return (Job) field.get(runnable);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    private SmartExecutorService.Job getJobFromFutureTask(Runnable runnable) {
+        try {
+            Field field = runnable.getClass().getDeclaredField("callable");
+            field.setAccessible(true);
+            SmartCallable smartCallable = (SmartCallable) field.get(runnable);
+
+            return smartCallable.job;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -180,5 +186,20 @@ public class SmartExecutorService {
         LIGHT,
 
         HEAVY
+    }
+
+    private static class SmartCallable implements Callable<Job> {
+
+        private Job job;
+
+        private SmartCallable(Job job) {
+            this.job = job;
+        }
+
+        @Override
+        public Job call() throws Exception {
+            job.execute();
+            return job;
+        }
     }
 }

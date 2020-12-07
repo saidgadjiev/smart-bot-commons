@@ -46,8 +46,8 @@ public class CompletedItemsCleaner {
         List<QueueItem> queueItems = workQueueService.deleteCompleted();
         String queueName = workQueueService.getQueueDao().getQueueName();
         Set<Integer> queueItemsIds = queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet());
-        downloadJob.deleteDownloads(queueName, queueItemsIds);
-        uploadJob.deleteUploads(queueName, queueItemsIds);
+        downloadJob.cleanUpDownloads(queueName, queueItemsIds);
+        uploadJob.cleanUpUploads(queueName, queueItemsIds);
 
         LOGGER.debug("Delete completed({}, {})", queueItems.size(), new Date());
     }

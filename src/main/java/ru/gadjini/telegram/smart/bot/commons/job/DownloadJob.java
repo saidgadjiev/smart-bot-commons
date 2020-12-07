@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
@@ -21,6 +22,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.event.DownloadCompleted;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -55,6 +57,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private UserService userService;
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -64,7 +68,7 @@ public class DownloadJob extends WorkQueueJobPusher {
     @Autowired
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                       WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
+                       WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService, ApplicationEventPublisher applicationEventPublisher) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -72,6 +76,7 @@ public class DownloadJob extends WorkQueueJobPusher {
         this.workQueueDao = workQueueDao;
         this.messageService = messageService;
         this.userService = userService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Autowired
@@ -140,6 +145,12 @@ public class DownloadJob extends WorkQueueJobPusher {
     }
 
     public void deleteDownloads(String producer, Set<Integer> producerIds) {
+        List<DownloadQueueItem> deleted = downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
+        downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
+        releaseResources(deleted);
+    }
+
+    public void cleanUpDownloads(String producer, Set<Integer> producerIds) {
         List<DownloadQueueItem> deleted = new ArrayList<>(downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds));
         List<DownloadQueueItem> orphanDownloads = downloadingQueueService.deleteOrphanDownloads(producer);
         deleted.addAll(orphanDownloads);
@@ -186,6 +197,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                 } else {
                     downloadingQueueService.setCompleted(downloadingQueueItem.getId());
                 }
+                applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } finally {
                 currentDownloads.remove(downloadingQueueItem);
             }
