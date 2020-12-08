@@ -196,8 +196,8 @@ public class DownloadJob extends WorkQueueJobPusher {
                     doDownloadFile(downloadingQueueItem);
                 } else {
                     downloadingQueueService.setCompleted(downloadingQueueItem.getId());
+                    applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
                 }
-                applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } finally {
                 currentDownloads.remove(downloadingQueueItem);
             }
@@ -259,6 +259,7 @@ public class DownloadJob extends WorkQueueJobPusher {
             try {
                 fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(), downloadingQueueItem.getProgress(), tempFile);
                 downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
+                applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } catch (Exception e) {
                 tempFile.smartDelete();
 

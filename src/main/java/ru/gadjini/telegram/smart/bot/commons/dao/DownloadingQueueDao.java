@@ -181,6 +181,7 @@ public class DownloadingQueueDao extends QueueDao {
 
         item.setUserId(rs.getInt(DownloadQueueItem.USER_ID));
         item.setProducer(rs.getString(DownloadQueueItem.PRODUCER));
+        item.setProducerId(rs.getInt(DownloadQueueItem.PRODUCER_ID));
         item.setFilePath(rs.getString(DownloadQueueItem.FILE_PATH));
         item.setDeleteParentDir(rs.getBoolean(DownloadQueueItem.DELETE_PARENT_DIR));
 

@@ -138,7 +138,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         pushJobs();
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     public final void pushJobs() {
         super.push();
     }
