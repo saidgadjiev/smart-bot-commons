@@ -8,7 +8,6 @@ import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
-import javax.annotation.PostConstruct;
 import java.util.Date;
 import java.util.List;
 import java.util.Set;
@@ -30,15 +29,6 @@ public class CompletedItemsCleaner {
         this.workQueueService = workQueueService;
         this.downloadJob = downloadJob;
         this.uploadJob = uploadJob;
-    }
-
-    @PostConstruct
-    public void init() {
-        try {
-            clean();
-        } catch (Exception e) {
-            LOGGER.error(e.getMessage(), e);
-        }
     }
 
     @Scheduled(cron = "0 0 * * * *")
