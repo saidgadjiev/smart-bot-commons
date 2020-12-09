@@ -302,11 +302,11 @@ public class UploadJob extends WorkQueueJobPusher {
         }
 
         private void noneCriticalException(UploadQueueItem uploadQueueItem, Throwable e) {
-            uploadQueueService.setWaiting(uploadQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeUploadAttempt(), e);
+            uploadQueueService.setWaitingAndDecrementAttempts(uploadQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeUploadAttempt(), e);
         }
 
         private void floodControlException(UploadQueueItem uploadQueueItem, FloodControlException e) {
-            uploadQueueService.setWaiting(uploadQueueItem.getId(), e.getSleepTime(), e);
+            uploadQueueService.setWaitingAndDecrementAttempts(uploadQueueItem.getId(), e.getSleepTime(), e);
         }
 
         private void floodWaitException(UploadQueueItem uploadQueueItem, FloodWaitException e) {

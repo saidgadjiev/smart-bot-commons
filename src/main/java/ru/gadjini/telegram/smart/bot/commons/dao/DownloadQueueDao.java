@@ -11,7 +11,7 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
-import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -29,7 +29,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Repository
-public class DownloadingQueueDao extends QueueDao {
+public class DownloadQueueDao extends QueueDao {
 
     private JdbcTemplate jdbcTemplate;
 
@@ -40,7 +40,7 @@ public class DownloadingQueueDao extends QueueDao {
     private Gson gson;
 
     @Autowired
-    public DownloadingQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties, Gson gson) {
+    public DownloadQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties, Gson gson) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
@@ -138,7 +138,7 @@ public class DownloadingQueueDao extends QueueDao {
 
     public long countFloodWaits() {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE exception like '%" + FloodControlException.FLOOD_WAIT_BASE_MESSAGE + "%'",
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE exception like '%" + FloodWaitException.FLOOD_WAIT_BASE_MESSAGE + "%'",
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }

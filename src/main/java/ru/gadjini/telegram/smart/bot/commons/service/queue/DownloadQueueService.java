@@ -3,7 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.queue;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.gadjini.telegram.smart.bot.commons.dao.DownloadingQueueDao;
+import ru.gadjini.telegram.smart.bot.commons.dao.DownloadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -17,10 +17,10 @@ import java.util.Set;
 @Service
 public class DownloadQueueService extends QueueService {
 
-    private DownloadingQueueDao downloadingQueueDao;
+    private DownloadQueueDao downloadingQueueDao;
 
     @Autowired
-    public DownloadQueueService(DownloadingQueueDao downloadingQueueDao) {
+    public DownloadQueueService(DownloadQueueDao downloadingQueueDao) {
         this.downloadingQueueDao = downloadingQueueDao;
     }
 

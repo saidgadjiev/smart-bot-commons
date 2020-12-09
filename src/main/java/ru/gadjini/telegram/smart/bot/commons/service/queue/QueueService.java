@@ -38,6 +38,11 @@ public abstract class QueueService {
         getQueueDao().setWaiting(id);
     }
 
+    public final void setWaitingAndDecrementAttempts(int id, long seconds, Throwable reason) {
+        String exception = ExceptionUtils.getMessage(reason) + "\n" + ExceptionUtils.getStackTrace(reason);
+        getQueueDao().setWaitingAndDecrementAttempts(id, seconds, exception);
+    }
+
     public final void setWaiting(int id, long seconds, Throwable reason) {
         String exception = ExceptionUtils.getMessage(reason) + "\n" + ExceptionUtils.getStackTrace(reason);
         getQueueDao().setWaiting(id, seconds, exception);

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.DownloadFloodControlProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 
@@ -46,7 +47,7 @@ public class DownloadFloodWaitController {
             if (floodWaitProperties.isEnableLogging()) {
                 LOGGER.debug(Thread.currentThread().getName() + " flood wait " + fileId);
             }
-            throw new FloodControlException(sleepTime.get(), false);
+            throw new FloodControlException(sleepTime.get());
         } else {
             acquireDownloadingChannel(fileId);
         }
@@ -73,7 +74,7 @@ public class DownloadFloodWaitController {
     public synchronized void downloadingFloodWait() {
         long sleep = sleep(floodWaitProperties.getSleepOnDownloadingFloodWait());
 
-        throw new FloodControlException(sleep, true);
+        throw new FloodWaitException(sleep);
     }
 
     private synchronized long sleep(long sleep) {

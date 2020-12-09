@@ -285,11 +285,11 @@ public class DownloadJob extends WorkQueueJobPusher {
         }
 
         private void noneCriticalException(DownloadQueueItem downloadingQueueItem, Throwable e) {
-            downloadingQueueService.setWaiting(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
+            downloadingQueueService.setWaitingAndDecrementAttempts(downloadingQueueItem.getId(), fileManagerProperties.getSleepTimeBeforeDownloadAttempt(), e);
         }
 
         private void floodControlException(DownloadQueueItem downloadingQueueItem, FloodControlException e) {
-            downloadingQueueService.setWaiting(downloadingQueueItem.getId(), e.getSleepTime(), e);
+            downloadingQueueService.setWaitingAndDecrementAttempts(downloadingQueueItem.getId(), e.getSleepTime(), e);
         }
 
         private void floodWaitException(DownloadQueueItem downloadingQueueItem, FloodWaitException e) {

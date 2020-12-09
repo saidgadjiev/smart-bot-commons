@@ -2,12 +2,15 @@ package ru.gadjini.telegram.smart.bot.commons.exception;
 
 public class FloodWaitException extends RuntimeException {
 
-    private int sleepTime;
+    public static final String FLOOD_WAIT_BASE_MESSAGE = "Flood wait";
 
-    public FloodWaitException() {
+    private long sleepTime;
+
+    public FloodWaitException(long sleepTime) {
+        super(FLOOD_WAIT_BASE_MESSAGE + " " + sleepTime);
     }
 
-    public FloodWaitException(String message, int sleepTime) {
+    public FloodWaitException(String message, long sleepTime) {
         super(message + " " + sleepTime);
         this.sleepTime = sleepTime;
     }
@@ -24,7 +27,7 @@ public class FloodWaitException extends RuntimeException {
         super(message, cause, enableSuppression, writableStackTrace);
     }
 
-    public int getSleepTime() {
+    public long getSleepTime() {
         return sleepTime;
     }
 }

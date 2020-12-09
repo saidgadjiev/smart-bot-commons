@@ -47,6 +47,15 @@ public abstract class QueueDao {
                 ps -> ps.setInt(1, id));
     }
 
+    public final void setWaitingAndDecrementAttempts(int id, long seconds, String exception) {
+        getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0, " +
+                        "next_run_at = now() + interval '" + seconds + " seconds', exception = ?, attempts = GREATEST(0, attempts - 1) WHERE id = ?",
+                ps -> {
+                    ps.setString(1, exception);
+                    ps.setInt(2, id);
+                });
+    }
+
     public final void setWaiting(int id, long seconds, String exception) {
         getJdbcTemplate().update("UPDATE " + getQueueName() + " SET status = 0, " +
                         "next_run_at = now() + interval '" + seconds + " seconds', exception = ? WHERE id = ?",
