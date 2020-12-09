@@ -15,7 +15,6 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
-import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
 import java.sql.ResultSet;
