@@ -74,6 +74,10 @@ public class WorkQueueDao extends QueueDao {
         return queueDaoDelegate;
     }
 
+    public String getProducerName() {
+        return queueDaoDelegate.getProducerName();
+    }
+
     private QueueItem map(ResultSet rs) throws SQLException {
         QueueItem queueItem = new QueueItem();
         queueItem.setId(rs.getInt(QueueItem.ID));

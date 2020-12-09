@@ -49,14 +49,15 @@ public class DownloadQueueDao extends QueueDao {
 
     public void create(DownloadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer, progress, status, file_path, delete_parent_dir, producer_id, extra)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer_table, progress, status, file_path, " +
+                        "delete_parent_dir, producer_id, extra, producer)\n" +
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
 
                     ps.setObject(2, queueItem.getFile().sqlObject());
 
-                    ps.setString(3, queueItem.getProducer());
+                    ps.setString(3, queueItem.getProducerTable());
                     try {
                         ps.setString(4, objectMapper.writeValueAsString(queueItem.getProgress()));
                     } catch (JsonProcessingException e) {
@@ -75,6 +76,7 @@ public class DownloadQueueDao extends QueueDao {
                     } else {
                         ps.setString(9, gson.toJson(queueItem.getExtra()));
                     }
+                    ps.setString(10, queueItem.getProducer());
                 }
         );
     }
@@ -114,7 +116,7 @@ public class DownloadQueueDao extends QueueDao {
             return Collections.emptyList();
         }
         return jdbcTemplate.query(
-                "SELECT *, (file).* FROM " + getQueueName() + " WHERE producer = ? AND producer_id IN("
+                "SELECT *, (file).* FROM " + DownloadQueueItem.NAME + " WHERE producer = ? AND producer_id IN("
                         + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
@@ -138,17 +140,17 @@ public class DownloadQueueDao extends QueueDao {
 
     public long countFloodWaits() {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE exception like '%" + FloodWaitException.class.getSimpleName() + "%'",
+                "SELECT COUNT(*) as cnt FROM " + DownloadQueueItem.NAME + " WHERE exception like '%" + FloodWaitException.class.getSimpleName() + "%'",
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }
 
-    public List<DownloadQueueItem> deleteOrphan(String producer) {
+    public List<DownloadQueueItem> deleteOrphan(String producer, String producerTable) {
         return jdbcTemplate.query(
                 "WITH del as (delete\n" +
                         "from downloading_queue dq\n" +
                         "where producer = ?\n" +
-                        "  and not exists(select 1 from " + producer + " uq where uq.id = dq.producer_id) RETURNING *) " +
+                        "  and not exists(select 1 from " + producerTable + " uq where uq.id = dq.producer_id) RETURNING *) " +
                         "SELECT *, (file).* FROM del",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
@@ -179,7 +181,7 @@ public class DownloadQueueDao extends QueueDao {
         item.setFile(tgFile);
 
         item.setUserId(rs.getInt(DownloadQueueItem.USER_ID));
-        item.setProducer(rs.getString(DownloadQueueItem.PRODUCER));
+        item.setProducerTable(rs.getString(DownloadQueueItem.PRODUCER_TABLE));
         item.setProducerId(rs.getInt(DownloadQueueItem.PRODUCER_ID));
         item.setFilePath(rs.getString(DownloadQueueItem.FILE_PATH));
         item.setDeleteParentDir(rs.getBoolean(DownloadQueueItem.DELETE_PARENT_DIR));

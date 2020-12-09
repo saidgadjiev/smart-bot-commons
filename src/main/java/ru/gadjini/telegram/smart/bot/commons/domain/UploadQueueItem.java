@@ -6,6 +6,8 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String NAME = "upload_queue";
 
+    public static final String PRODUCER_TABLE = "producer_table";
+
     public static final String PRODUCER = "producer";
 
     public static final String PRODUCER_ID = "producer_id";
@@ -19,6 +21,8 @@ public class UploadQueueItem extends QueueItem {
     public static final String EXTRA = "extra";
 
     public static final String FILE_SIZE = "file_size";
+
+    private String producerTable;
 
     private String producer;
 
@@ -34,12 +38,12 @@ public class UploadQueueItem extends QueueItem {
 
     private long fileSize;
 
-    public String getProducer() {
-        return producer;
+    public String getProducerTable() {
+        return producerTable;
     }
 
-    public void setProducer(String producer) {
-        this.producer = producer;
+    public void setProducerTable(String producerTable) {
+        this.producerTable = producerTable;
     }
 
     public Progress getProgress() {
@@ -88,5 +92,13 @@ public class UploadQueueItem extends QueueItem {
 
     public long getFileSize() {
         return fileSize;
+    }
+
+    public String getProducer() {
+        return producer;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
     }
 }

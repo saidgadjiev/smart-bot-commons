@@ -30,12 +30,13 @@ public class UploadQueueService extends QueueService {
         this.fileUploader = fileUploader;
     }
 
-    public void createUpload(int userId, String method, Object body, Progress progress, String producer,
+    public void createUpload(int userId, String method, Object body, Progress progress, String producerTable, String producer,
                              int producerId, Object extra) {
         UploadQueueItem uploadQueueItem = new UploadQueueItem();
         uploadQueueItem.setUserId(userId);
         uploadQueueItem.setMethod(method);
         uploadQueueItem.setBody(body);
+        uploadQueueItem.setProducerTable(producerTable);
         uploadQueueItem.setProducer(producer);
         uploadQueueItem.setProgress(progress);
         uploadQueueItem.setProducerId(producerId);
@@ -46,16 +47,8 @@ public class UploadQueueService extends QueueService {
         uploadQueueDao.create(uploadQueueItem);
     }
 
-    public void createUpload(int userId, String method, Object body, Progress progress, String producer, int producerId) {
-        createUpload(userId, method, body, progress, producer, producerId, null);
-    }
-
     public List<UploadQueueItem> poll(String producer, SmartExecutorService.JobWeight jobWeight, int limit) {
         return uploadQueueDao.poll(producer, jobWeight, limit);
-    }
-
-    public List<UploadQueueItem> getUploads(String producer, Set<Integer> producerIds) {
-        return uploadQueueDao.getUploads(producer, producerIds);
     }
 
     public List<UploadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {

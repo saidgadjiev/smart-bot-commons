@@ -36,7 +36,7 @@ public class FileDownloadService {
     }
 
     public void createDownloads(Collection<TgFile> files, int producerId, int userId, Object extra) {
-        queueService.create(files, workQueueDao.getQueueName(), producerId, userId, extra);
+        queueService.create(files, workQueueDao.getQueueName(), workQueueDao.getProducerName(), producerId, userId, extra);
     }
 
     public void createDownload(TgFile file, int producerId, int userId) {

@@ -29,10 +29,11 @@ public class DownloadQueueService extends QueueService {
     }
 
     @Transactional
-    public void create(Collection<TgFile> files, String producer, int producerId, int userId, Object extra) {
+    public void create(Collection<TgFile> files, String producerTable, String producer, int producerId, int userId, Object extra) {
         for (TgFile file : files) {
             DownloadQueueItem queueItem = new DownloadQueueItem();
             queueItem.setFile(file);
+            queueItem.setProducerTable(producerTable);
             queueItem.setProducer(producer);
             queueItem.setProgress(file.getProgress());
             queueItem.setFilePath(file.getFilePath());
@@ -62,8 +63,8 @@ public class DownloadQueueService extends QueueService {
         return downloadingQueueDao.deleteByProducerIdsWithReturning(producer, producerIds);
     }
 
-    public List<DownloadQueueItem> deleteOrphanDownloads(String producer) {
-        return downloadingQueueDao.deleteOrphan(producer);
+    public List<DownloadQueueItem> deleteOrphanDownloads(String producer, String producerTable) {
+        return downloadingQueueDao.deleteOrphan(producer, producerTable);
     }
 
     public long floodWaitsCount() {

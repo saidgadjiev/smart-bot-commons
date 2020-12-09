@@ -50,13 +50,13 @@ public class UploadQueueDao extends QueueDao {
 
     public void create(UploadQueueItem queueItem) {
         jdbcTemplate.update(
-                "INSERT INTO upload_queue (user_id, method, body, producer, progress, status, producer_id, extra, file_size)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                "INSERT INTO upload_queue (user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer)\n" +
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
                     ps.setString(3, gson.toJson(queueItem.getBody()));
-                    ps.setString(4, queueItem.getProducer());
+                    ps.setString(4, queueItem.getProducerTable());
                     try {
                         ps.setString(5, objectMapper.writeValueAsString(queueItem.getProgress()));
                     } catch (JsonProcessingException e) {
@@ -70,6 +70,7 @@ public class UploadQueueDao extends QueueDao {
                         ps.setNull(8, Types.VARCHAR);
                     }
                     ps.setLong(9, queueItem.getFileSize());
+                    ps.setString(10, queueItem.getProducer());
                 }
         );
     }
@@ -91,7 +92,7 @@ public class UploadQueueDao extends QueueDao {
             return Collections.emptyList();
         }
         return jdbcTemplate.query(
-                "WITH del AS(DELETE FROM " + getQueueName() + " WHERE producer = ? AND producer_id IN("
+                "WITH del AS(DELETE FROM " + UploadQueueItem.NAME + " WHERE producer = ? AND producer_id IN("
                         + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") RETURNING *) " +
                         "SELECT * FROM del",
                 ps -> {
@@ -147,7 +148,7 @@ public class UploadQueueDao extends QueueDao {
         item.setId(rs.getInt(UploadQueueItem.ID));
 
         item.setUserId(rs.getInt(UploadQueueItem.USER_ID));
-        item.setProducer(rs.getString(UploadQueueItem.PRODUCER));
+        item.setProducerTable(rs.getString(UploadQueueItem.PRODUCER_TABLE));
         item.setMethod(rs.getString(UploadQueueItem.METHOD));
         item.setBody(deserializeBody(item.getMethod(), rs.getString(UploadQueueItem.BODY)));
 

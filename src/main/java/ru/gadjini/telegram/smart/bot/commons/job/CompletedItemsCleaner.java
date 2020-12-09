@@ -5,6 +5,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
@@ -35,8 +36,9 @@ public class CompletedItemsCleaner {
     public void clean() {
         List<QueueItem> queueItems = workQueueService.deleteCompleted();
         String queueName = workQueueService.getQueueDao().getQueueName();
+        String producerName = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
         Set<Integer> queueItemsIds = queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet());
-        downloadJob.cleanUpDownloads(queueName, queueItemsIds);
+        downloadJob.cleanUpDownloads(producerName, queueName, queueItemsIds);
         uploadJob.cleanUpUploads(queueName, queueItemsIds);
 
         LOGGER.debug("Delete completed({}, {})", queueItems.size(), new Date());

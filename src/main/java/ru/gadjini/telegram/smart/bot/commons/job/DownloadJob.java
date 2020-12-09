@@ -132,7 +132,7 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getQueueName(), weight, limit);
+        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
     }
 
     @Override
@@ -154,9 +154,9 @@ public class DownloadJob extends WorkQueueJobPusher {
         releaseResources(deleted);
     }
 
-    public void cleanUpDownloads(String producer, Set<Integer> producerIds) {
-        List<DownloadQueueItem> deleted = new ArrayList<>(downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds));
-        List<DownloadQueueItem> orphanDownloads = downloadingQueueService.deleteOrphanDownloads(producer);
+    public void cleanUpDownloads(String producer, String producerTable, Set<Integer> producerIds) {
+        List<DownloadQueueItem> deleted = new ArrayList<>(downloadingQueueService.deleteByProducerIdsWithReturning(producerTable, producerIds));
+        List<DownloadQueueItem> orphanDownloads = downloadingQueueService.deleteOrphanDownloads(producer, producerTable);
         deleted.addAll(orphanDownloads);
         downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
         releaseResources(deleted);
@@ -247,7 +247,7 @@ public class DownloadJob extends WorkQueueJobPusher {
             fileDownloader.cancelDownloading(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize());
             if (canceledByUser) {
                 downloadingQueueService.deleteById(downloadingQueueItem.getId());
-                LOGGER.debug("Canceled downloading({}, {}, {})", downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getProducer(), downloadingQueueItem.getProducerId());
+                LOGGER.debug("Canceled downloading({}, {}, {})", downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getProducerTable(), downloadingQueueItem.getProducerId());
             }
             if (tempFile != null) {
                 tempFile.smartDelete();

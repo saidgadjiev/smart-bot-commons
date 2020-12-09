@@ -132,7 +132,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getQueueName(), weight, limit);
+        return (List<QueueItem>) (Object) uploadQueueService.poll(workQueueDao.getProducerName(), weight, limit);
     }
 
     @Override
@@ -297,7 +297,7 @@ public class UploadJob extends WorkQueueJobPusher {
             if (canceledByUser) {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
                 releaseResources(uploadQueueItem);
-                LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducer(), uploadQueueItem.getProducerId());
+                LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducerTable(), uploadQueueItem.getProducerId());
             }
         }
 

@@ -30,7 +30,7 @@ public class FileUploadService {
     }
 
     public void createUpload(int userId, String method, Object body, Progress progress, int producerId, Object extra) {
-        uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(), producerId, extra);
+        uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(), workQueueDao.getProducerName(), producerId, extra);
     }
 
     public void createUpload(int userId, String method, Object body, Progress progress, int producerId) {

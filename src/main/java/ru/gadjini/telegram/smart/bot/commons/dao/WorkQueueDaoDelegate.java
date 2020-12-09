@@ -36,5 +36,5 @@ public interface WorkQueueDaoDelegate<T extends QueueItem> extends QueueDaoDeleg
         throw new UnsupportedOperationException();
     }
 
-    String getQueueName();
+    String getProducerName();
 }

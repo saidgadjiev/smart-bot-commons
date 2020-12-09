@@ -8,6 +8,8 @@ public class DownloadQueueItem extends QueueItem {
 
     public static final String FILE = "file";
 
+    public static final String PRODUCER_TABLE = "producer_table";
+
     public static final String PRODUCER = "producer";
 
     public static final String PRODUCER_ID = "producer_id";
@@ -21,6 +23,8 @@ public class DownloadQueueItem extends QueueItem {
     public static final String EXTRA = "extra";
 
     private TgFile file;
+
+    private String producerTable;
 
     private String producer;
 
@@ -42,12 +46,12 @@ public class DownloadQueueItem extends QueueItem {
         this.file = file;
     }
 
-    public String getProducer() {
-        return producer;
+    public String getProducerTable() {
+        return producerTable;
     }
 
-    public void setProducer(String producer) {
-        this.producer = producer;
+    public void setProducerTable(String producerTable) {
+        this.producerTable = producerTable;
     }
 
     public Progress getProgress() {
@@ -88,5 +92,13 @@ public class DownloadQueueItem extends QueueItem {
 
     public void setExtra(Object extra) {
         this.extra = extra;
+    }
+
+    public String getProducer() {
+        return producer;
+    }
+
+    public void setProducer(String producer) {
+        this.producer = producer;
     }
 }
