@@ -138,7 +138,7 @@ public class DownloadQueueDao extends QueueDao {
 
     public long countFloodWaits() {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE exception like '%" + FloodWaitException.FLOOD_WAIT_BASE_MESSAGE + "%'",
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE exception like '%" + FloodWaitException.class.getSimpleName() + "%'",
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }

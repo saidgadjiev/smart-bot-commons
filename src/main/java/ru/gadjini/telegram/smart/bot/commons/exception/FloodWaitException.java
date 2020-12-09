@@ -2,12 +2,10 @@ package ru.gadjini.telegram.smart.bot.commons.exception;
 
 public class FloodWaitException extends RuntimeException {
 
-    public static final String FLOOD_WAIT_BASE_MESSAGE = "Flood wait";
-
     private long sleepTime;
 
     public FloodWaitException(long sleepTime) {
-        super(FLOOD_WAIT_BASE_MESSAGE + " " + sleepTime);
+        super("Flood wait " + sleepTime);
     }
 
     public FloodWaitException(String message, long sleepTime) {
