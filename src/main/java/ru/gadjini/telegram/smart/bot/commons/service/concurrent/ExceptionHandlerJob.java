@@ -18,7 +18,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import java.util.Locale;
 import java.util.function.Supplier;
 
-public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
+public class ExceptionHandlerJob implements SmartExecutorService.Job {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExceptionHandlerJob.class);
 
@@ -39,47 +39,7 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
     }
 
     @Override
-    public void execute() throws Exception {
-        job.execute();
-    }
-
-    @Override
-    public int getId() {
-        return job.getId();
-    }
-
-    @Override
-    public SmartExecutorService.JobWeight getWeight() {
-        return job.getWeight();
-    }
-
-    @Override
-    public long getChatId() {
-        return job.getChatId();
-    }
-
-    @Override
-    public String getErrorCode(Throwable e) {
-        return job.getErrorCode(e);
-    }
-
-    @Override
-    public void cancel() {
-        job.cancel();
-    }
-
-    @Override
-    public void setCancelChecker(Supplier<Boolean> checker) {
-        job.setCancelChecker(checker);
-    }
-
-    @Override
-    public void setCanceledByUser(boolean canceledByUser) {
-        job.setCanceledByUser(canceledByUser);
-    }
-
-    @Override
-    public void run() {
+    public void execute() {
         try {
             job.execute();
         } catch (Throwable e) {
@@ -125,6 +85,41 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job, Runnable {
                 }
             }
         }
+    }
+
+    @Override
+    public int getId() {
+        return job.getId();
+    }
+
+    @Override
+    public SmartExecutorService.JobWeight getWeight() {
+        return job.getWeight();
+    }
+
+    @Override
+    public long getChatId() {
+        return job.getChatId();
+    }
+
+    @Override
+    public String getErrorCode(Throwable e) {
+        return job.getErrorCode(e);
+    }
+
+    @Override
+    public void cancel() {
+        job.cancel();
+    }
+
+    @Override
+    public void setCancelChecker(Supplier<Boolean> checker) {
+        job.setCancelChecker(checker);
+    }
+
+    @Override
+    public void setCanceledByUser(boolean canceledByUser) {
+        job.setCanceledByUser(canceledByUser);
     }
 
     private void sendUserExceptionMessage(SendMessage sendMessage) {
