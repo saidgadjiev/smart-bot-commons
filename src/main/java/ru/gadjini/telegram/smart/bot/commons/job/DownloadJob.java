@@ -16,6 +16,7 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -47,6 +48,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private FileManagerProperties fileManagerProperties;
 
+    private MediaLimitProperties mediaLimitProperties;
+
     private WorkQueueDao workQueueDao;
 
     private SmartExecutorService downloadTasksExecutor;
@@ -68,11 +71,12 @@ public class DownloadJob extends WorkQueueJobPusher {
     @Autowired
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                       WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService, ApplicationEventPublisher applicationEventPublisher) {
+                       MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService, ApplicationEventPublisher applicationEventPublisher) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
         this.fileManagerProperties = fileManagerProperties;
+        this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
         this.messageService = messageService;
         this.userService = userService;
@@ -210,7 +214,7 @@ public class DownloadJob extends WorkQueueJobPusher {
 
         @Override
         public SmartExecutorService.JobWeight getWeight() {
-            return SmartExecutorService.JobWeight.HEAVY;
+            return downloadingQueueItem.getFile().getSize() > mediaLimitProperties.getLightFileMaxWeight() ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
         }
 
         @Override
@@ -257,7 +261,8 @@ public class DownloadJob extends WorkQueueJobPusher {
                 tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
             }
             try {
-                fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(), downloadingQueueItem.getProgress(), tempFile);
+                fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(),
+                        downloadingQueueItem.getProgress(), tempFile, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
                 downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
                 applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } catch (Exception e) {

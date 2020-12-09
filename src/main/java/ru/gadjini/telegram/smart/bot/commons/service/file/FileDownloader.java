@@ -29,23 +29,14 @@ public class FileDownloader {
     }
 
     public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        downloadFileByFileId(fileId, fileSize, null, outputFile);
+        downloadFileByFileId(fileId, fileSize, null, outputFile, true);
     }
 
-    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
-        floodWaitController.startDownloading(fileId);
-        try {
-            try {
-                telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
-            } catch (TelegramApiRequestException ex) {
-                if (isWrongFileIdException(ex)) {
-                    floodWaitController.downloadingFloodWait();
-                } else {
-                    throw ex;
-                }
-            }
-        } finally {
-            floodWaitController.finishDownloading(fileId, fileSize);
+    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile, boolean withFloodControl) {
+        if (withFloodControl) {
+            downloadWithFloodControl(fileId, fileSize, progress, outputFile);
+        } else {
+            downloadWithoutFloodControl(fileId, fileSize, progress, outputFile);
         }
     }
 
@@ -64,6 +55,35 @@ public class FileDownloader {
         int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
 
         return indexOfNoResponseException != -1 || socketException != -1;
+    }
+
+    private void downloadWithoutFloodControl(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        try {
+            telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
+        } catch (TelegramApiRequestException ex) {
+            if (isWrongFileIdException(ex)) {
+                floodWaitController.downloadingFloodWait();
+            } else {
+                throw ex;
+            }
+        }
+    }
+
+    private void downloadWithFloodControl(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        floodWaitController.startDownloading(fileId);
+        try {
+            try {
+                telegramLocalBotApiService.downloadFileByFileId(fileId, fileSize, progress, outputFile);
+            } catch (TelegramApiRequestException ex) {
+                if (isWrongFileIdException(ex)) {
+                    floodWaitController.downloadingFloodWait();
+                } else {
+                    throw ex;
+                }
+            }
+        } finally {
+            floodWaitController.finishDownloading(fileId, fileSize);
+        }
     }
 
     private boolean isWrongFileIdException(TelegramApiRequestException ex) {

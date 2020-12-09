@@ -21,6 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
@@ -45,6 +46,8 @@ public class UploadJob extends WorkQueueJobPusher {
 
     private FileManagerProperties fileManagerProperties;
 
+    private MediaLimitProperties mediaLimitProperties;
+
     private WorkQueueDao workQueueDao;
 
     private FileUploader fileUploader;
@@ -68,10 +71,11 @@ public class UploadJob extends WorkQueueJobPusher {
     @Autowired
     public UploadJob(UploadQueueService uploadQueueService,
                      FileManagerProperties fileManagerProperties,
-                     WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
+                     MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
                      FileUploader fileUploader, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
         this.uploadQueueService = uploadQueueService;
         this.fileManagerProperties = fileManagerProperties;
+        this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
         this.applicationEventPublisher = applicationEventPublisher;
         this.fileUploader = fileUploader;
@@ -259,7 +263,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
         @Override
         public SmartExecutorService.JobWeight getWeight() {
-            return SmartExecutorService.JobWeight.HEAVY;
+            return uploadQueueItem.getFileSize() > mediaLimitProperties.getLightFileMaxWeight() ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
         }
 
         @Override
