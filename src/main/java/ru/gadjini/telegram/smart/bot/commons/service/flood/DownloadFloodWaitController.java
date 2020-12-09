@@ -46,7 +46,7 @@ public class DownloadFloodWaitController {
             if (floodWaitProperties.isEnableLogging()) {
                 LOGGER.debug(Thread.currentThread().getName() + " flood wait " + fileId);
             }
-            throw new FloodControlException(sleepTime.get());
+            throw new FloodControlException(sleepTime.get(), false);
         } else {
             acquireDownloadingChannel(fileId);
         }
@@ -73,7 +73,7 @@ public class DownloadFloodWaitController {
     public synchronized void downloadingFloodWait() {
         long sleep = sleep(floodWaitProperties.getSleepOnDownloadingFloodWait());
 
-        throw new FloodControlException(sleep);
+        throw new FloodControlException(sleep, true);
     }
 
     private synchronized long sleep(long sleep) {

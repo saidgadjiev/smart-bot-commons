@@ -66,8 +66,8 @@ public class DownloadQueueService extends QueueService {
         return downloadingQueueDao.deleteOrphan(producer);
     }
 
-    public long countWrongFileIdErrors() {
-        return downloadingQueueDao.countWrongFileIdErrors();
+    public long floodWaitsCount() {
+        return downloadingQueueDao.countFloodWaits();
     }
 
     @Override

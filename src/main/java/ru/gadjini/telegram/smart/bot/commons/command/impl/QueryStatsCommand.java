@@ -60,7 +60,7 @@ public class QueryStatsCommand implements BotCommand {
         long waitingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.WAITING);
         long errorForTodayDownloads = downloadQueueService.countByStatusForToday(QueueItem.Status.EXCEPTION);
         long errorAllTimeDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
-        long wrongFileIdErrors = downloadQueueService.countWrongFileIdErrors();
+        long floodWaitsCount = downloadQueueService.floodWaitsCount();
         long completedDownloads = downloadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
 
         long processingUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
@@ -71,7 +71,7 @@ public class QueryStatsCommand implements BotCommand {
 
         String statsMessage = localisationService.getMessage(MessagesProperties.MESSAGE_QUEUE_STATS, new Object[]{
                 processing, waiting, errorForToday, completed, activeUsers, errorAllTime,
-                processingDownloads, waitingDownloads, errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, wrongFileIdErrors,
+                processingDownloads, waitingDownloads, errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, floodWaitsCount,
                 processingUploads, waitingUploads, errorForTodayUploads, completedUploads, errorAllTimeUploads
         }, locale);
         messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(message.getChatId()))

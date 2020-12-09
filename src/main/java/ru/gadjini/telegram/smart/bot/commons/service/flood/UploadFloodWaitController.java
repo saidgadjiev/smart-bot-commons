@@ -44,7 +44,7 @@ public class UploadFloodWaitController {
             if (floodWaitProperties.isEnableLogging()) {
                 LOGGER.debug(Thread.currentThread().getName() + " flood wait " + key);
             }
-            throw new FloodControlException(sleepTime.get());
+            throw new FloodControlException(sleepTime.get(), false);
         } else {
             acquireUploadingChannel(key);
         }

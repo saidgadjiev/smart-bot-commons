@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
+import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -136,9 +137,9 @@ public class DownloadingQueueDao extends QueueDao {
         );
     }
 
-    public long countWrongFileIdErrors() {
+    public long countFloodWaits() {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND exception like '%" + FileDownloader.FILE_ID_TEMPORARILY_UNAVAILABLE + "%'",
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND exception like '%" + FloodControlException.FLOOD_WAIT_BASE_MESSAGE + "%'",
                 ps -> ps.setInt(1, QueueItem.Status.EXCEPTION.getCode()),
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
