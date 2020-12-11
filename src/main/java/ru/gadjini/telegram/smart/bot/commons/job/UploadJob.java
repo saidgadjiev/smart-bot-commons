@@ -97,7 +97,6 @@ public class UploadJob extends WorkQueueJobPusher {
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
-        doUploads();
     }
 
     public void rejectTask(SmartExecutorService.Job job) {

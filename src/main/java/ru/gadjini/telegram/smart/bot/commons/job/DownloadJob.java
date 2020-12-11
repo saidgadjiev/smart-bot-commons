@@ -97,7 +97,6 @@ public class DownloadJob extends WorkQueueJobPusher {
         } catch (Exception ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
-        doDownloads();
     }
 
     public void rejectTask(SmartExecutorService.Job job) {
