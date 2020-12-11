@@ -61,6 +61,8 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
         long readToCompleteLight = workQueueService.countReadToComplete(SmartExecutorService.JobWeight.LIGHT);
 
         Map<Integer, SmartExecutorService.Job> activeTasks = executorService.getActiveTasks();
+        StringBuilder activeTasksToString = new StringBuilder();
+        activeTasks.forEach((integer, job) -> activeTasksToString.append(integer).append("-").append(job.getWeight().name()).append(" "));
 
         messageService.sendMessage(
                 new SendMessage(
@@ -68,7 +70,7 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
                         localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[]{
                                 heavyCorePoolSize, lightCorePoolSize, heavyActiveCount, lightActiveCount,
                                 processingHeavy, processingLight, readyToCompleteHeavy, readToCompleteLight,
-                                activeTasks.toString()
+                                activeTasksToString.toString().trim()
                         }, userService.getLocaleOrDefault(message.getFrom().getId()))
                 )
         );
