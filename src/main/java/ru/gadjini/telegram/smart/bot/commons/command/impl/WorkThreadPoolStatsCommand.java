@@ -30,13 +30,16 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
     private UserService userService;
 
     @Autowired
-    public WorkThreadPoolStatsCommand(LocalisationService localisationService,
-                                      WorkQueueService workQueueService, @Qualifier("messageLimits") MessageService messageService,
+    public WorkThreadPoolStatsCommand(LocalisationService localisationService, @Qualifier("messageLimits") MessageService messageService,
                                       UserService userService) {
         this.localisationService = localisationService;
-        this.workQueueService = workQueueService;
         this.messageService = messageService;
         this.userService = userService;
+    }
+
+    @Autowired
+    public void setWorkQueueService(WorkQueueService queueService) {
+        this.workQueueService = queueService;
     }
 
     @Autowired
@@ -62,7 +65,7 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
         messageService.sendMessage(
                 new SendMessage(
                         String.valueOf(message.getChatId()),
-                        localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[] {
+                        localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[]{
                                 heavyCorePoolSize, lightCorePoolSize, heavyActiveCount, lightActiveCount,
                                 processingHeavy, processingLight, readyToCompleteHeavy, readToCompleteLight,
                                 activeTasks.toString()
