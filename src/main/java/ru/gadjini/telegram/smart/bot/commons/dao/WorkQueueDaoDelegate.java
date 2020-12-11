@@ -8,24 +8,24 @@ import java.util.List;
 
 public interface WorkQueueDaoDelegate<T extends QueueItem> extends QueueDaoDelegate<T> {
 
-    default List<T> poll() {
-        return Collections.emptyList();
-    }
+    long countReadToComplete(SmartExecutorService.JobWeight weight);
+
+    long countProcessing(SmartExecutorService.JobWeight weight);
 
     default List<T> poll(SmartExecutorService.JobWeight weight, int limit) {
         return Collections.emptyList();
     }
 
     default T getById(int id) {
-         return null;
+        return null;
     }
 
     default List<T> deleteAndGetProcessingOrWaitingByUserId(int userId) {
-         return Collections.emptyList();
+        return Collections.emptyList();
     }
 
     default T deleteAndGetById(int id) {
-         return null;
+        return null;
     }
 
     default boolean isDeleteCompletedShouldBeDelegated() {

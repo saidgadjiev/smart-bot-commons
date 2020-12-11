@@ -23,12 +23,12 @@ public class WorkQueueDao extends QueueDao {
         this.queueDaoDelegate = queueDaoDelegate;
     }
 
-    public List<QueueItem> poll() {
-        return queueDaoDelegate.poll();
+    public long countReadToComplete(SmartExecutorService.JobWeight weight) {
+        return queueDaoDelegate.countReadToComplete(weight);
     }
 
-    public List<QueueItem> poll(int limit) {
-        return queueDaoDelegate.poll(null, limit);
+    public long countProcessing(SmartExecutorService.JobWeight weight) {
+        return queueDaoDelegate.countProcessing(weight);
     }
 
     public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {

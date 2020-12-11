@@ -30,5 +30,7 @@ public class CommandNames {
 
     public static final String QUEUE_STATS = "qstats";
 
+    public static final String TSTATS = "tstats";
+
     public static final String GLOBAL_STATS = "gstats";
 }

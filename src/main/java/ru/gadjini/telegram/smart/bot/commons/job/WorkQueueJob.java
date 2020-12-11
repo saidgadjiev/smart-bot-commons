@@ -257,7 +257,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
                 queueWorker.execute();
                 workQueueService.setCompleted(queueItem.getId());
             } catch (BusyWorkerException e) {
-                workQueueService.setWaitingAndDecrementAttempts(queueItem.getId());
+                workQueueService.setWaiting(queueItem.getId());
             } catch (Throwable ex) {
                 if (checker == null || !checker.get()) {
                     workQueueService.setExceptionStatus(queueItem.getId(), ex);

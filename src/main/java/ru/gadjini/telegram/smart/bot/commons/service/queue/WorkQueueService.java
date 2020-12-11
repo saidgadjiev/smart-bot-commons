@@ -19,14 +19,6 @@ public class WorkQueueService extends QueueService {
         this.queueDao = workQueueDao;
     }
 
-    public List<QueueItem> poll() {
-        return queueDao.poll();
-    }
-
-    public List<QueueItem> poll(int limit) {
-        return queueDao.poll(limit);
-    }
-
     public List<QueueItem> poll(SmartExecutorService.JobWeight weight, int limit) {
         return queueDao.poll(weight, limit);
     }
@@ -45,6 +37,14 @@ public class WorkQueueService extends QueueService {
 
     public List<QueueItem> deleteCompleted() {
         return queueDao.deleteCompleted();
+    }
+
+    public long countReadToComplete(SmartExecutorService.JobWeight weight) {
+        return queueDao.countReadToComplete(weight);
+    }
+
+    public long countProcessing(SmartExecutorService.JobWeight weight) {
+        return queueDao.countProcessing(weight);
     }
 
     @Override

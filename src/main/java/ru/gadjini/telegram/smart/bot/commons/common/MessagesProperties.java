@@ -54,4 +54,6 @@ public class MessagesProperties {
     public static final String MESSAGE_QUEUE_STATS = "message.queue.stats";
 
     public static final String MESSAGE_GLOBAL_STATS = "message.global.stats";
+
+    public static final String MESSAGE_WORK_THREAD_POOL_STATS = "message.work.thread.pool.stats";
 }
