@@ -14,6 +14,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
+import java.util.Map;
+
 @Component
 public class WorkThreadPoolStatsCommand implements BotCommand {
 
@@ -55,12 +57,15 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
         long readyToCompleteHeavy = workQueueService.countReadToComplete(SmartExecutorService.JobWeight.HEAVY);
         long readToCompleteLight = workQueueService.countReadToComplete(SmartExecutorService.JobWeight.LIGHT);
 
+        Map<Integer, SmartExecutorService.Job> activeTasks = executorService.getActiveTasks();
+
         messageService.sendMessage(
                 new SendMessage(
                         String.valueOf(message.getChatId()),
                         localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[] {
                                 heavyCorePoolSize, lightCorePoolSize, heavyActiveCount, lightActiveCount,
-                                processingHeavy, processingLight, readyToCompleteHeavy, readToCompleteLight
+                                processingHeavy, processingLight, readyToCompleteHeavy, readToCompleteLight,
+                                activeTasks.toString()
                         }, userService.getLocaleOrDefault(message.getFrom().getId()))
                 )
         );

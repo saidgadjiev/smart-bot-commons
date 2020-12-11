@@ -91,6 +91,10 @@ public class SmartExecutorService {
         return executors.get(jobWeight);
     }
 
+    public Map<Integer, Job> getActiveTasks() {
+        return activeTasks;
+    }
+
     public void shutdown() {
         try {
             for (Map.Entry<JobWeight, ThreadPoolExecutor> entry : executors.entrySet()) {
