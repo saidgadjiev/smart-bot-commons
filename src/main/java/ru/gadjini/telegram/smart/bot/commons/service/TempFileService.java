@@ -130,6 +130,6 @@ public class TempFileService {
         tag = StringUtils.defaultIfBlank(tag, "-");
         long n = RANDOM.nextLong();
 
-        return "tag_" + tag + "_chatId_" + chatId + "_time_" + System.nanoTime() + "_salt_" + Long.toUnsignedString(n);
+        return "tag_" + tag + "_chatId_" + chatId + "_time_" + System.currentTimeMillis() + "_salt_" + Long.toUnsignedString(n);
     }
 }
