@@ -104,6 +104,7 @@ public enum Format {
     DOTX(FormatCategory.DOCUMENTS),
     DOTM(FormatCategory.DOCUMENTS),
     OTT(FormatCategory.DOCUMENTS),
+    MERGE(FormatCategory.COMMON),
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
@@ -135,6 +136,7 @@ public enum Format {
     WMV(FormatCategory.VIDEO),
     TS(FormatCategory.VIDEO),
     IMAGES(FormatCategory.IMAGES),
+    PDFS(FormatCategory.DOCUMENTS),
     COMPRESS(FormatCategory.VIDEO) {
         @Override
         public String getExt() {
