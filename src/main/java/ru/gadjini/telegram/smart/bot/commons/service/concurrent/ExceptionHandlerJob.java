@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
-import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -43,46 +42,48 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job {
         try {
             job.execute();
         } catch (Throwable e) {
-            if (userService.handleBotBlockedByUser(e)) {
-                TelegramApiRequestException exception = (TelegramApiRequestException) e;
-                LOGGER.error("Bot is blocked({})", exception.getChatId());
-                return;
-            }
-            if (!job.getCancelChecker().get()) {
-                Locale locale = userService.getLocaleOrDefault((int) job.getChatId());
-
-                int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(e, FloodWaitException.class);
-                if (e instanceof UserException) {
-                    if (((UserException) e).isPrintLog()) {
-                        LOGGER.error(e.getMessage(), e);
-                    }
-                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId())).text(((UserException) e).getHumanMessage())
-                            .parseMode(ParseMode.HTML)
-                            .replyToMessageId(((UserException) e).getReplyToMessageId()).build());
-                } else if (e instanceof ProcessException) {
-                    LOGGER.error(e.getMessage(), e);
-                    sendUserExceptionMessage(
-                            SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                                    .parseMode(ParseMode.HTML)
-                                    .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                            MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId()).build());
-                } else if (floodWaitExceptionIndexOf != -1) {
-                    LOGGER.error(e.getMessage());
-                    FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
-                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                            .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
-                                    new Object[]{floodWaitException.getSleepTime()},
-                                    locale)
-                            ).replyToMessageId(job.getReplyToMessageId())
-                            .parseMode(ParseMode.HTML).build());
-                } else {
-                    LOGGER.error(e.getMessage(), e);
-                    sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                            .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                    MessagesProperties.MESSAGE_ERROR), locale))
-                            .parseMode(ParseMode.HTML).replyToMessageId(job.getReplyToMessageId())
-                            .build());
+            try {
+                if (userService.handleBotBlockedByUser(e)) {
+                    return;
                 }
+                if (!job.getCancelChecker().get()) {
+                    Locale locale = userService.getLocaleOrDefault((int) job.getChatId());
+
+                    int floodWaitExceptionIndexOf = ExceptionUtils.indexOfThrowable(e, FloodWaitException.class);
+                    if (e instanceof UserException) {
+                        if (((UserException) e).isPrintLog()) {
+                            LOGGER.error(e.getMessage(), e);
+                        }
+                        sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId())).text(((UserException) e).getHumanMessage())
+                                .parseMode(ParseMode.HTML)
+                                .replyToMessageId(((UserException) e).getReplyToMessageId()).build());
+                    } else if (e instanceof ProcessException) {
+                        LOGGER.error(e.getMessage(), e);
+                        sendUserExceptionMessage(
+                                SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                        .parseMode(ParseMode.HTML)
+                                        .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                                MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId()).build());
+                    } else if (floodWaitExceptionIndexOf != -1) {
+                        LOGGER.error(e.getMessage());
+                        FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
+                        sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
+                                        new Object[]{floodWaitException.getSleepTime()},
+                                        locale)
+                                ).replyToMessageId(job.getReplyToMessageId())
+                                .parseMode(ParseMode.HTML).build());
+                    } else {
+                        LOGGER.error(e.getMessage(), e);
+                        sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
+                                        MessagesProperties.MESSAGE_ERROR), locale))
+                                .parseMode(ParseMode.HTML).replyToMessageId(job.getReplyToMessageId())
+                                .build());
+                    }
+                }
+            } catch (Throwable ex) {
+                userService.handleBotBlockedByUser(e);
             }
         }
     }
