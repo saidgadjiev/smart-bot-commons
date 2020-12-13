@@ -5,6 +5,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
 import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -143,6 +146,21 @@ public abstract class QueueDao {
                 ps -> {
                     ps.setString(2, exception);
                     ps.setInt(3, id);
+                }
+        );
+    }
+
+    public ZonedDateTime getWaitingMaxNextRunAt() {
+        return getJdbcTemplate().query(
+                "SELECT MAX(next_run_at) FROM " + getQueueName() + " WHERE status = 0",
+                rs -> {
+                    if (rs.next()) {
+                        Timestamp nextRunAt = rs.getTimestamp("next_run_at");
+
+                        return ZonedDateTime.of(nextRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                    }
+
+                    return null;
                 }
         );
     }

@@ -17,10 +17,14 @@ import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
 @Component
-public class QueryStatsCommand implements BotCommand {
+public class QueueStatsCommand implements BotCommand {
+
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss");
 
     private WorkQueueService queueService;
 
@@ -35,7 +39,7 @@ public class QueryStatsCommand implements BotCommand {
     private UploadQueueService uploadQueueService;
 
     @Autowired
-    public QueryStatsCommand(WorkQueueService queueService, LocalisationService localisationService,
+    public QueueStatsCommand(WorkQueueService queueService, LocalisationService localisationService,
                              UserService userService, @Qualifier("messageLimits") MessageService messageService,
                              DownloadQueueService downloadQueueService, UploadQueueService uploadQueueService) {
         this.queueService = queueService;
@@ -62,6 +66,7 @@ public class QueryStatsCommand implements BotCommand {
         long errorAllTimeDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
         long floodWaitsCount = downloadQueueService.floodWaitsCount();
         long completedDownloads = downloadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
+        ZonedDateTime maxNextRunAt = downloadQueueService.getWaitingMaxNextRunAt();
 
         long processingUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
         long waitingUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.WAITING);
@@ -71,7 +76,8 @@ public class QueryStatsCommand implements BotCommand {
 
         String statsMessage = localisationService.getMessage(MessagesProperties.MESSAGE_QUEUE_STATS, new Object[]{
                 processing, waiting, errorForToday, completed, activeUsers, errorAllTime,
-                processingDownloads, waitingDownloads, errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, floodWaitsCount,
+                processingDownloads, waitingDownloads, maxNextRunAt == null ? "" : DATE_TIME_FORMATTER.format(maxNextRunAt),
+                errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, floodWaitsCount,
                 processingUploads, waitingUploads, errorForTodayUploads, completedUploads, errorAllTimeUploads
         }, locale);
         messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(message.getChatId()))

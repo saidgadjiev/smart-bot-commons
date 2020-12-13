@@ -4,6 +4,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
+import java.time.ZonedDateTime;
 import java.util.Set;
 
 public abstract class QueueService {
@@ -74,6 +75,10 @@ public abstract class QueueService {
 
     public final boolean exists(int id) {
         return getQueueDao().exists(id);
+    }
+
+    public final ZonedDateTime getWaitingMaxNextRunAt() {
+        return getQueueDao().getWaitingMaxNextRunAt();
     }
 
     public abstract QueueDao getQueueDao();
