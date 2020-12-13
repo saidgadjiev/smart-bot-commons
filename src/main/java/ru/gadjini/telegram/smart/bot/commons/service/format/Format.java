@@ -77,6 +77,13 @@ public enum Format {
     TXTZ(FormatCategory.DOCUMENTS),
     OEB(FormatCategory.DOCUMENTS),
     PMLZ(FormatCategory.DOCUMENTS),
+    XML(FormatCategory.DOCUMENTS),
+    PDF_IMPORT(FormatCategory.DOCUMENTS) {
+        @Override
+        public String getExt() {
+            return PDF.getExt();
+        }
+    },
     MP4(FormatCategory.VIDEO),
     _3GP(FormatCategory.VIDEO) {
         @Override
