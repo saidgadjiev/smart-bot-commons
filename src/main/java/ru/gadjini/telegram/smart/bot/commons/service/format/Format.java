@@ -83,6 +83,18 @@ public enum Format {
     XML(FormatCategory.DOCUMENTS),
     SWF(FormatCategory.DOCUMENTS),
     OTP(FormatCategory.DOCUMENTS),
+    DIF(FormatCategory.DOCUMENTS),
+    FODS(FormatCategory.DOCUMENTS),
+    NUMBERS(FormatCategory.DOCUMENTS),
+    ODS(FormatCategory.DOCUMENTS),
+    SXC(FormatCategory.DOCUMENTS),
+    TSV(FormatCategory.DOCUMENTS),
+    XLSM(FormatCategory.DOCUMENTS),
+    XLTX(FormatCategory.DOCUMENTS),
+    XLTM(FormatCategory.DOCUMENTS),
+    XLAM(FormatCategory.DOCUMENTS),
+    XLSB(FormatCategory.DOCUMENTS),
+    MHTML(FormatCategory.DOCUMENTS),
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
