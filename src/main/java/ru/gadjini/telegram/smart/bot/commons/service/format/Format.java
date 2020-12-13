@@ -78,7 +78,11 @@ public enum Format {
     OEB(FormatCategory.DOCUMENTS),
     PMLZ(FormatCategory.DOCUMENTS),
     CSV(FormatCategory.DOCUMENTS),
+    ODP(FormatCategory.DOCUMENTS),
+    XPS(FormatCategory.DOCUMENTS),
     XML(FormatCategory.DOCUMENTS),
+    SWF(FormatCategory.DOCUMENTS),
+    OTP(FormatCategory.DOCUMENTS),
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
