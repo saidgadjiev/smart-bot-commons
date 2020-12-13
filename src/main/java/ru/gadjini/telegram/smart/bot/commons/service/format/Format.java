@@ -95,6 +95,15 @@ public enum Format {
     XLAM(FormatCategory.DOCUMENTS),
     XLSB(FormatCategory.DOCUMENTS),
     MHTML(FormatCategory.DOCUMENTS),
+    MHT(FormatCategory.DOCUMENTS),
+    PCL(FormatCategory.DOCUMENTS),
+    PS(FormatCategory.DOCUMENTS),
+    CGM(FormatCategory.DOCUMENTS),
+    DOT(FormatCategory.DOCUMENTS),
+    DOCM(FormatCategory.DOCUMENTS),
+    DOTX(FormatCategory.DOCUMENTS),
+    DOTM(FormatCategory.DOCUMENTS),
+    OTT(FormatCategory.DOCUMENTS),
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
@@ -181,7 +190,8 @@ public enum Format {
             return OGG.getExt();
         }
     },
-    RA(FormatCategory.AUDIO);
+    RA(FormatCategory.AUDIO),
+    RM(FormatCategory.AUDIO);
 
     private FormatCategory category;
 
