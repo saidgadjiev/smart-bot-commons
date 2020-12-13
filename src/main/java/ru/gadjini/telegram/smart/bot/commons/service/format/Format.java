@@ -77,6 +77,7 @@ public enum Format {
     TXTZ(FormatCategory.DOCUMENTS),
     OEB(FormatCategory.DOCUMENTS),
     PMLZ(FormatCategory.DOCUMENTS),
+    CSV(FormatCategory.DOCUMENTS),
     XML(FormatCategory.DOCUMENTS),
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
