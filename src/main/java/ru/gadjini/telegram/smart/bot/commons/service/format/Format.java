@@ -104,7 +104,12 @@ public enum Format {
     DOTX(FormatCategory.DOCUMENTS),
     DOTM(FormatCategory.DOCUMENTS),
     OTT(FormatCategory.DOCUMENTS),
-    MERGE(FormatCategory.COMMON),
+    MERGE_PDFS(FormatCategory.DOCUMENTS) {
+        @Override
+        public String getName() {
+            return "MERGE";
+        }
+    },
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
