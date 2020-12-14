@@ -21,7 +21,7 @@ public abstract class QueueDao {
 
     public final void setExceptionStatus(int id, String exception) {
         getJdbcTemplate().update(
-                "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE WHERE id = ?",
+                "UPDATE " + getQueueName() + " SET status = ?, exception = ?, suppress_user_exceptions = TRUE, completed_at = now() WHERE id = ?",
                 ps -> {
                     ps.setInt(1, QueueItem.Status.EXCEPTION.getCode());
                     ps.setString(2, exception);
