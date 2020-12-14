@@ -14,7 +14,11 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class WorkThreadPoolStatsCommand implements BotCommand {
@@ -62,7 +66,15 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
 
         Map<Integer, SmartExecutorService.Job> activeTasks = executorService.getActiveTasks();
         StringBuilder activeTasksToString = new StringBuilder();
-        activeTasks.forEach((integer, job) -> activeTasksToString.append(integer).append("-").append(job.getWeight().name()).append(" "));
+        Map<SmartExecutorService.JobWeight, List<Integer>> jobWeightListMap = new LinkedHashMap<>();
+        activeTasks.forEach((integer, job) -> {
+            jobWeightListMap.putIfAbsent(job.getWeight(), new ArrayList<>());
+            jobWeightListMap.get(job.getWeight()).add(integer);
+        });
+        jobWeightListMap.forEach((jobWeight, integers) -> {
+            activeTasksToString.append(jobWeight.name()).append("-").append(integers.stream().map(String::valueOf)
+                    .collect(Collectors.joining(", "))).append("\n");
+        });
 
         messageService.sendMessage(
                 new SendMessage(
