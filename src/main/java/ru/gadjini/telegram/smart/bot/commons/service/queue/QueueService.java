@@ -81,5 +81,9 @@ public abstract class QueueService {
         return getQueueDao().getWaitingMaxNextRunAt();
     }
 
+    public final ZonedDateTime getWaitingMinLastRunAt() {
+        return getQueueDao().getWaitingMinLastRunAt();
+    }
+
     public abstract QueueDao getQueueDao();
 }

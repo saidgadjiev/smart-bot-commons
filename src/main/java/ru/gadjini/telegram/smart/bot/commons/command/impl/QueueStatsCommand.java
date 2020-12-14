@@ -59,6 +59,7 @@ public class QueueStatsCommand implements BotCommand {
         long errorAllTime = queueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
         long completed = queueService.countByStatusForToday(QueueItem.Status.COMPLETED);
         long activeUsers = queueService.countActiveUsersForToday();
+        ZonedDateTime minLastRunAt = queueService.getWaitingMinLastRunAt();
 
         long processingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
         long waitingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.WAITING);
@@ -75,7 +76,8 @@ public class QueueStatsCommand implements BotCommand {
         long completedUploads = uploadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
 
         String statsMessage = localisationService.getMessage(MessagesProperties.MESSAGE_QUEUE_STATS, new Object[]{
-                processing, waiting, errorForToday, completed, activeUsers, errorAllTime,
+                processing, waiting, minLastRunAt == null ? "" : DATE_TIME_FORMATTER.format(minLastRunAt),
+                errorForToday, completed, activeUsers, errorAllTime,
                 processingDownloads, waitingDownloads, maxNextRunAt == null ? "" : DATE_TIME_FORMATTER.format(maxNextRunAt),
                 errorForTodayDownloads, completedDownloads, errorAllTimeDownloads, floodWaitsCount,
                 processingUploads, waitingUploads, errorForTodayUploads, completedUploads, errorAllTimeUploads

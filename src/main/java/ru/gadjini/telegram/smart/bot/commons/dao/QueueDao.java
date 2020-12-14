@@ -165,6 +165,21 @@ public abstract class QueueDao {
         );
     }
 
+    public ZonedDateTime getWaitingMinLastRunAt() {
+        return getJdbcTemplate().query(
+                "SELECT MIN(last_run_at) FROM " + getQueueName() + " WHERE status = 0",
+                rs -> {
+                    if (rs.next()) {
+                        Timestamp lastRunAt = rs.getTimestamp("last_run_at");
+
+                        return ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                    }
+
+                    return null;
+                }
+        );
+    }
+
     public final String getQueueName() {
         return getQueueDaoDelegate().getQueueName();
     }
