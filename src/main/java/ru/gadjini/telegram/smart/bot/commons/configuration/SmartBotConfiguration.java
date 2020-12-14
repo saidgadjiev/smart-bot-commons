@@ -5,12 +5,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 
 @Configuration
@@ -58,5 +60,12 @@ public class SmartBotConfiguration {
     @Qualifier("botapi")
     public Gson gson(GsonBuilder gsonBuilder) {
         return gsonBuilder.create();
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public QueueJobConfigurator queueJobConfigurator() {
+        return new QueueJobConfigurator() {
+        };
     }
 }
