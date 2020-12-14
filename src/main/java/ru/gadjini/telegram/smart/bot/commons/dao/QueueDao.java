@@ -165,14 +165,29 @@ public abstract class QueueDao {
         );
     }
 
-    public ZonedDateTime getWaitingMinLastRunAt() {
+    public ZonedDateTime getProcessingMinLastRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(last_run_at) FROM " + getQueueName() + " WHERE status = 0",
+                "SELECT MIN(last_run_at) FROM " + getQueueName() + " WHERE status = 1",
                 rs -> {
                     if (rs.next()) {
                         Timestamp lastRunAt = rs.getTimestamp("last_run_at");
 
                         return ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+    public ZonedDateTime getWaitingMinCreatedAt() {
+        return getJdbcTemplate().query(
+                "SELECT MIN(created_at) FROM " + getQueueName() + " WHERE status = 0",
+                rs -> {
+                    if (rs.next()) {
+                        Timestamp createdAt = rs.getTimestamp("created_at");
+
+                        return ZonedDateTime.of(createdAt.toLocalDateTime(), ZoneOffset.UTC);
                     }
 
                     return null;
