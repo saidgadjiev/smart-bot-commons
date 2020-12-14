@@ -83,7 +83,9 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job {
                     }
                 }
             } catch (Throwable ex) {
-                userService.handleBotBlockedByUser(e);
+                if (!userService.handleBotBlockedByUser(e)) {
+                    LOGGER.error(e.getMessage(), e);
+                }
             }
         }
     }
