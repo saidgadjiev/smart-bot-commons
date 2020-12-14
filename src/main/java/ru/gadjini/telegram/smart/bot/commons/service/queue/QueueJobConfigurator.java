@@ -7,8 +7,4 @@ public interface QueueJobConfigurator<T extends QueueItem> {
     default boolean isNeedUpdateMessageAfterCancel(T queueItem) {
         return true;
     }
-
-    default String getErrorCode(Throwable e) {
-        return null;
-    }
 }

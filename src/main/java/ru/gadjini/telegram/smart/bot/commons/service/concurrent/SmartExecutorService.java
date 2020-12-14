@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.localisation.ErrorCode;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.lang.reflect.Field;
@@ -155,8 +156,8 @@ public class SmartExecutorService {
             return false;
         }
 
-        default String getErrorCode(Throwable e) {
-            return null;
+        default ErrorCode getErrorCode(Throwable e) {
+            return ErrorCode.EMPTY;
         }
 
         default void cancel() {

@@ -20,6 +20,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloadService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploadService;
+import ru.gadjini.telegram.smart.bot.commons.service.localisation.ErrorCode;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueWorker;
@@ -284,8 +285,8 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         }
 
         @Override
-        public String getErrorCode(Throwable e) {
-            return queueJobConfigurator.getErrorCode(e);
+        public ErrorCode getErrorCode(Throwable e) {
+            return queueWorker.getErrorCode(e);
         }
 
         @Override

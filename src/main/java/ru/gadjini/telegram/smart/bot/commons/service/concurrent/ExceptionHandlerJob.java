@@ -12,6 +12,7 @@ import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.localisation.ErrorCode;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.Locale;
@@ -57,29 +58,33 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job {
                         sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId())).text(((UserException) e).getHumanMessage())
                                 .parseMode(ParseMode.HTML)
                                 .replyToMessageId(((UserException) e).getReplyToMessageId()).build());
-                    } else if (e instanceof ProcessException) {
-                        LOGGER.error(e.getMessage(), e);
-                        sendUserExceptionMessage(
-                                SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                                        .parseMode(ParseMode.HTML)
-                                        .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                                MessagesProperties.MESSAGE_ERROR), locale)).replyToMessageId(job.getReplyToMessageId()).build());
-                    } else if (floodWaitExceptionIndexOf != -1) {
-                        LOGGER.error(e.getMessage());
-                        FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
-                        sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                                .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
-                                        new Object[]{floodWaitException.getSleepTime()},
-                                        locale)
-                                ).replyToMessageId(job.getReplyToMessageId())
-                                .parseMode(ParseMode.HTML).build());
                     } else {
-                        LOGGER.error(e.getMessage(), e);
-                        sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
-                                .text(localisationService.getMessage(StringUtils.defaultIfBlank(job.getErrorCode(e),
-                                        MessagesProperties.MESSAGE_ERROR), locale))
-                                .parseMode(ParseMode.HTML).replyToMessageId(job.getReplyToMessageId())
-                                .build());
+                        if (e instanceof ProcessException) {
+                            ErrorCode errorCode = job.getErrorCode(e);
+                            LOGGER.error(e.getMessage(), e);
+                            sendUserExceptionMessage(
+                                    SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                            .parseMode(ParseMode.HTML)
+                                            .text(localisationService.getMessage(StringUtils.defaultIfBlank(errorCode.getCode(),
+                                                    MessagesProperties.MESSAGE_ERROR), errorCode.getArgs(), locale)).replyToMessageId(job.getReplyToMessageId()).build());
+                        } else if (floodWaitExceptionIndexOf != -1) {
+                            LOGGER.error(e.getMessage());
+                            FloodWaitException floodWaitException = (FloodWaitException) ExceptionUtils.getThrowableList(e).get(floodWaitExceptionIndexOf);
+                            sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_IS_SLEEPING,
+                                            new Object[]{floodWaitException.getSleepTime()},
+                                            locale)
+                                    ).replyToMessageId(job.getReplyToMessageId())
+                                    .parseMode(ParseMode.HTML).build());
+                        } else {
+                            ErrorCode errorCode = job.getErrorCode(e);
+                            LOGGER.error(e.getMessage(), e);
+                            sendUserExceptionMessage(SendMessage.builder().chatId(String.valueOf(job.getChatId()))
+                                    .text(localisationService.getMessage(StringUtils.defaultIfBlank(errorCode.getCode(),
+                                            MessagesProperties.MESSAGE_ERROR), errorCode.getArgs(), locale))
+                                    .parseMode(ParseMode.HTML).replyToMessageId(job.getReplyToMessageId())
+                                    .build());
+                        }
                     }
                 }
             } catch (Throwable ex) {
@@ -106,7 +111,7 @@ public class ExceptionHandlerJob implements SmartExecutorService.Job {
     }
 
     @Override
-    public String getErrorCode(Throwable e) {
+    public ErrorCode getErrorCode(Throwable e) {
         return job.getErrorCode(e);
     }
 
