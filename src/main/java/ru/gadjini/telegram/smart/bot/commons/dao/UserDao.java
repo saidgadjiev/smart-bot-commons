@@ -97,9 +97,10 @@ public class UserDao {
         );
     }
 
-    public Long countActiveUsersForToday() {
+    public Long countActiveUsers(int intervalInDays) {
         return jdbcTemplate.query(
-                "SELECT count(user_id) as cnt FROM tg_user WHERE last_activity_at::date != created_at::date AND last_activity_at::date = current_date",
+                "SELECT count(user_id) as cnt FROM tg_user WHERE last_activity_at::date != created_at::date " +
+                        "AND last_activity_at::date = current_date - interval '" + intervalInDays + " days'",
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }

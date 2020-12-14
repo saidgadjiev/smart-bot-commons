@@ -34,10 +34,11 @@ public class GlobalStatsCommand implements BotCommand {
     @Override
     public void processMessage(Message message, String[] params) {
         Locale locale = userService.getLocaleOrDefault(message.getFrom().getId());
-        long activity = userService.countActiveUsersForToday();
+        long activityToday = userService.countActiveUsers(0);
+        long activityYesterday = userService.countActiveUsers(1);
         String statsMessage = localisationService.getMessage(
                 MessagesProperties.MESSAGE_GLOBAL_STATS,
-                new Object[]{activity},
+                new Object[]{activityToday, activityYesterday},
                 locale
         );
         messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(message.getChatId()))

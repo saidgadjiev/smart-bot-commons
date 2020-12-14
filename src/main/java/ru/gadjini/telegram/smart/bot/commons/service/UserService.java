@@ -54,8 +54,8 @@ public class UserService {
         return Locale.getDefault();
     }
 
-    public long countActiveUsersForToday() {
-        return userDao.countActiveUsersForToday();
+    public long countActiveUsers(int intervalInDays) {
+        return userDao.countActiveUsers(intervalInDays);
     }
 
     public void activity(User user) {
