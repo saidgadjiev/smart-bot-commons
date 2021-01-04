@@ -152,12 +152,14 @@ public abstract class QueueDao {
 
     public ZonedDateTime getWaitingMaxNextRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MAX(next_run_at) FROM " + getQueueName() + " WHERE status = 0",
+                "SELECT MAX(next_run_at) as next_run_at FROM " + getQueueName() + " WHERE status = 0",
                 rs -> {
                     if (rs.next()) {
                         Timestamp nextRunAt = rs.getTimestamp("next_run_at");
 
-                        return ZonedDateTime.of(nextRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                        if (nextRunAt != null) {
+                            return ZonedDateTime.of(nextRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                        }
                     }
 
                     return null;
@@ -167,12 +169,14 @@ public abstract class QueueDao {
 
     public ZonedDateTime getProcessingMinLastRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(last_run_at) FROM " + getQueueName() + " WHERE status = 1",
+                "SELECT MIN(last_run_at) as last_run_at FROM " + getQueueName() + " WHERE status = 1",
                 rs -> {
                     if (rs.next()) {
                         Timestamp lastRunAt = rs.getTimestamp("last_run_at");
 
-                        return ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                        if (lastRunAt != null) {
+                            return ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                        }
                     }
 
                     return null;
@@ -182,12 +186,14 @@ public abstract class QueueDao {
 
     public ZonedDateTime getWaitingMinCreatedAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(created_at) FROM " + getQueueName() + " WHERE status = 0",
+                "SELECT MIN(created_at) as created_at FROM " + getQueueName() + " WHERE status = 0",
                 rs -> {
                     if (rs.next()) {
                         Timestamp createdAt = rs.getTimestamp("created_at");
 
-                        return ZonedDateTime.of(createdAt.toLocalDateTime(), ZoneOffset.UTC);
+                        if (createdAt != null) {
+                            return ZonedDateTime.of(createdAt.toLocalDateTime(), ZoneOffset.UTC);
+                        }
                     }
 
                     return null;
