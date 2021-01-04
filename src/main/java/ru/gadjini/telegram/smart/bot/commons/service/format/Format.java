@@ -104,6 +104,7 @@ public enum Format {
     DOTX(FormatCategory.DOCUMENTS),
     DOTM(FormatCategory.DOCUMENTS),
     OTT(FormatCategory.DOCUMENTS),
+    SRT(FormatCategory.VIDEO),
     MERGE_PDFS(FormatCategory.DOCUMENTS) {
         @Override
         public String getName() {
