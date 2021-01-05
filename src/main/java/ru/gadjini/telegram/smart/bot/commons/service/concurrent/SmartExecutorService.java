@@ -59,8 +59,9 @@ public class SmartExecutorService {
 
     public void complete(Runnable job) {
         Job smartJob = getJobFromFutureTaskResult(job);
-        processing.remove(smartJob.getId());
-        activeTasks.remove(smartJob.getId());
+        if (smartJob != null) {
+            complete(smartJob.getId());
+        }
     }
 
     public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
@@ -71,17 +72,21 @@ public class SmartExecutorService {
     }
 
     public boolean cancel(int jobId, boolean userOriginated) {
-        Future<?> future = processing.get(jobId);
-        if (future != null && (!future.isCancelled() || !future.isDone())) {
-            Job job = activeTasks.get(jobId);
-            job.setCanceledByUser(userOriginated);
-            future.cancel(true);
-            job.cancel();
+        try {
+            Future<?> future = processing.get(jobId);
+            if (future != null && (!future.isCancelled() || !future.isDone())) {
+                Job job = activeTasks.get(jobId);
+                job.setCanceledByUser(userOriginated);
+                future.cancel(true);
+                job.cancel();
 
-            return true;
+                return true;
+            }
+
+            return false;
+        } finally {
+            complete(jobId);
         }
-
-        return false;
     }
 
     public void cancel(List<Integer> ids, boolean userOriginated) {
@@ -113,6 +118,11 @@ public class SmartExecutorService {
         } catch (Throwable ex) {
             LOGGER.error(ex.getMessage(), ex);
         }
+    }
+
+    private void complete(int jobId) {
+        processing.remove(jobId);
+        activeTasks.remove(jobId);
     }
 
     private SmartExecutorService.Job getJobFromFutureTaskResult(Runnable runnable) {
