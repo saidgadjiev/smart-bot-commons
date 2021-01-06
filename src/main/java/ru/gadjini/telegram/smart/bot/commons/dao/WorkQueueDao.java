@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -18,7 +19,7 @@ public class WorkQueueDao extends QueueDao {
     private WorkQueueDaoDelegate queueDaoDelegate;
 
     @Autowired
-    public WorkQueueDao(JdbcTemplate jdbcTemplate, WorkQueueDaoDelegate queueDaoDelegate) {
+    public WorkQueueDao(JdbcTemplate jdbcTemplate, @Lazy WorkQueueDaoDelegate queueDaoDelegate) {
         this.jdbcTemplate = jdbcTemplate;
         this.queueDaoDelegate = queueDaoDelegate;
     }
