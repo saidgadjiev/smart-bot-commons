@@ -243,9 +243,9 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     @Override
-    public boolean cancelUploading(String filePath) {
+    public void cancelUploading(String filePath) {
         if (StringUtils.isBlank(filePath)) {
-            return false;
+            return;
         }
         try {
             SmartTempFile tempFile = uploading.get(filePath);
@@ -255,20 +255,16 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-
-                return true;
             }
-
-            return false;
         } finally {
             uploading.remove(filePath);
         }
     }
 
     @Override
-    public boolean cancelDownloading(String fileId) {
+    public void cancelDownloading(String fileId) {
         if (StringUtils.isBlank(fileId)) {
-            return false;
+            return;
         }
         try {
             SmartTempFile tempFile = downloading.get(fileId);
@@ -286,10 +282,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
-                return true;
             }
-
-            return false;
         } finally {
             downloading.remove(fileId);
             downloadingRequests.remove(fileId);

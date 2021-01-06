@@ -32,6 +32,10 @@ public class FileDownloader {
         downloadFileByFileId(fileId, fileSize, null, outputFile, true);
     }
 
+    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile, boolean withFloodControl) {
+        downloadFileByFileId(fileId, fileSize, null, outputFile, withFloodControl);
+    }
+
     public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile, boolean withFloodControl) {
         if (withFloodControl) {
             downloadWithFloodControl(fileId, fileSize, progress, outputFile);
@@ -40,10 +44,10 @@ public class FileDownloader {
         }
     }
 
-    public boolean cancelDownloading(String fileId, long fileSize) {
+    public void cancelDownloading(String fileId, long fileSize) {
         floodWaitController.cancelDownloading(fileId, fileSize);
 
-        return telegramLocalBotApiService.cancelDownloading(fileId);
+        telegramLocalBotApiService.cancelDownloading(fileId);
     }
 
     public void cancelDownloads() {

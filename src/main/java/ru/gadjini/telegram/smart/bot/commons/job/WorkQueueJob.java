@@ -281,7 +281,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
 
                 LOGGER.debug("Canceled({}, {}, {})", queueItem.getUserId(), queueItem.getId(), MemoryUtils.humanReadableByteCount(queueItem.getSize()));
             }
-            queueWorker.cancel();
+            queueWorker.cancel(canceledByUser);
         }
 
         @Override

@@ -11,8 +11,6 @@ public class MessagesProperties {
 
     public static final String LANGUAGE_COMMAND_NAME = "language.command.name";
 
-    public static final String RETRY_COMMAND_DESCRIPTION = "retry.command.description";
-
     public static final String GO_BACK_COMMAND_NAME = "go.back.command.name";
 
     public static final String CANCEL_COMMAND_DESCRIPTION = "cancel.command.description";
@@ -38,8 +36,6 @@ public class MessagesProperties {
     public static final String MESSAGE_TOO_LARGE_IN_FILE = "message.too.large.in.file";
 
     public static final String MESSAGE_ZERO_LENGTH_FILE = "message.zero.length.file";
-
-    public static final String MESSAGE_BOT_IS_SLEEPING = "message.bot.is.sleeping";
 
     public static final String MESSAGE_QUERY_CANCELED = "message.query.canceled";
 

@@ -6,7 +6,7 @@ public interface QueueWorker {
 
     void execute() throws Exception;
 
-    default void cancel() {
+    default void cancel(boolean canceledByUser) {
 
     }
 
@@ -19,6 +19,6 @@ public interface QueueWorker {
     }
 
     default ErrorCode getErrorCode(Throwable e) {
-        return null;
+        return ErrorCode.EMPTY;
     }
 }
