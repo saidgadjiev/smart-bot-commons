@@ -40,12 +40,16 @@ public class UploadQueueDao extends QueueDao {
 
     private MediaLimitProperties mediaLimitProperties;
 
+    private WorkQueueDao workQueueDao;
+
     @Autowired
-    public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties) {
+    public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper,
+                          MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao) {
         this.jdbcTemplate = jdbcTemplate;
         this.gson = gson;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
+        this.workQueueDao = workQueueDao;
     }
 
     public void create(UploadQueueItem queueItem) {
@@ -140,7 +144,17 @@ public class UploadQueueDao extends QueueDao {
 
     @Override
     public QueueDaoDelegate getQueueDaoDelegate() {
-        return () -> UploadQueueItem.NAME;
+        return new QueueDaoDelegate() {
+            @Override
+            public String getQueueName() {
+                return UploadQueueItem.NAME;
+            }
+
+            @Override
+            public String getBaseAdditionalClause() {
+                return "AND producer = '" + workQueueDao.getProducerName() + "'";
+            }
+        };
     }
 
     private UploadQueueItem map(ResultSet rs) throws SQLException {

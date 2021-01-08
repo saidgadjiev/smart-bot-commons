@@ -21,6 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
+import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.DownloadCompleted;
@@ -62,6 +63,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+    private FormatService formatService;
+
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -71,7 +74,9 @@ public class DownloadJob extends WorkQueueJobPusher {
     @Autowired
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
-                       MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, @Qualifier("messageLimits") MessageService messageService, UserService userService, ApplicationEventPublisher applicationEventPublisher) {
+                       MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
+                       @Qualifier("messageLimits") MessageService messageService, UserService userService,
+                       ApplicationEventPublisher applicationEventPublisher, FormatService formatService) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -81,6 +86,7 @@ public class DownloadJob extends WorkQueueJobPusher {
         this.messageService = messageService;
         this.userService = userService;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.formatService = formatService;
     }
 
     @Autowired
@@ -255,7 +261,13 @@ public class DownloadJob extends WorkQueueJobPusher {
 
         private void doDownloadFile(DownloadQueueItem downloadingQueueItem) {
             if (StringUtils.isBlank(downloadingQueueItem.getFilePath())) {
-                tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, downloadingQueueItem.getFile().getFormat().getExt());
+                String ext;
+                if (downloadingQueueItem.getFile().getFormat() != null) {
+                    ext = downloadingQueueItem.getFile().getFormat().getExt();
+                } else {
+                    ext = formatService.getExt(downloadingQueueItem.getFile().getFileName(), downloadingQueueItem.getFile().getMimeType());
+                }
+                tempFile = tempFileService.createTempFile(downloadingQueueItem.getUserId(), downloadingQueueItem.getFile().getFileId(), TAG, ext);
             } else {
                 tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
             }

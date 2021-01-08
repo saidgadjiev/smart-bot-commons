@@ -37,13 +37,17 @@ public class DownloadQueueDao extends QueueDao {
 
     private MediaLimitProperties mediaLimitProperties;
 
+    private WorkQueueDao workQueueDao;
+
     private Gson gson;
 
     @Autowired
-    public DownloadQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties, Gson gson) {
+    public DownloadQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties,
+                            WorkQueueDao workQueueDao, Gson gson) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
+        this.workQueueDao = workQueueDao;
         this.gson = gson;
     }
 
@@ -164,7 +168,17 @@ public class DownloadQueueDao extends QueueDao {
 
     @Override
     public QueueDaoDelegate getQueueDaoDelegate() {
-        return () -> DownloadQueueItem.NAME;
+        return new QueueDaoDelegate() {
+            @Override
+            public String getQueueName() {
+                return DownloadQueueItem.NAME;
+            }
+
+            @Override
+            public String getBaseAdditionalClause() {
+                return "AND producer = '" + workQueueDao.getProducerName() + "'";
+            }
+        };
     }
 
     public DownloadQueueItem map(ResultSet rs) throws SQLException {
@@ -177,7 +191,10 @@ public class DownloadQueueDao extends QueueDao {
         tgFile.setMimeType(rs.getString(TgFile.MIME_TYPE));
         tgFile.setSize(rs.getLong(TgFile.SIZE));
         tgFile.setThumb(rs.getString(TgFile.THUMB));
-        tgFile.setFormat(Format.valueOf(rs.getString(TgFile.FORMAT)));
+        String format = rs.getString(TgFile.FORMAT);
+        if (StringUtils.isNotBlank(format)) {
+            tgFile.setFormat(Format.valueOf(format));
+        }
         item.setFile(tgFile);
 
         item.setUserId(rs.getInt(DownloadQueueItem.USER_ID));

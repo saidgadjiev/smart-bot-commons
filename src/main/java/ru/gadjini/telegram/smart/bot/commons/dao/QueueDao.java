@@ -70,7 +70,7 @@ public abstract class QueueDao {
 
     public final void resetProcessing() {
         getJdbcTemplate().update(
-                "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE status = 1"
+                "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause()
         );
     }
 
@@ -111,7 +111,7 @@ public abstract class QueueDao {
 
     public final long countByStatusForToday(QueueItem.Status status) {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND created_at::date = current_date",
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? AND created_at::date = current_date " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 ps -> ps.setInt(1, status.getCode()),
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
@@ -119,7 +119,7 @@ public abstract class QueueDao {
 
     public final long countByStatusAllTime(QueueItem.Status status) {
         return getJdbcTemplate().query(
-                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ?",
+                "SELECT COUNT(*) as cnt FROM " + getQueueName() + " WHERE status = ? " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 ps -> ps.setInt(1, status.getCode()),
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
@@ -127,7 +127,7 @@ public abstract class QueueDao {
 
     public final Long countActiveUsersForToday() {
         return getJdbcTemplate().query(
-                "SELECT count(DISTINCT user_id) as cnt FROM " + getQueueName() + " WHERE created_at::date = current_date",
+                "SELECT count(DISTINCT user_id) as cnt FROM " + getQueueName() + " WHERE created_at::date = current_date " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 rs -> rs.next() ? rs.getLong("cnt") : 0
         );
     }
@@ -152,7 +152,7 @@ public abstract class QueueDao {
 
     public ZonedDateTime getWaitingMaxNextRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MAX(next_run_at) as next_run_at FROM " + getQueueName() + " WHERE status = 0",
+                "SELECT MAX(next_run_at) as next_run_at FROM " + getQueueName() + " WHERE status = 0 " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 rs -> {
                     if (rs.next()) {
                         Timestamp nextRunAt = rs.getTimestamp("next_run_at");
@@ -169,7 +169,7 @@ public abstract class QueueDao {
 
     public ZonedDateTime getProcessingMinLastRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(last_run_at) as last_run_at FROM " + getQueueName() + " WHERE status = 1",
+                "SELECT MIN(last_run_at) as last_run_at FROM " + getQueueName() + " WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 rs -> {
                     if (rs.next()) {
                         Timestamp lastRunAt = rs.getTimestamp("last_run_at");
@@ -186,7 +186,7 @@ public abstract class QueueDao {
 
     public ZonedDateTime getWaitingMinCreatedAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(created_at) as created_at FROM " + getQueueName() + " WHERE status = 0",
+                "SELECT MIN(created_at) as created_at FROM " + getQueueName() + " WHERE status = 0 " + getQueueDaoDelegate().getBaseAdditionalClause(),
                 rs -> {
                     if (rs.next()) {
                         Timestamp createdAt = rs.getTimestamp("created_at");

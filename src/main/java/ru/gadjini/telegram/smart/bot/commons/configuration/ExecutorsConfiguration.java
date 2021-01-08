@@ -29,7 +29,7 @@ public class ExecutorsConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ExecutorsConfiguration.class);
 
-    private WorkQueueJob conversionJob;
+    private WorkQueueJob workQueueJob;
 
     private DownloadJob downloadingJob;
 
@@ -64,8 +64,8 @@ public class ExecutorsConfiguration {
     }
 
     @Autowired
-    public void setConversionJob(WorkQueueJob conversionJob) {
-        this.conversionJob = conversionJob;
+    public void setWorkQueueJob(WorkQueueJob workQueueJob) {
+        this.workQueueJob = workQueueJob;
     }
 
     @Autowired
@@ -102,8 +102,8 @@ public class ExecutorsConfiguration {
         LOGGER.debug("Conversion heavy thread pool({})", heavyTaskExecutor.getCorePoolSize());
 
         executorService.setExecutors(Map.of(SmartExecutorService.JobWeight.LIGHT, lightTaskExecutor, SmartExecutorService.JobWeight.HEAVY, heavyTaskExecutor));
-        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> conversionJob.rejectTask(job));
-        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> conversionJob.rejectTask(job));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.HEAVY, job -> workQueueJob.rejectTask(job));
+        executorService.setRejectJobHandler(SmartExecutorService.JobWeight.LIGHT, job -> workQueueJob.rejectTask(job));
 
         return executorService;
     }
