@@ -201,7 +201,8 @@ public class DownloadJob extends WorkQueueJobPusher {
         public void execute() {
             currentDownloads.add(downloadingQueueItem);
             try {
-                if (downloadingQueueItem.getFile().getFormat().isDownloadable()) {
+                if (downloadingQueueItem.getFile().getFormat() == null
+                        || downloadingQueueItem.getFile().getFormat().isDownloadable()) {
                     doDownloadFile(downloadingQueueItem);
                 } else {
                     downloadingQueueService.setCompleted(downloadingQueueItem.getId());
