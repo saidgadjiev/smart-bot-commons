@@ -6,6 +6,7 @@ import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.CallbackBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
@@ -49,6 +50,11 @@ public class UpdateQueryStatusCommand implements CallbackBotCommand {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.inlineKeyboardService = inlineKeyboardService;
+    }
+
+    @Override
+    public boolean accept(Message message) {
+        return userService.isAdmin(message.getFrom().getId());
     }
 
     @Override

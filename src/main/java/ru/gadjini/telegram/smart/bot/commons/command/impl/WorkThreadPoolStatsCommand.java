@@ -41,6 +41,11 @@ public class WorkThreadPoolStatsCommand implements BotCommand {
         this.userService = userService;
     }
 
+    @Override
+    public boolean accept(Message message) {
+        return userService.isAdmin(message.getFrom().getId());
+    }
+
     @Autowired
     public void setWorkQueueService(WorkQueueService queueService) {
         this.workQueueService = queueService;

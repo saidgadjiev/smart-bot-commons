@@ -51,6 +51,11 @@ public class QueueStatsCommand implements BotCommand {
     }
 
     @Override
+    public boolean accept(Message message) {
+        return userService.isAdmin(message.getFrom().getId());
+    }
+
+    @Override
     public void processMessage(Message message, String[] params) {
         Locale locale = userService.getLocaleOrDefault(message.getFrom().getId());
         long processing = queueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
