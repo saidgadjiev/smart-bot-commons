@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.controller.BotController;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
+import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -84,6 +85,8 @@ public class SmartBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             botFilter.doFilter(update);
+        } catch (ZeroLengthException ignore) {
+
         } catch (UserException ex) {
             if (ex.isPrintLog()) {
                 LOGGER.error(ex.getMessage(), ex);

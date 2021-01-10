@@ -12,6 +12,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
+import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
@@ -68,7 +69,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendDocument(sendDocument, progress);
         }
 
-        return null;
+        throw new ZeroLengthException();
     }
 
     @Override
@@ -86,7 +87,8 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
         if (validate(sendVideo.getChatId(), sendVideo.getVideo(), sendVideo.getReplyMarkup(), sendVideo.getReplyToMessageId())) {
             return mediaMessageService.sendVideo(sendVideo, progress);
         }
-        return null;
+
+        throw new ZeroLengthException();
     }
 
     @Override
@@ -95,7 +97,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendAudio(sendAudio, progress);
         }
 
-        return null;
+        throw new ZeroLengthException();
     }
 
     @Override
@@ -104,7 +106,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendVoice(sendVoice, progress);
         }
 
-        return null;
+        throw new ZeroLengthException();
     }
 
     private boolean validate(String chatId, InputFile inputFile, ReplyKeyboard replyKeyboard, Integer replyMessageId) {
