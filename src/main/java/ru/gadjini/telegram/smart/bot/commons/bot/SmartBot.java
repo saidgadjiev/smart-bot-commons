@@ -24,7 +24,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 @Component
 public class SmartBot extends TelegramLongPollingBot {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(BotController.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartBot.class);
 
     private BotProperties botProperties;
 
