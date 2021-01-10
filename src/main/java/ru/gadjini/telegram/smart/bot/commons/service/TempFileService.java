@@ -52,7 +52,6 @@ public class TempFileService {
     public SmartTempFile getTempFile(long chatId, String fileId, String tag, String ext) {
         String filePath = getTempFile(tempDir, chatId, fileId, tag, ext);
 
-        LOGGER.debug("Get({})", filePath);
         return new SmartTempFile(new File(filePath));
     }
 
