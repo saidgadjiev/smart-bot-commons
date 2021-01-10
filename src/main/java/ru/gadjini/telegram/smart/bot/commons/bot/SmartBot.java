@@ -23,6 +23,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 @Component
+@SuppressWarnings("PMD")
 public class SmartBot extends TelegramLongPollingBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartBot.class);
