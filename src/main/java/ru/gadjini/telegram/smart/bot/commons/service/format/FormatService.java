@@ -54,7 +54,7 @@ public class FormatService {
 
     private Format findFormat(String extension) {
         for (Format format : Format.values()) {
-            if (format.getExt().equals(extension)) {
+            if (!format.isDummy() && format.getExt().equals(extension)) {
                 return format;
             }
         }

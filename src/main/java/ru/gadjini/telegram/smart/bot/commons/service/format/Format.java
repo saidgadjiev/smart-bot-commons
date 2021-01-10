@@ -45,11 +45,21 @@ public enum Format {
         public boolean isDownloadable() {
             return false;
         }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
     },
     TEXT(FormatCategory.DOCUMENTS) {
         @Override
         public boolean isDownloadable() {
             return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
         }
     },
     ZIP(FormatCategory.ARCHIVE),
@@ -110,11 +120,21 @@ public enum Format {
         public String getName() {
             return "MERGE";
         }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
     },
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
             return PDF.getExt();
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
         }
     },
     MP4(FormatCategory.VIDEO),
@@ -143,7 +163,17 @@ public enum Format {
     TS(FormatCategory.VIDEO),
     IMAGES(FormatCategory.IMAGES),
     PDFS(FormatCategory.DOCUMENTS),
-    COMPRESS(FormatCategory.COMMON),
+    COMPRESS(FormatCategory.COMMON) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+    },
     AAC(FormatCategory.AUDIO) {
         @Override
         public boolean canBeSentAsAudio() {
@@ -220,5 +250,9 @@ public enum Format {
 
     public boolean isDownloadable() {
         return true;
+    }
+
+    public boolean isDummy() {
+        return false;
     }
 }
