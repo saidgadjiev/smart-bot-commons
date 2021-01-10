@@ -143,12 +143,7 @@ public enum Format {
     TS(FormatCategory.VIDEO),
     IMAGES(FormatCategory.IMAGES),
     PDFS(FormatCategory.DOCUMENTS),
-    COMPRESS(FormatCategory.VIDEO) {
-        @Override
-        public String getExt() {
-            return "mp4";
-        }
-    },
+    COMPRESS(FormatCategory.COMMON),
     AAC(FormatCategory.AUDIO) {
         @Override
         public boolean canBeSentAsAudio() {
