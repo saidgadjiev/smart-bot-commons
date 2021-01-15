@@ -66,18 +66,17 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         }
         try {
             sendPhoto(new SendPhoto(String.valueOf(chatId), new InputFile(fileId)));
+            return;
         } catch (Exception ignore) {
-
         }
         try {
             sendAudio(SendAudio.builder().chatId(String.valueOf(chatId)).audio(new InputFile(fileId)).build());
+            return;
         } catch (Exception ignore) {
-
         }
         try {
             sendSticker(new SendSticker(String.valueOf(chatId), new InputFile(fileId)));
         } catch (Exception ignore) {
-
         }
     }
 

@@ -58,4 +58,8 @@ public class FileDownloadService {
     public void cancelDownloads() {
         downloadingJob.cancelDownloads();
     }
+
+    public void deleteDownload(int id) {
+        queueService.deleteById(id);
+    }
 }
