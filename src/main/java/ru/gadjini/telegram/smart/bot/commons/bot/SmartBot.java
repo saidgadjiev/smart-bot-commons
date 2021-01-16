@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.methods.updates.Close;
-import org.telegram.telegrambots.meta.api.methods.updates.LogOut;
+import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
@@ -23,7 +22,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 @Component
 @SuppressWarnings("PMD")
-public class SmartBot extends TelegramLongPollingBot {
+public class SmartBot extends SpringWebhookBot {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartBot.class);
 
@@ -38,9 +37,8 @@ public class SmartBot extends TelegramLongPollingBot {
     @Autowired
     public SmartBot(BotProperties botProperties, BotFilter botFilter,
                     @Qualifier("messageLimits") MessageService messageService,
-                    UserService userService,
-                    DefaultBotOptions botOptions) {
-        super(botOptions);
+                    UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook) {
+        super(botOptions, setWebhook);
         this.botProperties = botProperties;
         this.botFilter = botFilter;
         this.messageService = messageService;
@@ -48,41 +46,7 @@ public class SmartBot extends TelegramLongPollingBot {
     }
 
     @Override
-    public void clearWebhook() {
-        try {
-            super.clearWebhook();
-        } catch (TelegramApiException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
-        if (botProperties.isLogout()) {
-            try {
-                execute(new LogOut());
-            } catch (TelegramApiException e) {
-                throw new ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException(e);
-            }
-            throw new RuntimeException("Success logout");
-        } else if (botProperties.isClose()) {
-            try {
-                execute(new Close());
-            } catch (TelegramApiException e) {
-                throw new ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException(e);
-            }
-            throw new RuntimeException("Success close");
-        }
-    }
-
-    @Override
-    public String getBotUsername() {
-        return botProperties.getName();
-    }
-
-    @Override
-    public String getBotToken() {
-        return botProperties.getToken();
-    }
-
-    @Override
-    public void onUpdateReceived(Update update) {
+    public BotApiMethod onWebhookUpdateReceived(Update update) {
         try {
             botFilter.doFilter(update);
         } catch (ZeroLengthException ignore) {
@@ -99,5 +63,22 @@ public class SmartBot extends TelegramLongPollingBot {
             TgMessage tgMessage = TgMessage.from(update);
             messageService.sendErrorMessage(tgMessage.getChatId(), userService.getLocaleOrDefault(tgMessage.getUser().getId()));
         }
+
+        return null;
+    }
+
+    @Override
+    public String getBotUsername() {
+        return botProperties.getName();
+    }
+
+    @Override
+    public String getBotToken() {
+        return botProperties.getToken();
+    }
+
+    @Override
+    public String getBotPath() {
+        return botProperties.getName();
     }
 }

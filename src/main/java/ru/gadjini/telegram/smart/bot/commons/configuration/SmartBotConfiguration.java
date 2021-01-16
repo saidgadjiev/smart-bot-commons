@@ -10,16 +10,34 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.WebhookProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
+import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
+import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
 
 @Configuration
 public class SmartBotConfiguration {
 
     //Infinite
     private static final int SO_TIMEOUT = 0;
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public SetWebhook setWebhook(WebhookProperties webhookProperties) {
+        return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
+    }
+
+    @Bean
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
+        return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());
+    }
 
     @Bean
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
