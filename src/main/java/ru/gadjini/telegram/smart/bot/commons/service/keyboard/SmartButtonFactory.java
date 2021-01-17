@@ -42,4 +42,14 @@ public class SmartButtonFactory {
         return inlineKeyboardButton;
     }
 
+    public InlineKeyboardButton getFile(int uploadId, Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.GET_FILE_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.CANCEL_QUERY_COMMAND_NAME + CommandParser.COMMAND_NAME_SEPARATOR +
+                new RequestParams()
+                        .add(Arg.QUEUE_ITEM_ID.getKey(), uploadId)
+                        .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
+
+        return inlineKeyboardButton;
+    }
+
 }

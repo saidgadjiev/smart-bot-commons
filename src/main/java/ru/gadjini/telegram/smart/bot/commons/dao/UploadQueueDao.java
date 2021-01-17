@@ -8,20 +8,19 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
 import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
 import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Timestamp;
-import java.sql.Types;
+import java.sql.*;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.util.Collections;
@@ -53,10 +52,11 @@ public class UploadQueueDao extends QueueDao {
     }
 
     public void create(UploadQueueItem queueItem) {
+        GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
-                "INSERT INTO upload_queue (user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer)\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                ps -> {
+                con -> {
+                    PreparedStatement ps = con.prepareStatement("INSERT INTO upload_queue (user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer)\n" +
+                            "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
                     ps.setString(3, gson.toJson(queueItem.getBody()));
@@ -75,8 +75,14 @@ public class UploadQueueDao extends QueueDao {
                     }
                     ps.setLong(9, queueItem.getFileSize());
                     ps.setString(10, queueItem.getProducer());
-                }
+
+                    return ps;
+                },
+                keyHolder
         );
+
+        int id = ((Number) keyHolder.getKeys().get(UploadQueueItem.ID)).intValue();
+        queueItem.setId(id);
     }
 
     public List<UploadQueueItem> getUploads(String producer, Set<Integer> producerIds) {
@@ -134,6 +140,17 @@ public class UploadQueueDao extends QueueDao {
                         "SELECT * FROM del",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)
+        );
+    }
+
+    public void updateStatus(int id, QueueItem.Status newStatus, QueueItem.Status oldStatus) {
+        jdbcTemplate.update(
+                "UPDATE upload_queue SET status = ? WHERE id = ? AND status = ?",
+                ps -> {
+                    ps.setInt(1, newStatus.getCode());
+                    ps.setInt(2, id);
+                    ps.setInt(3, oldStatus.getCode());
+                }
         );
     }
 

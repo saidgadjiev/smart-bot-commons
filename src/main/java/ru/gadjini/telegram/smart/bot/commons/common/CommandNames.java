@@ -22,8 +22,6 @@ public class CommandNames {
 
     public static final String GO_BACK = "goback";
 
-    public static final String RETRY = "rtr";
-
     public static final String CANCEL_QUERY_COMMAND_NAME = "c";
 
     public static final String UPDATE_QUERY_STATUS = "updq";
@@ -33,4 +31,6 @@ public class CommandNames {
     public static final String TSTATS = "tstats";
 
     public static final String GLOBAL_STATS = "gstats";
+
+    public static final String GET_SMART_FILE = "gsmart";
 }

@@ -52,4 +52,10 @@ public class MessagesProperties {
     public static final String MESSAGE_GLOBAL_STATS = "message.global.stats";
 
     public static final String MESSAGE_WORK_THREAD_POOL_STATS = "message.work.thread.pool.stats";
+
+    public static final String GET_FILE_COMMAND_DESCRIPTION = "get.file.command.description";
+
+    public static final String MESSAGE_SMART_FILE_IS_READY = "message.smart.file.is.ready";
+
+    public static final String MESSAGE_GET_SMART_FILE_CALLBACK = "message.get.smart.file.callback";
 }
