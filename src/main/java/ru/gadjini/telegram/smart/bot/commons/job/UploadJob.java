@@ -8,10 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -203,6 +200,11 @@ public class UploadJob extends WorkQueueJobPusher {
             case SendVoice.PATH: {
                 SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
                 inputFile = sendVoice.getVoice();
+                break;
+            }
+            case SendSticker.PATH: {
+                SendSticker sendSticker = (SendSticker) uploadQueueItem.getBody();
+                inputFile = sendSticker.getSticker();
                 break;
             }
         }

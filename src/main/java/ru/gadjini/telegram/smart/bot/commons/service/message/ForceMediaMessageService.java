@@ -41,8 +41,8 @@ public class ForceMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public SendFileResult sendSticker(SendSticker sendSticker) {
-        return mediaMessageService.sendSticker(sendSticker);
+    public SendFileResult sendSticker(SendSticker sendSticker, Progress progress) {
+        return mediaMessageService.sendSticker(sendSticker, progress);
     }
 
     @Override

@@ -143,12 +143,12 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     }
 
     @Override
-    public Message sendSticker(SendSticker sendSticker) {
-        return executeWithResult(sendSticker.getChatId(), () -> {
+    public Message sendSticker(SendSticker sendSticker, Progress progress) {
+        return uploadFile(sendSticker.getChatId(), () -> {
             Message execute = execute(sendSticker);
 
             return objectMapper.convertValue(execute, Message.class);
-        });
+        }, sendSticker.getSticker(), progress);
     }
 
     @Override

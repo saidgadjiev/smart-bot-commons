@@ -4,10 +4,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
-import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
@@ -75,6 +72,11 @@ public class FileUploader {
                 inputFile = sendVoice.getVoice();
                 break;
             }
+            case SendSticker.PATH: {
+                SendSticker sendSticker = (SendSticker) body;
+                inputFile = sendSticker.getSticker();
+                break;
+            }
         }
         if (inputFile == null) {
             throw new IllegalArgumentException("Null input file " + body);
@@ -120,6 +122,10 @@ public class FileUploader {
             case SendVoice.PATH: {
                 SendVoice sendVoice = (SendVoice) body;
                 return mediaMessageService.sendVoice(sendVoice, progress);
+            }
+            case SendSticker.PATH: {
+                SendSticker sendSticker = (SendSticker) body;
+                return mediaMessageService.sendSticker(sendSticker, progress);
             }
         }
 

@@ -9,7 +9,11 @@ import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 public interface MediaMessageService {
     EditMediaResult editMessageMedia(EditMessageMedia editMediaContext);
 
-    SendFileResult sendSticker(SendSticker sendSticker);
+    default SendFileResult sendSticker(SendSticker sendSticker) {
+        return sendSticker(sendSticker, null);
+    }
+
+    SendFileResult sendSticker(SendSticker sendSticker, Progress progress);
 
     void sendFile(long chatId, String fileId);
 

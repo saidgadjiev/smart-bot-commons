@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
-import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
@@ -197,6 +194,8 @@ public class UploadQueueDao extends QueueDao {
                 return gson.fromJson(body, SendVideo.class);
             case SendVoice.PATH:
                 return gson.fromJson(body, SendVoice.class);
+            case SendSticker.PATH:
+                return gson.fromJson(body, SendSticker.class);
         }
 
         throw new IllegalArgumentException("Unsupported method " + method);
