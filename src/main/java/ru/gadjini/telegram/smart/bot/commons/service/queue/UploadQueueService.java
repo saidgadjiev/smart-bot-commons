@@ -65,6 +65,10 @@ public class UploadQueueService extends QueueService {
         return uploadQueueDao.deleteOrphan(producer);
     }
 
+    public UploadQueueItem supportsStreaming(int id, boolean supportsStreaming) {
+        return uploadQueueDao.supportsStreaming(id, supportsStreaming);
+    }
+
     @Override
     public QueueDao getQueueDao() {
         return uploadQueueDao;

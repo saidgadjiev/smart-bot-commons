@@ -18,7 +18,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 import java.util.Locale;
 
 @Component
-public class GetSmartFileCommand implements CallbackBotCommand {
+public class DoSmartUploadCommand implements CallbackBotCommand {
 
     private FileUploadService fileUploadService;
 
@@ -29,8 +29,8 @@ public class GetSmartFileCommand implements CallbackBotCommand {
     private UserService userService;
 
     @Autowired
-    public GetSmartFileCommand(FileUploadService fileUploadService, @Qualifier("messageLimits") MessageService messageService,
-                               LocalisationService localisationService, UserService userService) {
+    public DoSmartUploadCommand(FileUploadService fileUploadService, @Qualifier("messageLimits") MessageService messageService,
+                                LocalisationService localisationService, UserService userService) {
         this.fileUploadService = fileUploadService;
         this.messageService = messageService;
         this.localisationService = localisationService;
@@ -48,7 +48,7 @@ public class GetSmartFileCommand implements CallbackBotCommand {
         Locale locale = userService.getLocaleOrDefault(callbackQuery.getFrom().getId());
         messageService.sendAnswerCallbackQuery(
                 AnswerCallbackQuery.builder().callbackQueryId(callbackQuery.getId())
-                        .text(localisationService.getMessage(MessagesProperties.GET_FILE_COMMAND_DESCRIPTION, locale))
+                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_DO_SMART_UPLOAD_ANSWER, locale))
                         .showAlert(true)
                         .build()
         );

@@ -22,6 +22,8 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String FILE_SIZE = "file_size";
 
+    public static final String SUPPORTS_STREAMING = "supports_streaming";
+
     private String producerTable;
 
     private String producer;
@@ -37,6 +39,8 @@ public class UploadQueueItem extends QueueItem {
     private Object extra;
 
     private long fileSize;
+
+    private boolean supportsStreaming;
 
     public String getProducerTable() {
         return producerTable;
@@ -100,5 +104,13 @@ public class UploadQueueItem extends QueueItem {
 
     public void setProducer(String producer) {
         this.producer = producer;
+    }
+
+    public boolean isSupportsStreaming() {
+        return supportsStreaming;
+    }
+
+    public void setSupportsStreaming(boolean supportsStreaming) {
+        this.supportsStreaming = supportsStreaming;
     }
 }

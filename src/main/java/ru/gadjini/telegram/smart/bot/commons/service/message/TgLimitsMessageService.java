@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -83,6 +84,11 @@ public class TgLimitsMessageService implements MessageService {
     @Override
     public void editMessage(EditMessageText messageContext, boolean ignoreException) {
         messageService.editMessage(messageContext, ignoreException);
+    }
+
+    @Override
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
+        messageService.editKeyboard(editMessageReplyMarkup, ignoreException);
     }
 
     @Override

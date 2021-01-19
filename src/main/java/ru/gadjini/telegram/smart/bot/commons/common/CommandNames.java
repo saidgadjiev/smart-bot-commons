@@ -24,6 +24,8 @@ public class CommandNames {
 
     public static final String CANCEL_QUERY_COMMAND_NAME = "c";
 
+    public static final String SUPPORTS_STREAMING = "sfs";
+
     public static final String UPDATE_QUERY_STATUS = "updq";
 
     public static final String QUEUE_STATS = "qstats";

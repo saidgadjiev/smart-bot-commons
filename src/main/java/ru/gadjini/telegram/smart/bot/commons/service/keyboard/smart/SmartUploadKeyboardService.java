@@ -10,18 +10,19 @@ import java.util.List;
 import java.util.Locale;
 
 @Service
-public class SmartFileKeyboardService {
+public class SmartUploadKeyboardService {
 
     private SmartButtonFactory smartButtonFactory;
 
     @Autowired
-    public SmartFileKeyboardService(SmartButtonFactory smartButtonFactory) {
+    public SmartUploadKeyboardService(SmartButtonFactory smartButtonFactory) {
         this.smartButtonFactory = smartButtonFactory;
     }
 
-    public InlineKeyboardMarkup getSmartFileKeyboard(int uploadId, Locale locale) {
+    public InlineKeyboardMarkup getSmartUploadKeyboard(int uploadId, Locale locale) {
         InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboardMarkup();
-        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.getFile(uploadId, locale)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.supportsStreaming(uploadId, locale)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.doSmartUpload(uploadId, locale)));
 
         return inlineKeyboardMarkup;
     }

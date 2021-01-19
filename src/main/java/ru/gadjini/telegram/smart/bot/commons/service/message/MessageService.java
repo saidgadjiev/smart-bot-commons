@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.message;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -27,6 +28,8 @@ public interface MessageService {
     default void editMessage(EditMessageText messageContext) {
         editMessage(messageContext, true);
     }
+
+    void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException);
 
     void editMessageCaption(EditMessageCaption context);
 

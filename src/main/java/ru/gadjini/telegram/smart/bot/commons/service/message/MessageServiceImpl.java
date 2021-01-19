@@ -97,6 +97,17 @@ public class MessageServiceImpl implements MessageService {
             }
         }
     }
+    
+    @Override
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
+        try {
+            telegramService.editReplyMarkup(editMessageReplyMarkup);
+        } catch (Exception ex) {
+            if (!ignoreException) {
+                throw ex;
+            }
+        }
+    }
 
     @Override
     public void editMessageCaption(EditMessageCaption editMessageCaption) {

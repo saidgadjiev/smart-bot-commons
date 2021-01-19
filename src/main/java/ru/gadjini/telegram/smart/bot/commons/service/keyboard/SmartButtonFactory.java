@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.keyboard;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import ru.gadjini.telegram.smart.bot.commons.command.impl.CallbackDelegate;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.request.Arg;
@@ -42,9 +43,9 @@ public class SmartButtonFactory {
         return inlineKeyboardButton;
     }
 
-    public InlineKeyboardButton getFile(int uploadId, Locale locale) {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.GET_FILE_COMMAND_DESCRIPTION, locale));
-        inlineKeyboardButton.setCallbackData(CommandNames.CANCEL_QUERY_COMMAND_NAME + CommandParser.COMMAND_NAME_SEPARATOR +
+    public InlineKeyboardButton doSmartUpload(int uploadId, Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.DO_SMART_UPLOAD_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.GET_SMART_FILE + CommandParser.COMMAND_NAME_SEPARATOR +
                 new RequestParams()
                         .add(Arg.QUEUE_ITEM_ID.getKey(), uploadId)
                         .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
@@ -52,4 +53,27 @@ public class SmartButtonFactory {
         return inlineKeyboardButton;
     }
 
+    public InlineKeyboardButton supportsStreaming(int uploadId, Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.VIDEO_SUPPORTS_STREAMING_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.CALLBACK_DELEGATE_COMMAND_NAME + CommandParser.COMMAND_NAME_SEPARATOR +
+                new RequestParams()
+                        .add(CallbackDelegate.ARG_NAME, CommandNames.SUPPORTS_STREAMING)
+                        .add(Arg.SUPPORTS_STREAMING.getKey(), true)
+                        .add(Arg.QUEUE_ITEM_ID.getKey(), uploadId)
+                        .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
+
+        return inlineKeyboardButton;
+    }
+
+    public InlineKeyboardButton cancelSupportsStreaming(int uploadId, Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.VIDEO_SUPPORTS_STREAMING_CANCEL_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.CALLBACK_DELEGATE_COMMAND_NAME + CommandParser.COMMAND_NAME_SEPARATOR +
+                new RequestParams()
+                        .add(CallbackDelegate.ARG_NAME, CommandNames.SUPPORTS_STREAMING)
+                        .add(Arg.SUPPORTS_STREAMING.getKey(), false)
+                        .add(Arg.QUEUE_ITEM_ID.getKey(), uploadId)
+                        .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
+
+        return inlineKeyboardButton;
+    }
 }

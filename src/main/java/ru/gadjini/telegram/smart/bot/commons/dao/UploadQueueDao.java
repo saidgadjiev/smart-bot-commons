@@ -19,6 +19,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
+import ru.gadjini.telegram.smart.bot.commons.utils.JdbcUtils;
 
 import java.sql.*;
 import java.time.ZoneOffset;
@@ -154,6 +155,19 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
+    public UploadQueueItem supportsStreaming(int id, boolean supportsStreaming) {
+        return jdbcTemplate.query(
+                "WITH upd AS (UPDATE upload_queue SET supports_streaming = ? WHERE id = ? AND status = ? RETURNING id, supports_streaming)\n" +
+                        "SELECT * FROM upd",
+                ps -> {
+                    ps.setBoolean(1, supportsStreaming);
+                    ps.setInt(2, id);
+                    ps.setInt(3, QueueItem.Status.BLOCKED.getCode());
+                },
+                rs -> rs.next() ? map(rs) : null
+        );
+    }
+
     @Override
     public JdbcTemplate getJdbcTemplate() {
         return jdbcTemplate;
@@ -199,6 +213,10 @@ public class UploadQueueDao extends QueueDao {
         String extra = rs.getString(UploadQueueItem.EXTRA);
         if (StringUtils.isNotBlank(extra)) {
             item.setExtra(gson.fromJson(extra, JsonElement.class));
+        }
+        Set<String> columns = JdbcUtils.getColumnNames(rs.getMetaData());
+        if (columns.contains(UploadQueueItem.SUPPORTS_STREAMING)) {
+            item.setSupportsStreaming(rs.getBoolean(UploadQueueItem.SUPPORTS_STREAMING));
         }
 
         return item;

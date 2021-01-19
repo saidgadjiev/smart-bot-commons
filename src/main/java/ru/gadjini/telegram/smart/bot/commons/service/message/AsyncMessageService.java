@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -63,6 +64,11 @@ public class AsyncMessageService implements MessageService {
     @Override
     public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
         messageSenderJob.push(() -> messageService.editMessage(editMessageText, ignoreException));
+    }
+
+    @Override
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
+        messageSenderJob.push(() -> messageService.editKeyboard(editMessageReplyMarkup, ignoreException));
     }
 
     @Override

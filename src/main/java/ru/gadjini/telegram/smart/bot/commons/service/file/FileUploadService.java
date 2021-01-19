@@ -14,7 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.service.keyboard.smart.SmartFileKeyboardService;
+import ru.gadjini.telegram.smart.bot.commons.service.keyboard.smart.SmartUploadKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 
@@ -30,7 +30,7 @@ public class FileUploadService {
 
     private WorkQueueDao workQueueDao;
 
-    private SmartFileKeyboardService smartKeyboardService;
+    private SmartUploadKeyboardService smartKeyboardService;
 
     private MessageService messageService;
 
@@ -40,7 +40,7 @@ public class FileUploadService {
 
     @Autowired
     public FileUploadService(UploadQueueService uploadQueueService,
-                             WorkQueueDao workQueueDao, SmartFileKeyboardService smartKeyboardService,
+                             WorkQueueDao workQueueDao, SmartUploadKeyboardService smartKeyboardService,
                              @Qualifier("messageLimits") MessageService messageService,
                              LocalisationService localisationService, UserService userService) {
         this.uploadQueueService = uploadQueueService;
@@ -93,10 +93,10 @@ public class FileUploadService {
 
     private void sendSmartFile(int userId, int uploadId) {
         Locale locale = userService.getLocaleOrDefault(userId);
-        InlineKeyboardMarkup smartKeyboard = smartKeyboardService.getSmartFileKeyboard(uploadId, locale);
+        InlineKeyboardMarkup smartKeyboard = smartKeyboardService.getSmartUploadKeyboard(uploadId, locale);
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_SMART_FILE_IS_READY, locale))
+                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_SMART_UPLOAD_IS_READY, locale))
                         .parseMode(ParseMode.HTML)
                         .replyMarkup(smartKeyboard)
                         .build()

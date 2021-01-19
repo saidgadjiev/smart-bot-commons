@@ -53,9 +53,13 @@ public class MessagesProperties {
 
     public static final String MESSAGE_WORK_THREAD_POOL_STATS = "message.work.thread.pool.stats";
 
-    public static final String GET_FILE_COMMAND_DESCRIPTION = "get.file.command.description";
+    public static final String DO_SMART_UPLOAD_COMMAND_DESCRIPTION = "do.smart.upload.command.description";
 
-    public static final String MESSAGE_SMART_FILE_IS_READY = "message.smart.file.is.ready";
+    public static final String MESSAGE_SMART_UPLOAD_IS_READY = "message.smart.upload.is.ready";
 
-    public static final String MESSAGE_GET_SMART_FILE_CALLBACK = "message.get.smart.file.callback";
+    public static final String MESSAGE_DO_SMART_UPLOAD_ANSWER = "message.do.smart.upload.answer";
+
+    public static final String VIDEO_SUPPORTS_STREAMING_COMMAND_DESCRIPTION = "video.supports.streaming.command.description";
+
+    public static final String VIDEO_SUPPORTS_STREAMING_CANCEL_COMMAND_DESCRIPTION = "video.supports.streaming.cancel.command.description";
 }
