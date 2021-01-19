@@ -179,19 +179,24 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     }
 
     public final int removeAndCancelCurrentTasks(long chatId) {
-        List<QueueItem> conversionQueueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
-        for (QueueItem item : conversionQueueItems) {
+        List<QueueItem> queueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
+        if (!queueItems.isEmpty()) {
+            LOGGER.debug("Cancel current tasks({}, {}, {})", chatId, queueItems.size(),
+                    queueItems.stream().map(QueueItem::getId).collect(Collectors.toList()));
+        }
+        for (QueueItem item : queueItems) {
             executor.cancel(item.getId(), true);
             applicationEventPublisher.publishEvent(new TaskCanceled(item));
         }
-        fileDownloadService.cancelDownloads(conversionQueueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
-        fileUploadService.cancelUploads(conversionQueueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
+        fileDownloadService.cancelDownloads(queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
+        fileUploadService.cancelUploads(queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
         applicationEventPublisher.publishEvent(new CurrentTasksCanceled((int) chatId));
 
-        return conversionQueueItems.size();
+        return queueItems.size();
     }
 
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
+        LOGGER.debug("Cancel query({}, {})", chatId, jobId);
         QueueItem queueItem = workQueueService.getById(jobId);
         if (queueItem == null) {
             messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder()
