@@ -57,7 +57,7 @@ public class ProcessExecutor {
         File errorFile = getErrorLogFile();
         try {
             if (errorFile != null) {
-                FileUtils.writeStringToFile(errorFile, String.join(" ", command), StandardCharsets.UTF_8);
+                FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
             }
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             if (redirectOutput != null) {
