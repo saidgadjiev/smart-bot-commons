@@ -66,7 +66,7 @@ public class ProcessExecutor {
                 processBuilder.redirectOutput(new File(outputRedirectFile));
             }
             if (errorFile != null) {
-                processBuilder.redirectError(errorFile);
+                processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
             }
             Process process = processBuilder.start();
             try {
