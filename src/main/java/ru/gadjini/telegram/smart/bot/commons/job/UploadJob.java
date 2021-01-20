@@ -15,6 +15,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
@@ -230,10 +231,16 @@ public class UploadJob extends WorkQueueJobPusher {
         }
 
         @Override
+        @SuppressWarnings("PMD")
         public void execute() {
             currentUploads.add(uploadQueueItem);
             try {
-                SendFileResult sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
+                SendFileResult sendFileResult = null;
+                try {
+                    sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
+                } catch (ZeroLengthException ignore) {
+
+                }
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
                 releaseResources(uploadQueueItem);
 
