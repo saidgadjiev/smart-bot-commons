@@ -11,9 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
-import org.telegram.telegrambots.util.WebhookUtils;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
@@ -45,13 +43,6 @@ public class SmartBot extends SpringWebhookBot {
         this.botFilter = botFilter;
         this.messageService = messageService;
         this.userService = userService;
-        if (botProperties.isClearWebhook()) {
-            try {
-                WebhookUtils.clearWebhook(this);
-            } catch (TelegramApiRequestException e) {
-                LOGGER.error(e.getMessage(), e);
-            }
-        }
 
         LOGGER.debug("Webhook url({})", setWebhook.getUrl());
     }

@@ -9,12 +9,6 @@ public class BotProperties {
 
     private String name;
 
-    private boolean logout;
-
-    private boolean close;
-
-    private boolean clearWebhook;
-
     public String getToken() {
         return token;
     }
@@ -29,30 +23,6 @@ public class BotProperties {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isLogout() {
-        return logout;
-    }
-
-    public void setLogout(boolean logout) {
-        this.logout = logout;
-    }
-
-    public boolean isClose() {
-        return close;
-    }
-
-    public void setClose(boolean close) {
-        this.close = close;
-    }
-
-    public boolean isClearWebhook() {
-        return clearWebhook;
-    }
-
-    public void setClearWebhook(boolean clearWebhook) {
-        this.clearWebhook = clearWebhook;
     }
 }
 
