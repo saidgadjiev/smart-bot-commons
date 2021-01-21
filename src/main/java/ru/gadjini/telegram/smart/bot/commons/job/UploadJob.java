@@ -8,15 +8,12 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.*;
-import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
-import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
@@ -148,15 +145,7 @@ public class UploadJob extends WorkQueueJobPusher {
     public void deleteUploads(String producer, Set<Integer> producerIds) {
         List<UploadQueueItem> deleted = uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
         uploadTasksExecutor.cancel(deleted.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
-        releaseResources(deleted);
-    }
-
-    public void cleanUpUploads(String producer, Set<Integer> producerIds) {
-        List<UploadQueueItem> deleted = new ArrayList<>(uploadQueueService.deleteByProducerIdsWithReturning(producer, producerIds));
-        List<UploadQueueItem> orphanUploads = uploadQueueService.deleteOrphanUploads(producer);
-        deleted.addAll(orphanUploads);
-        uploadTasksExecutor.cancel(deleted.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
-        releaseResources(deleted);
+        uploadQueueService.releaseResources(deleted);
     }
 
     public void cancelUploads() {
@@ -165,57 +154,6 @@ public class UploadJob extends WorkQueueJobPusher {
 
     public final void shutdown() {
         uploadTasksExecutor.shutdown();
-    }
-
-    private void releaseResources(List<UploadQueueItem> uploadQueueItems) {
-        for (UploadQueueItem uploadQueueItem : uploadQueueItems) {
-            releaseResources(uploadQueueItem);
-        }
-    }
-
-    private void releaseResources(UploadQueueItem uploadQueueItem) {
-        if (uploadQueueItem == null) {
-            return;
-        }
-        InputFile inputFile = null;
-        InputFile thumb = null;
-        switch (uploadQueueItem.getMethod()) {
-            case SendDocument.PATH: {
-                SendDocument sendDocument = (SendDocument) uploadQueueItem.getBody();
-                inputFile = sendDocument.getDocument();
-                thumb = sendDocument.getThumb();
-                break;
-            }
-            case SendAudio.PATH: {
-                SendAudio sendAudio = (SendAudio) uploadQueueItem.getBody();
-                inputFile = sendAudio.getAudio();
-                thumb = sendAudio.getThumb();
-                break;
-            }
-            case SendVideo.PATH: {
-                SendVideo sendVideo = (SendVideo) uploadQueueItem.getBody();
-                inputFile = sendVideo.getVideo();
-                thumb = sendVideo.getThumb();
-                break;
-            }
-            case SendVoice.PATH: {
-                SendVoice sendVoice = (SendVoice) uploadQueueItem.getBody();
-                inputFile = sendVoice.getVoice();
-                break;
-            }
-            case SendSticker.PATH: {
-                SendSticker sendSticker = (SendSticker) uploadQueueItem.getBody();
-                inputFile = sendSticker.getSticker();
-                break;
-            }
-        }
-
-        if (inputFile != null && inputFile.isNew()) {
-            new SmartTempFile(inputFile.getNewMediaFile()).smartDelete();
-        }
-        if (thumb != null && thumb.isNew()) {
-            new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
-        }
     }
 
     private class UploadTask implements SmartExecutorService.Job {
@@ -242,7 +180,7 @@ public class UploadJob extends WorkQueueJobPusher {
 
                 }
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
-                releaseResources(uploadQueueItem);
+                uploadQueueService.releaseResources(uploadQueueItem);
 
                 applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
             } catch (Exception e) {
@@ -304,7 +242,7 @@ public class UploadJob extends WorkQueueJobPusher {
             fileUploader.cancelUploading(uploadQueueItem.getMethod(), uploadQueueItem.getBody());
             if (canceledByUser) {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
-                releaseResources(uploadQueueItem);
+                uploadQueueService.releaseResources(uploadQueueItem);
                 LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducerTable(), uploadQueueItem.getProducerId());
             }
         }

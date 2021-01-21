@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.queue;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -8,8 +9,11 @@ import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
+import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
+import java.io.File;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Set;
@@ -65,6 +69,21 @@ public class DownloadQueueService extends QueueService {
 
     public List<DownloadQueueItem> deleteOrphanDownloads(String producer, String producerTable) {
         return downloadingQueueDao.deleteOrphan(producer, producerTable);
+    }
+
+    public void deleteCompletedAndOrphans(String producer, String producerTable, Set<Integer> producerIds) {
+        List<DownloadQueueItem> deleted = new ArrayList<>(deleteByProducerIdsWithReturning(producerTable, producerIds));
+        List<DownloadQueueItem> orphanDownloads = deleteOrphanDownloads(producer, producerTable);
+        deleted.addAll(orphanDownloads);
+        releaseResources(deleted);
+    }
+
+    public void releaseResources(List<DownloadQueueItem> downloadQueueItems) {
+        for (DownloadQueueItem downloadQueueItem : downloadQueueItems) {
+            if (StringUtils.isNotBlank(downloadQueueItem.getFilePath())) {
+                new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
+            }
+        }
     }
 
     public long floodWaitsCount() {

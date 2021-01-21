@@ -129,12 +129,12 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
-    public List<UploadQueueItem> deleteOrphan(String producer) {
+    public List<UploadQueueItem> deleteOrphan(String producer, String producerTable) {
         return jdbcTemplate.query(
                 "WITH del AS(delete\n" +
                         "from upload_queue dq\n" +
                         "where producer = ?\n" +
-                        "  and not exists(select 1 from " + producer + " uq where uq.id = dq.producer_id) RETURNING *) " +
+                        "  and not exists(select 1 from " + producerTable + " uq where uq.id = dq.producer_id) RETURNING *) " +
                         "SELECT * FROM del",
                 ps -> ps.setString(1, producer),
                 (rs, rowNum) -> map(rs)

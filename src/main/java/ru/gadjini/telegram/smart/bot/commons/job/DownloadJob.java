@@ -156,15 +156,7 @@ public class DownloadJob extends WorkQueueJobPusher {
     public void deleteDownloads(String producer, Set<Integer> producerIds) {
         List<DownloadQueueItem> deleted = downloadingQueueService.deleteByProducerIdsWithReturning(producer, producerIds);
         downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
-        releaseResources(deleted);
-    }
-
-    public void cleanUpDownloads(String producer, String producerTable, Set<Integer> producerIds) {
-        List<DownloadQueueItem> deleted = new ArrayList<>(downloadingQueueService.deleteByProducerIdsWithReturning(producerTable, producerIds));
-        List<DownloadQueueItem> orphanDownloads = downloadingQueueService.deleteOrphanDownloads(producer, producerTable);
-        deleted.addAll(orphanDownloads);
-        downloadTasksExecutor.cancel(deleted.stream().map(DownloadQueueItem::getId).collect(Collectors.toList()), true);
-        releaseResources(deleted);
+        downloadingQueueService.releaseResources(deleted);
     }
 
     public void cancelDownloads() {
@@ -173,14 +165,6 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     public final void shutdown() {
         downloadTasksExecutor.shutdown();
-    }
-
-    private void releaseResources(List<DownloadQueueItem> downloadQueueItems) {
-        for (DownloadQueueItem downloadQueueItem : downloadQueueItems) {
-            if (StringUtils.isNotBlank(downloadQueueItem.getFilePath())) {
-                new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
-            }
-        }
     }
 
     private class DownloadTask implements SmartExecutorService.Job {
