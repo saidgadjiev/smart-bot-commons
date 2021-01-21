@@ -8,6 +8,8 @@ public enum FileSource {
 
     VIDEO,
 
+    VIDEO_NOTE,
+
     AUDIO,
 
     STICKER,

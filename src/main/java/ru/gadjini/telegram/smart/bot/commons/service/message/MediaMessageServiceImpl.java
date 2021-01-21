@@ -124,9 +124,9 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
-    public SendFileResult sendSticker(SendSticker sendSticker) {
+    public SendFileResult sendSticker(SendSticker sendSticker, Progress progress) {
         sendSticker.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendSticker(sendSticker);
+        Message message = telegramLocalBotApiService.sendSticker(sendSticker, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }

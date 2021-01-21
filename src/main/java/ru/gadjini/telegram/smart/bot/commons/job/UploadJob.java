@@ -8,16 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import org.telegram.telegrambots.meta.api.methods.send.SendAudio;
-import org.telegram.telegrambots.meta.api.methods.send.SendDocument;
-import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
-import org.telegram.telegrambots.meta.api.methods.send.SendVoice;
+import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
+import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
@@ -205,6 +203,11 @@ public class UploadJob extends WorkQueueJobPusher {
                 inputFile = sendVoice.getVoice();
                 break;
             }
+            case SendSticker.PATH: {
+                SendSticker sendSticker = (SendSticker) uploadQueueItem.getBody();
+                inputFile = sendSticker.getSticker();
+                break;
+            }
         }
 
         if (inputFile != null && inputFile.isNew()) {
@@ -228,10 +231,16 @@ public class UploadJob extends WorkQueueJobPusher {
         }
 
         @Override
+        @SuppressWarnings("PMD")
         public void execute() {
             currentUploads.add(uploadQueueItem);
             try {
-                SendFileResult sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
+                SendFileResult sendFileResult = null;
+                try {
+                    sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
+                } catch (ZeroLengthException ignore) {
+
+                }
                 uploadQueueService.setCompleted(uploadQueueItem.getId());
                 releaseResources(uploadQueueItem);
 

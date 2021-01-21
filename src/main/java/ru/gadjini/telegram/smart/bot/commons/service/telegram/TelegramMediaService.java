@@ -9,7 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 public interface TelegramMediaService {
     Message editMessageMedia(EditMessageMedia editMessageMedia);
 
-    Message sendSticker(SendSticker sendSticker);
+    Message sendSticker(SendSticker sendSticker, Progress progress);
 
     Message sendDocument(SendDocument sendDocument, Progress progress);
 
