@@ -7,6 +7,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
 import java.util.Date;
@@ -21,15 +23,15 @@ public class CompletedItemsCleaner {
 
     private WorkQueueService workQueueService;
 
-    private DownloadJob downloadJob;
+    private DownloadQueueService downloadQueueService;
 
-    private UploadJob uploadJob;
+    private UploadQueueService uploadQueueService;
 
     @Autowired
-    public CompletedItemsCleaner(WorkQueueService workQueueService, DownloadJob downloadJob, UploadJob uploadJob) {
+    public CompletedItemsCleaner(WorkQueueService workQueueService, DownloadQueueService downloadQueueService, UploadQueueService uploadQueueService) {
         this.workQueueService = workQueueService;
-        this.downloadJob = downloadJob;
-        this.uploadJob = uploadJob;
+        this.downloadQueueService = downloadQueueService;
+        this.uploadQueueService = uploadQueueService;
     }
 
     @Scheduled(cron = "0 0 * * * *")
@@ -38,8 +40,8 @@ public class CompletedItemsCleaner {
         String queueName = workQueueService.getQueueDao().getQueueName();
         String producerName = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
         Set<Integer> queueItemsIds = queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet());
-        downloadJob.cleanUpDownloads(producerName, queueName, queueItemsIds);
-        uploadJob.cleanUpUploads(queueName, queueItemsIds);
+        downloadQueueService.deleteCompletedAndOrphans(producerName, queueName, queueItemsIds);
+        uploadQueueService.deleteCompletedAndOrphans(producerName, queueName, queueItemsIds);
 
         LOGGER.debug("Delete completed({}, {})", queueItems.size(), new Date());
     }
