@@ -9,10 +9,6 @@ public class BotProperties {
 
     private String name;
 
-    private boolean logout;
-
-    private boolean close;
-
     public String getToken() {
         return token;
     }
@@ -27,22 +23,6 @@ public class BotProperties {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isLogout() {
-        return logout;
-    }
-
-    public void setLogout(boolean logout) {
-        this.logout = logout;
-    }
-
-    public boolean isClose() {
-        return close;
-    }
-
-    public void setClose(boolean close) {
-        this.close = close;
     }
 }
 
