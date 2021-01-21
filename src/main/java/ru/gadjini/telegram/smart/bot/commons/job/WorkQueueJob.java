@@ -302,6 +302,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         @Override
         public void setCancelChecker(Supplier<Boolean> checker) {
             this.checker = checker;
+            queueWorker.setCancelChecker(checker);
         }
 
         @Override
@@ -312,6 +313,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         @Override
         public void setCanceledByUser(boolean canceledByUser) {
             this.canceledByUser = canceledByUser;
+            queueWorker.setCanceledByUser(canceledByUser);
         }
 
         @Override

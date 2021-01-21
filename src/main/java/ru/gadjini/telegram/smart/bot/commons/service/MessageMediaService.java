@@ -47,6 +47,8 @@ public class MessageMediaService {
             Sticker sticker = message.getSticker();
 
             return sticker.getFileId();
+        } else if (message.hasVideoNote()) {
+            return message.getVideoNote().getFileId();
         }
 
         return null;
@@ -92,6 +94,19 @@ public class MessageMediaService {
             messageMedia.setFormat(format);
             messageMedia.setSource(FileSource.VIDEO);
             messageMedia.setDuration(message.getVideo().getDuration());
+
+            return messageMedia;
+        } else if (message.hasVideoNote()) {
+            String fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + Format.MP4.getExt();
+
+            messageMedia.setFileName(fileName);
+            messageMedia.setFileId(message.getVideoNote().getFileId());
+            messageMedia.setFileSize(message.getVideoNote().getFileSize());
+            messageMedia.setThumb(message.getVideoNote().getThumb() != null ? message.getVideoNote().getThumb().getFileId() : null);
+            messageMedia.setMimeType("video/mp4");
+            messageMedia.setFormat(Format.MP4);
+            messageMedia.setSource(FileSource.VIDEO_NOTE);
+            messageMedia.setDuration(message.getVideoNote().getDuration());
 
             return messageMedia;
         } else if (message.hasAudio()) {
