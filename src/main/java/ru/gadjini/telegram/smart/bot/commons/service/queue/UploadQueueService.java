@@ -10,6 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 
@@ -59,6 +60,10 @@ public class UploadQueueService extends QueueService {
 
     public void updateStatus(int id, QueueItem.Status newStatus, QueueItem.Status oldStatus) {
         uploadQueueDao.updateStatus(id, newStatus, oldStatus);
+    }
+
+    public UploadQueueItem updateUploadType(int id, UploadType uploadType) {
+        return uploadQueueDao.updateUploadType(id, uploadType);
     }
 
     public List<UploadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
@@ -125,10 +130,6 @@ public class UploadQueueService extends QueueService {
         if (thumb != null && thumb.isNew()) {
             new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
         }
-    }
-
-    public UploadQueueItem supportsStreaming(int id, boolean supportsStreaming) {
-        return uploadQueueDao.supportsStreaming(id, supportsStreaming);
     }
 
     @Override

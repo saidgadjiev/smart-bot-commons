@@ -6,8 +6,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
+import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.service.flood.UploadFloodWaitController;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
@@ -29,11 +31,13 @@ public class FileUploader {
         this.uploadFloodWaitController = uploadFloodWaitController;
     }
 
-    public SendFileResult upload(String method, Object body, Progress progress) {
-        String key = getFilePathOrFileId(method, body);
+    public SendFileResult upload(UploadQueueItem uploadQueueItem) {
+        String key = getFilePathOrFileId(uploadQueueItem.getMethod(), uploadQueueItem.getBody());
         uploadFloodWaitController.startUploading(key);
+        applySmartOptionsToBody(uploadQueueItem);
+
         try {
-            return doUpload(method, body, progress);
+            return doUpload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
         } finally {
             uploadFloodWaitController.finishUploading(key);
         }
@@ -130,5 +134,44 @@ public class FileUploader {
         }
 
         throw new IllegalArgumentException("Unsupported method to upload " + method);
+    }
+
+    private void applySmartOptionsToBody(UploadQueueItem queueItem) {
+        switch (queueItem.getMethod()) {
+            case SendDocument.PATH: {
+                SendDocument sendDocument = (SendDocument) queueItem.getBody();
+                if (queueItem.getUploadType() != UploadType.DOCUMENT) {
+                    SendVideo sendVideo = convert(sendDocument);
+                    sendVideo.setSupportsStreaming(queueItem.getUploadType() == UploadType.STREAMING_VIDEO);
+                    queueItem.setBody(sendVideo);
+                    queueItem.setMethod(SendVideo.PATH);
+                }
+                break;
+            }
+            case SendVideo.PATH: {
+                SendVideo sendVideo = (SendVideo) queueItem.getBody();
+                if (queueItem.getUploadType() != UploadType.DOCUMENT) {
+                    queueItem.setBody(convert(sendVideo));
+                    queueItem.setMethod(SendDocument.PATH);
+                }
+                break;
+            }
+        }
+    }
+
+    private SendDocument convert(SendVideo sendVideo) {
+        return SendDocument.builder().chatId(sendVideo.getChatId())
+                .document(sendVideo.getVideo())
+                .allowSendingWithoutReply(sendVideo.getAllowSendingWithoutReply())
+                .caption(sendVideo.getCaption())
+                .parseMode(sendVideo.getParseMode()).build();
+    }
+
+    private SendVideo convert(SendDocument sendDocument) {
+        return SendVideo.builder().chatId(sendDocument.getChatId())
+                .video(sendDocument.getDocument())
+                .allowSendingWithoutReply(sendDocument.getAllowSendingWithoutReply())
+                .caption(sendDocument.getCaption())
+                .parseMode(sendDocument.getParseMode()).build();
     }
 }

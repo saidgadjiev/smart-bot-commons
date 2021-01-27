@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 @JsonAutoDetect(fieldVisibility = JsonAutoDetect.Visibility.ANY)
 public class RequestParams {
@@ -14,6 +15,10 @@ public class RequestParams {
 
     public String getString(String key) {
         return params.get(key);
+    }
+
+    public <T> T get(String key, Function<String, T> mapper) {
+        return mapper.apply(params.get(key));
     }
 
     public Integer getInt(String key) {

@@ -61,5 +61,7 @@ public class MessagesProperties {
 
     public static final String VIDEO_SUPPORTS_STREAMING_COMMAND_DESCRIPTION = "video.supports.streaming.command.description";
 
-    public static final String VIDEO_SUPPORTS_STREAMING_CANCEL_COMMAND_DESCRIPTION = "video.supports.streaming.cancel.command.description";
+    public static final String VIDEO_COMMAND_DESCRIPTION = "video.command.description";
+
+    public static final String DOCUMENT_COMMAND_DESCRIPTION = "document.command.description";
 }

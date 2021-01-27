@@ -3,7 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.request;
 public enum Arg {
 
     QUEUE_ITEM_ID("a"),
-    SUPPORTS_STREAMING("aa");
+    UPLOAD_TYPE("aa");
 
     private final String key;
 

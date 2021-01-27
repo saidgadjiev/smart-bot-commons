@@ -175,7 +175,7 @@ public class UploadJob extends WorkQueueJobPusher {
             try {
                 SendFileResult sendFileResult = null;
                 try {
-                    sendFileResult = fileUploader.upload(uploadQueueItem.getMethod(), uploadQueueItem.getBody(), uploadQueueItem.getProgress());
+                    sendFileResult = fileUploader.upload(uploadQueueItem);
                 } catch (ZeroLengthException ignore) {
 
                 }

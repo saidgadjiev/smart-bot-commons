@@ -6,16 +6,15 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.smart.SmartUploadKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.message.smart.SmartUploadMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 
 import java.util.Locale;
@@ -32,22 +31,22 @@ public class FileUploadService {
 
     private SmartUploadKeyboardService smartKeyboardService;
 
-    private MessageService messageService;
+    private SmartUploadMessageBuilder smartUploadMessageBuilder;
 
-    private LocalisationService localisationService;
+    private MessageService messageService;
 
     private UserService userService;
 
     @Autowired
     public FileUploadService(UploadQueueService uploadQueueService,
                              WorkQueueDao workQueueDao, SmartUploadKeyboardService smartKeyboardService,
-                             @Qualifier("messageLimits") MessageService messageService,
-                             LocalisationService localisationService, UserService userService) {
+                             SmartUploadMessageBuilder smartUploadMessageBuilder, @Qualifier("messageLimits") MessageService messageService,
+                             UserService userService) {
         this.uploadQueueService = uploadQueueService;
         this.workQueueDao = workQueueDao;
         this.smartKeyboardService = smartKeyboardService;
+        this.smartUploadMessageBuilder = smartUploadMessageBuilder;
         this.messageService = messageService;
-        this.localisationService = localisationService;
         this.userService = userService;
     }
 
@@ -64,7 +63,7 @@ public class FileUploadService {
         if (isSmartFile()) {
             UploadQueueItem upload = uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(),
                     workQueueDao.getProducerName(), producerId, QueueItem.Status.BLOCKED, extra);
-            sendSmartFile(userId, upload.getId());
+            sendSmartFile(upload);
         } else {
             uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(),
                     workQueueDao.getProducerName(), producerId, QueueItem.Status.WAITING, extra);
@@ -91,12 +90,12 @@ public class FileUploadService {
         return true;
     }
 
-    private void sendSmartFile(int userId, int uploadId) {
-        Locale locale = userService.getLocaleOrDefault(userId);
-        InlineKeyboardMarkup smartKeyboard = smartKeyboardService.getSmartUploadKeyboard(uploadId, locale);
+    private void sendSmartFile(UploadQueueItem uploadQueueItem) {
+        Locale locale = userService.getLocaleOrDefault(uploadQueueItem.getUserId());
+        InlineKeyboardMarkup smartKeyboard = smartKeyboardService.getSmartUploadKeyboard(uploadQueueItem.getId(), locale);
         messageService.sendMessage(
-                SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_SMART_UPLOAD_IS_READY, locale))
+                SendMessage.builder().chatId(String.valueOf(uploadQueueItem.getUserId()))
+                        .text(smartUploadMessageBuilder.buildSmartUploadMessage(uploadQueueItem, locale))
                         .parseMode(ParseMode.HTML)
                         .replyMarkup(smartKeyboard)
                         .build()

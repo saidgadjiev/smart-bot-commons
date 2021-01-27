@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 
 public class UploadQueueItem extends QueueItem {
 
@@ -22,7 +23,7 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String FILE_SIZE = "file_size";
 
-    public static final String SUPPORTS_STREAMING = "supports_streaming";
+    public static final String UPLOAD_TYPE = "upload_type";
 
     private String producerTable;
 
@@ -40,7 +41,7 @@ public class UploadQueueItem extends QueueItem {
 
     private long fileSize;
 
-    private boolean supportsStreaming;
+    private UploadType uploadType = UploadType.DOCUMENT;
 
     public String getProducerTable() {
         return producerTable;
@@ -106,11 +107,11 @@ public class UploadQueueItem extends QueueItem {
         this.producer = producer;
     }
 
-    public boolean isSupportsStreaming() {
-        return supportsStreaming;
+    public UploadType getUploadType() {
+        return uploadType;
     }
 
-    public void setSupportsStreaming(boolean supportsStreaming) {
-        this.supportsStreaming = supportsStreaming;
+    public void setUploadType(UploadType uploadType) {
+        this.uploadType = uploadType;
     }
 }

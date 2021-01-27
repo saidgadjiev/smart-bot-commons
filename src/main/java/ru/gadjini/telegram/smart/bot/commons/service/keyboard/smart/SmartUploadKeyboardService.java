@@ -21,7 +21,9 @@ public class SmartUploadKeyboardService {
 
     public InlineKeyboardMarkup getSmartUploadKeyboard(int uploadId, Locale locale) {
         InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboardMarkup();
-        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.supportsStreaming(uploadId, locale)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.document(uploadId, locale)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.video(uploadId, locale)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.streamingVideo(uploadId, locale)));
         inlineKeyboardMarkup.getKeyboard().add(List.of(smartButtonFactory.doSmartUpload(uploadId, locale)));
 
         return inlineKeyboardMarkup;

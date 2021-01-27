@@ -14,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.*;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
+import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.utils.JdbcUtils;
@@ -152,16 +153,27 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
-    public UploadQueueItem supportsStreaming(int id, boolean supportsStreaming) {
+    public UploadQueueItem updateUploadType(int id, UploadType uploadType) {
         return jdbcTemplate.query(
-                "WITH upd AS (UPDATE upload_queue SET supports_streaming = ? WHERE id = ? AND status = ? RETURNING id, supports_streaming)\n" +
+                "WITH upd AS (UPDATE upload_queue SET upload_type = ? WHERE id = ? AND status = ? RETURNING id, user_id, upload_type)\n" +
                         "SELECT * FROM upd",
                 ps -> {
-                    ps.setBoolean(1, supportsStreaming);
+                    ps.setString(1, uploadType.name());
                     ps.setInt(2, id);
                     ps.setInt(3, QueueItem.Status.BLOCKED.getCode());
                 },
-                rs -> rs.next() ? map(rs) : null
+                rs -> {
+                    if (rs.next()) {
+                        UploadQueueItem queueItem = new UploadQueueItem();
+                        queueItem.setUploadType(UploadType.valueOf(rs.getString(UploadQueueItem.UPLOAD_TYPE)));
+                        queueItem.setId(rs.getInt(UploadQueueItem.ID));
+                        queueItem.setUserId(rs.getInt(UploadQueueItem.USER_ID));
+
+                        return queueItem;
+                    }
+
+                    return null;
+                }
         );
     }
 
@@ -212,8 +224,11 @@ public class UploadQueueDao extends QueueDao {
             item.setExtra(gson.fromJson(extra, JsonElement.class));
         }
         Set<String> columns = JdbcUtils.getColumnNames(rs.getMetaData());
-        if (columns.contains(UploadQueueItem.SUPPORTS_STREAMING)) {
-            item.setSupportsStreaming(rs.getBoolean(UploadQueueItem.SUPPORTS_STREAMING));
+        if (columns.contains(UploadQueueItem.UPLOAD_TYPE)) {
+            String uploadType = rs.getString(UploadQueueItem.UPLOAD_TYPE);
+            if (StringUtils.isNotBlank(uploadType)) {
+                item.setUploadType(UploadType.valueOf(uploadType));
+            }
         }
 
         return item;
