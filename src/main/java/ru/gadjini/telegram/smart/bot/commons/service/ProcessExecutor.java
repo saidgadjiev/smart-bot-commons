@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class ProcessExecutor {
@@ -53,21 +54,42 @@ public class ProcessExecutor {
         execute(command, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
     }
 
+    public String tryExecute(String[] command, int waitForInSeconds) {
+        File errorFile = getErrorLogFile();
+        try {
+            ProcessBuilder processBuilder = new ProcessBuilder(command);
+            processBuilder.redirectOutput(ProcessBuilder.Redirect.appendTo(errorFile));
+            processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
+            Process process = processBuilder.start();
+            try {
+                process.waitFor(waitForInSeconds, TimeUnit.SECONDS);
+
+                return FileUtils.readFileToString(errorFile, StandardCharsets.UTF_8);
+            } finally {
+                process.destroy();
+            }
+        } catch (Exception ex) {
+            if (ex instanceof ProcessException) {
+                throw (ProcessException) ex;
+            } else {
+                throw new ProcessException(ex);
+            }
+        } finally {
+            FileUtils.deleteQuietly(errorFile);
+        }
+    }
+
     private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) {
         File errorFile = getErrorLogFile();
         try {
-            if (errorFile != null) {
-                FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
-            }
+            FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
             ProcessBuilder processBuilder = new ProcessBuilder(command);
             if (redirectOutput != null) {
                 processBuilder.redirectOutput(redirectOutput);
             } else if (StringUtils.isNotBlank(outputRedirectFile)) {
                 processBuilder.redirectOutput(new File(outputRedirectFile));
             }
-            if (errorFile != null) {
-                processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
-            }
+            processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
             Process process = processBuilder.start();
             try {
                 Set<Integer> codes = new HashSet<>(successCodes);
@@ -102,10 +124,10 @@ public class ProcessExecutor {
     public File getErrorLogFile() {
         try {
             return File.createTempFile("log", ".txt", new File(processLoggingDir));
-        } catch (Throwable e) {
+        } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
 
-            return null;
+            throw new RuntimeException(e);
         }
     }
 }
