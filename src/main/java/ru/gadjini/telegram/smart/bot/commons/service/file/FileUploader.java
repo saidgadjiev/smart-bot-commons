@@ -14,6 +14,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.flood.UploadFloodWaitContro
 import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
+import java.util.Set;
+
 @Service
 public class FileUploader {
 
@@ -140,7 +142,7 @@ public class FileUploader {
         switch (queueItem.getMethod()) {
             case SendDocument.PATH: {
                 SendDocument sendDocument = (SendDocument) queueItem.getBody();
-                if (queueItem.getUploadType() != UploadType.DOCUMENT) {
+                if (Set.of(UploadType.VIDEO, UploadType.STREAMING_VIDEO).contains(queueItem.getUploadType())) {
                     SendVideo sendVideo = convert(sendDocument);
                     sendVideo.setSupportsStreaming(queueItem.getUploadType() == UploadType.STREAMING_VIDEO);
                     queueItem.setBody(sendVideo);
@@ -150,9 +152,13 @@ public class FileUploader {
             }
             case SendVideo.PATH: {
                 SendVideo sendVideo = (SendVideo) queueItem.getBody();
-                if (queueItem.getUploadType() != UploadType.DOCUMENT) {
+                if (queueItem.getUploadType() == UploadType.DOCUMENT) {
                     queueItem.setBody(convert(sendVideo));
                     queueItem.setMethod(SendDocument.PATH);
+                } else if (queueItem.getUploadType() == UploadType.STREAMING_VIDEO) {
+                    sendVideo.setSupportsStreaming(true);
+                } else {
+                    sendVideo.setSupportsStreaming(null);
                 }
                 break;
             }
