@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
@@ -12,6 +13,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
+import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
@@ -21,10 +23,11 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 @Component
+@Profile(SmartBotConfiguration.PROFILE_PROD)
 @SuppressWarnings("PMD")
-public class SmartBot extends SpringWebhookBot {
+public class SmartWebhookBot extends SpringWebhookBot {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartBot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartWebhookBot.class);
 
     private BotProperties botProperties;
 
@@ -35,9 +38,9 @@ public class SmartBot extends SpringWebhookBot {
     private UserService userService;
 
     @Autowired
-    public SmartBot(BotProperties botProperties, BotFilter botFilter,
-                    @Qualifier("messageLimits") MessageService messageService,
-                    UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook) {
+    public SmartWebhookBot(BotProperties botProperties, BotFilter botFilter,
+                           @Qualifier("messageLimits") MessageService messageService,
+                           UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook) {
         super(botOptions, setWebhook);
         this.botProperties = botProperties;
         this.botFilter = botFilter;

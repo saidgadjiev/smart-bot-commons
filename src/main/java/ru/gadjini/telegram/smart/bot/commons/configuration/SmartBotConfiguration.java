@@ -8,6 +8,7 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
@@ -24,16 +25,22 @@ import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
 @Configuration
 public class SmartBotConfiguration {
 
+    public static final String PROFILE_PROD = "prod";
+
+    public static final String PROFILE_DEV = "dev";
+
     //Infinite
     private static final int SO_TIMEOUT = 0;
 
     @Bean
+    @Profile(PROFILE_PROD)
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
         return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
+    @Profile(PROFILE_PROD)
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());

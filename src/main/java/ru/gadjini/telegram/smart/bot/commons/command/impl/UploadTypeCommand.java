@@ -33,7 +33,7 @@ public class UploadTypeCommand implements CallbackBotCommand {
     private UserService userService;
 
     @Autowired
-    public UploadTypeCommand(UploadQueueService uploadQueueService, @Qualifier("messageLmits") MessageService messageService,
+    public UploadTypeCommand(UploadQueueService uploadQueueService, @Qualifier("messageLimits") MessageService messageService,
                              SmartUploadKeyboardService smartUploadKeyboardService,
                              SmartUploadMessageBuilder smartUploadMessageBuilder, UserService userService) {
         this.uploadQueueService = uploadQueueService;
@@ -50,11 +50,6 @@ public class UploadTypeCommand implements CallbackBotCommand {
 
     @Override
     public void processMessage(CallbackQuery callbackQuery, RequestParams requestParams) {
-
-    }
-
-    @Override
-    public void processNonCommandCallback(CallbackQuery callbackQuery, RequestParams requestParams) {
         if (requestParams.contains(Arg.UPLOAD_TYPE.getKey())) {
             int uploadId = requestParams.getInt(Arg.QUEUE_ITEM_ID.getKey());
             UploadType uploadType = requestParams.get(Arg.UPLOAD_TYPE.getKey(), UploadType::valueOf);
@@ -63,6 +58,7 @@ public class UploadTypeCommand implements CallbackBotCommand {
             UploadQueueItem uploadQueueItem = uploadQueueService.updateUploadType(uploadId, uploadType);
             messageService.editMessage(
                     EditMessageText.builder().chatId(String.valueOf(callbackQuery.getMessage().getChatId()))
+                            .messageId(callbackQuery.getMessage().getMessageId())
                             .text(smartUploadMessageBuilder.buildSmartUploadMessage(uploadQueueItem, locale))
                             .replyMarkup(smartUploadKeyboardService.getSmartUploadKeyboard(uploadId, locale))
                             .build()
