@@ -27,8 +27,8 @@ public class TelegramHttpClientBuilder {
                 .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .setConnectionManager(createConnectionManager(options))
                 .setConnectionTimeToLive(70, TimeUnit.SECONDS)
-                .setMaxConnTotal(400)
-                .setMaxConnPerRoute(200);
+                .setMaxConnTotal(2000)
+                .setMaxConnPerRoute(1000);
         return httpClientBuilder.build();
     }
 
