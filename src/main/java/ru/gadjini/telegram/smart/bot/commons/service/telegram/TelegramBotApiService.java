@@ -402,13 +402,13 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
     private RuntimeException catchException(String chatId, Exception ex) {
         if (ex instanceof org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) {
             org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException e = (org.telegram.telegrambots.meta.exceptions.TelegramApiRequestException) ex;
-            LOGGER.error(e.getMessage() + "\n" + e.getErrorCode() + "\n" + e.getApiResponse(), e);
+            LOGGER.error("(" + chatId + ")" + e.getMessage() + "\n" + e.getErrorCode() + "\n" + e.getApiResponse(), e);
             if (e.getErrorCode() == HttpCodes.TOO_MANY_REQUESTS) {
                 return new FloodWaitException(e.getApiResponse(), 30);
             }
             return new TelegramApiRequestException(chatId, e.getMessage(), e.getErrorCode(), e.getApiResponse(), e);
         } else {
-            LOGGER.error(ex.getMessage(), ex);
+            LOGGER.error("(" + chatId + ")" + ex.getMessage(), ex);
             return new TelegramApiException(ex);
         }
     }

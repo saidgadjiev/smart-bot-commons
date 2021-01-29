@@ -61,9 +61,11 @@ public class SmartBot extends SpringWebhookBot {
                     .parseMode(ParseMode.HTML)
                     .text(ex.getHumanMessage()).replyToMessageId(ex.getReplyToMessageId()).build());
         } catch (Exception ex) {
-            LOGGER.error(ex.getMessage(), ex);
-            TgMessage tgMessage = TgMessage.from(update);
-            messageService.sendErrorMessage(tgMessage.getChatId(), userService.getLocaleOrDefault(tgMessage.getUser().getId()));
+            if (!userService.handleBotBlockedByUser(ex)) {
+                LOGGER.error(ex.getMessage(), ex);
+                TgMessage tgMessage = TgMessage.from(update);
+                messageService.sendErrorMessage(tgMessage.getChatId(), userService.getLocaleOrDefault(tgMessage.getUser().getId()));
+            }
         }
 
         return null;
