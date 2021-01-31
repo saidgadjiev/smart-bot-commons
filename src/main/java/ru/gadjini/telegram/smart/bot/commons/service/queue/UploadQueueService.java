@@ -13,6 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -35,8 +36,9 @@ public class UploadQueueService extends QueueService {
         this.fileUploader = fileUploader;
     }
 
-    public UploadQueueItem createUpload(int userId, String method, Object body, Progress progress, String producerTable, String producer,
-                             int producerId, QueueItem.Status status, Object extra) {
+    public UploadQueueItem createUpload(int userId, String method, Object body, Format fileFormat,
+                                        Progress progress, String producerTable, String producer,
+                                        int producerId, QueueItem.Status status, Object extra) {
         UploadQueueItem uploadQueueItem = new UploadQueueItem();
         uploadQueueItem.setUserId(userId);
         uploadQueueItem.setMethod(method);
@@ -46,6 +48,7 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setProgress(progress);
         uploadQueueItem.setProducerId(producerId);
         uploadQueueItem.setStatus(status);
+        uploadQueueItem.setFileFormat(fileFormat);
         uploadQueueItem.setExtra(extra);
         uploadQueueItem.setFileSize(fileUploader.getInputFile(method, body).getNewMediaFile().length());
 
@@ -60,6 +63,10 @@ public class UploadQueueService extends QueueService {
 
     public void updateStatus(int id, QueueItem.Status newStatus, QueueItem.Status oldStatus) {
         uploadQueueDao.updateStatus(id, newStatus, oldStatus);
+    }
+
+    public Format getFileFormat(int id) {
+        return uploadQueueDao.getFileFormat(id);
     }
 
     public UploadQueueItem updateUploadType(int id, UploadType uploadType) {

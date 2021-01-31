@@ -17,6 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.utils.JdbcUtils;
 
 import java.sql.*;
@@ -54,8 +55,9 @@ public class UploadQueueDao extends QueueDao {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("INSERT INTO upload_queue (user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer)\n" +
-                            "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement("INSERT INTO upload_queue " +
+                            "(user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer, file_format)\n" +
+                            "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
                     ps.setString(3, gson.toJson(queueItem.getBody()));
@@ -74,6 +76,11 @@ public class UploadQueueDao extends QueueDao {
                     }
                     ps.setLong(9, queueItem.getFileSize());
                     ps.setString(10, queueItem.getProducer());
+                    if (queueItem.getFileFormat() == null) {
+                        ps.setNull(11, Types.VARCHAR);
+                    } else {
+                        ps.setString(11, queueItem.getFileFormat().name());
+                    }
 
                     return ps;
                 },
@@ -155,7 +162,7 @@ public class UploadQueueDao extends QueueDao {
 
     public UploadQueueItem updateUploadType(int id, UploadType uploadType) {
         return jdbcTemplate.query(
-                "WITH upd AS (UPDATE upload_queue SET upload_type = ? WHERE id = ? AND status = ? RETURNING id, user_id, upload_type)\n" +
+                "WITH upd AS (UPDATE upload_queue SET upload_type = ? WHERE id = ? AND status = ? RETURNING id, user_id, upload_type, file_format)\n" +
                         "SELECT * FROM upd",
                 ps -> {
                     ps.setString(1, uploadType.name());
@@ -168,8 +175,28 @@ public class UploadQueueDao extends QueueDao {
                         queueItem.setUploadType(UploadType.valueOf(rs.getString(UploadQueueItem.UPLOAD_TYPE)));
                         queueItem.setId(rs.getInt(UploadQueueItem.ID));
                         queueItem.setUserId(rs.getInt(UploadQueueItem.USER_ID));
+                        String fileFormat = rs.getString(UploadQueueItem.FILE_FORMAT);
+                        if (StringUtils.isNotBlank(fileFormat)) {
+                            queueItem.setFileFormat(Format.valueOf(fileFormat));
+                        }
 
                         return queueItem;
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+    public Format getFileFormat(int id) {
+        return jdbcTemplate.query(
+                "SELECT file_format FROM upload_queue WHERE id = ?",
+                rs -> {
+                    if (rs.next()) {
+                        String fileFormat = rs.getString(UploadQueueItem.FILE_FORMAT);
+                        if (StringUtils.isBlank(fileFormat)) {
+                            return Format.valueOf(fileFormat);
+                        }
                     }
 
                     return null;
@@ -228,6 +255,12 @@ public class UploadQueueDao extends QueueDao {
             String uploadType = rs.getString(UploadQueueItem.UPLOAD_TYPE);
             if (StringUtils.isNotBlank(uploadType)) {
                 item.setUploadType(UploadType.valueOf(uploadType));
+            }
+        }
+        if (columns.contains(UploadQueueItem.FILE_FORMAT)) {
+            String fileFormat = rs.getString(UploadQueueItem.FILE_FORMAT);
+            if (StringUtils.isNotBlank(fileFormat)) {
+                item.setFileFormat(Format.valueOf(fileFormat));
             }
         }
 

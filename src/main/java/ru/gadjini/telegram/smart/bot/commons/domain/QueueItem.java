@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
+
 import java.time.ZonedDateTime;
 
 public class QueueItem {
@@ -30,6 +32,8 @@ public class QueueItem {
 
     public static final String NEXT_RUN_AT = "next_run_at";
 
+    public static final String FILE_FORMAT = "file_format";
+
     private int id;
 
     private int userId;
@@ -55,6 +59,8 @@ public class QueueItem {
     private String exception;
 
     private ZonedDateTime nextRunAt;
+
+    private Format fileFormat;
 
     public final int getId() {
         return id;
@@ -158,6 +164,14 @@ public class QueueItem {
 
     public void setNextRunAt(ZonedDateTime nextRunAt) {
         this.nextRunAt = nextRunAt;
+    }
+
+    public Format getFileFormat() {
+        return fileFormat;
+    }
+
+    public void setFileFormat(Format fileFormat) {
+        this.fileFormat = fileFormat;
     }
 
     public enum Status {

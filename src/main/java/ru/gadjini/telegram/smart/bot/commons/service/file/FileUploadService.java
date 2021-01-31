@@ -12,6 +12,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.job.UploadJob;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.smart.SmartUploadKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.smart.SmartUploadMessageBuilder;
@@ -59,19 +60,23 @@ public class FileUploadService {
         uploadQueueService.updateStatus(uploadId, QueueItem.Status.WAITING, QueueItem.Status.BLOCKED);
     }
 
-    public void createUpload(int userId, String method, Object body, Progress progress, int producerId, Object extra) {
+    public void createUpload(int userId, String method, Object body, Format fileFormat, Progress progress, int producerId, Object extra) {
         if (isSmartFile()) {
-            UploadQueueItem upload = uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(),
+            UploadQueueItem upload = uploadQueueService.createUpload(userId, method, body, fileFormat, progress, workQueueDao.getQueueName(),
                     workQueueDao.getProducerName(), producerId, QueueItem.Status.BLOCKED, extra);
             sendSmartFile(upload);
         } else {
-            uploadQueueService.createUpload(userId, method, body, progress, workQueueDao.getQueueName(),
+            uploadQueueService.createUpload(userId, method, body, fileFormat, progress, workQueueDao.getQueueName(),
                     workQueueDao.getProducerName(), producerId, QueueItem.Status.WAITING, extra);
         }
     }
 
     public void createUpload(int userId, String method, Object body, Progress progress, int producerId) {
-        createUpload(userId, method, body, progress, producerId, null);
+        createUpload(userId, method, body, null, progress, producerId, null);
+    }
+
+    public void createUpload(int userId, String method, Object body, Format fileFormat, Progress progress, int producerId) {
+        createUpload(userId, method, body, fileFormat, progress, producerId, null);
     }
 
     public void cancelUploads(int producerId) {

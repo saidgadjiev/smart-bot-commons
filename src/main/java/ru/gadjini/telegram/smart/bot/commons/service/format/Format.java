@@ -137,7 +137,17 @@ public enum Format {
             return true;
         }
     },
-    MP4(FormatCategory.VIDEO),
+    MP4(FormatCategory.VIDEO) {
+        @Override
+        public boolean supportsStreaming() {
+            return true;
+        }
+
+        @Override
+        public boolean canBeSentAsVideo() {
+            return true;
+        }
+    },
     _3GP(FormatCategory.VIDEO) {
         @Override
         public String getExt() {
@@ -151,7 +161,17 @@ public enum Format {
     },
     AVI(FormatCategory.VIDEO),
     FLV(FormatCategory.VIDEO),
-    M4V(FormatCategory.VIDEO),
+    M4V(FormatCategory.VIDEO) {
+        @Override
+        public boolean supportsStreaming() {
+            return true;
+        }
+
+        @Override
+        public boolean canBeSentAsVideo() {
+            return true;
+        }
+    },
     MKV(FormatCategory.VIDEO),
     MOV(FormatCategory.VIDEO),
     MPEG(FormatCategory.VIDEO),
@@ -224,7 +244,8 @@ public enum Format {
         }
     },
     RA(FormatCategory.AUDIO),
-    RM(FormatCategory.AUDIO);
+    RM(FormatCategory.AUDIO),
+    UNKNOWN(FormatCategory.COMMON);
 
     private FormatCategory category;
 
@@ -253,6 +274,14 @@ public enum Format {
     }
 
     public boolean isDummy() {
+        return false;
+    }
+
+    public boolean supportsStreaming() {
+        return false;
+    }
+
+    public boolean canBeSentAsVideo() {
         return false;
     }
 }

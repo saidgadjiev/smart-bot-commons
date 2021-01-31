@@ -64,4 +64,8 @@ public class MessagesProperties {
     public static final String VIDEO_COMMAND_DESCRIPTION = "video.command.description";
 
     public static final String DOCUMENT_COMMAND_DESCRIPTION = "document.command.description";
+
+    public static final String MESSAGE_AS_STREAMING_VIDEO_FORMATS = "message.as.streaming.video.formats";
+
+    public static final String MESSAGE_AS_VIDEO_FORMATS = "message.as.video.formats";
 }
