@@ -208,4 +208,5 @@ public abstract class QueueDao {
     public abstract JdbcTemplate getJdbcTemplate();
 
     public abstract QueueDaoDelegate getQueueDaoDelegate();
+
 }

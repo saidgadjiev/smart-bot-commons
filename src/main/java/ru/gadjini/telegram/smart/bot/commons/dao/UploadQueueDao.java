@@ -188,6 +188,13 @@ public class UploadQueueDao extends QueueDao {
         );
     }
 
+    public void setWaitingExpiredSmartUploads(long expirationInSeconds) {
+        jdbcTemplate.update(
+                "UPDATE upload_queue SET status = 0 WHERE status = 4 AND " +
+                        "created_at + interval '" + expirationInSeconds + " seconds' < now()"
+        );
+    }
+
     public Format getFileFormat(int id) {
         return jdbcTemplate.query(
                 "SELECT file_format FROM upload_queue WHERE id = ?",

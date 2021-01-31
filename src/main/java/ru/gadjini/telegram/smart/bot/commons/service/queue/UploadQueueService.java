@@ -81,6 +81,10 @@ public class UploadQueueService extends QueueService {
         return uploadQueueDao.deleteOrphan(producer, producerTable);
     }
 
+    public void setWaitingExpiredSmartUploads(long expirationInSeconds) {
+        uploadQueueDao.setWaitingExpiredSmartUploads(expirationInSeconds);
+    }
+
     public void deleteCompletedAndOrphans(String producer, String producerTable, Set<Integer> producerIds) {
         List<UploadQueueItem> deleted = new ArrayList<>(deleteByProducerIdsWithReturning(producer, producerIds));
         List<UploadQueueItem> orphanUploads = deleteOrphanUploads(producer, producerTable);
