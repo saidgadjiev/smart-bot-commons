@@ -18,11 +18,9 @@ import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.TempFileService;
-import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
-import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.DownloadCompleted;
 
@@ -57,10 +55,6 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private final List<DownloadQueueItem> currentDownloads = new ArrayList<>();
 
-    private MessageService messageService;
-
-    private UserService userService;
-
     private ApplicationEventPublisher applicationEventPublisher;
 
     private FormatService formatService;
@@ -75,7 +69,6 @@ public class DownloadJob extends WorkQueueJobPusher {
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
                        MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
-                       @Qualifier("messageLimits") MessageService messageService, UserService userService,
                        ApplicationEventPublisher applicationEventPublisher, FormatService formatService) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
@@ -83,8 +76,6 @@ public class DownloadJob extends WorkQueueJobPusher {
         this.fileManagerProperties = fileManagerProperties;
         this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
-        this.messageService = messageService;
-        this.userService = userService;
         this.applicationEventPublisher = applicationEventPublisher;
         this.formatService = formatService;
     }
@@ -262,7 +253,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                 downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
                 downloadingQueueItem.setFilePath(tempFile.getAbsolutePath());
                 applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 tempFile.smartDelete();
 
                 if (checker == null || !checker.get()) {
@@ -273,9 +264,9 @@ public class DownloadJob extends WorkQueueJobPusher {
                     } else if (FileDownloader.isNoneCriticalDownloadingException(e)) {
                         noneCriticalException(downloadingQueueItem, e);
                     } else {
-                        LOGGER.error(e.getMessage(), e);
                         downloadingQueueService.setExceptionStatus(downloadingQueueItem.getId(), e);
-                        messageService.sendErrorMessage(downloadingQueueItem.getUserId(), userService.getLocaleOrDefault(downloadingQueueItem.getUserId()));
+
+                        throw e;
                     }
                 }
             }

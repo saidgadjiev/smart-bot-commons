@@ -17,11 +17,9 @@ import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.ForceMediaMessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.UploadCompleted;
 
@@ -53,10 +51,6 @@ public class UploadJob extends WorkQueueJobPusher {
 
     private final List<UploadQueueItem> currentUploads = new ArrayList<>();
 
-    private MessageService messageService;
-
-    private UserService userService;
-
     @Value("${disable.jobs:false}")
     private boolean disableJobs;
 
@@ -67,15 +61,13 @@ public class UploadJob extends WorkQueueJobPusher {
     public UploadJob(UploadQueueService uploadQueueService,
                      FileManagerProperties fileManagerProperties,
                      MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
-                     FileUploader fileUploader, @Qualifier("messageLimits") MessageService messageService, UserService userService) {
+                     FileUploader fileUploader) {
         this.uploadQueueService = uploadQueueService;
         this.fileManagerProperties = fileManagerProperties;
         this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
         this.applicationEventPublisher = applicationEventPublisher;
         this.fileUploader = fileUploader;
-        this.messageService = messageService;
-        this.userService = userService;
     }
 
     @Autowired
@@ -183,7 +175,7 @@ public class UploadJob extends WorkQueueJobPusher {
                 uploadQueueService.releaseResources(uploadQueueItem);
 
                 applicationEventPublisher.publishEvent(new UploadCompleted(sendFileResult, uploadQueueItem));
-            } catch (Exception e) {
+            } catch (Throwable e) {
                 if (checker == null || !checker.get()) {
                     if (e instanceof FloodControlException) {
                         floodControlException(uploadQueueItem, (FloodControlException) e);
@@ -192,9 +184,9 @@ public class UploadJob extends WorkQueueJobPusher {
                     } else if (ForceMediaMessageService.shouldTryToUploadAgain(e)) {
                         noneCriticalException(uploadQueueItem, e);
                     } else {
-                        LOGGER.error(e.getMessage(), e);
                         uploadQueueService.setExceptionStatus(uploadQueueItem.getId(), e);
-                        messageService.sendErrorMessage(uploadQueueItem.getUserId(), userService.getLocaleOrDefault(uploadQueueItem.getUserId()));
+
+                        throw e;
                     }
                 }
             } finally {
