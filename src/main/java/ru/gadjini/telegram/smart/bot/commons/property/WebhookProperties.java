@@ -7,7 +7,7 @@ public class WebhookProperties {
 
     private String url;
 
-    private int maxConnections = 400;
+    private int maxConnections = 10000;
 
     public String getUrl() {
         return url;
