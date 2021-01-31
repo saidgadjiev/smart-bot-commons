@@ -68,4 +68,16 @@ public class MessagesProperties {
     public static final String MESSAGE_AS_STREAMING_VIDEO_FORMATS = "message.as.streaming.video.formats";
 
     public static final String MESSAGE_AS_VIDEO_FORMATS = "message.as.video.formats";
+
+    public static final String MESSAGE_SMART_FILE_FEATURE = "message.smart.file.feature";
+
+    public static final String MESSAGE_ENABLED = "message.enabled";
+
+    public static final String MESSAGE_DISABLED = "message.disabled";
+
+    public static final String ENABLE_COMMAND_NAME = "enable.command.name";
+
+    public static final String DISABLE_COMMAND_NAME = "disable.command.name";
+
+    public static final String MESSAGE_SMART_FILE_FEATURE_CHOOSE_STATUS = "message.smart.file.feature.choose.status";
 }

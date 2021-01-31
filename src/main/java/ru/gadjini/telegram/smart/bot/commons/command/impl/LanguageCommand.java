@@ -110,7 +110,7 @@ public class LanguageCommand implements KeyboardBotCommand, NavigableBotCommand,
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(message.getChatId()))
                         .text(localisationService.getMessage(MessagesProperties.MESSAGE_LANGUAGE_SELECTED, locale))
-                        .replyMarkup(replyKeyboardService.getMainMenu(message.getChatId(), locale))
+                        .replyMarkup(replyKeyboardService.mainMenuKeyboard(message.getChatId(), locale))
                         .build()
         );
         commandNavigator.silentPop(message.getChatId());

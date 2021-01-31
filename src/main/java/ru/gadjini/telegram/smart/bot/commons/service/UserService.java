@@ -11,6 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.UserDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
+import ru.gadjini.telegram.smart.bot.commons.service.settings.UserSettingsService;
 
 import java.util.Locale;
 
@@ -23,10 +24,13 @@ public class UserService {
 
     private LocalisationService localisationService;
 
+    private UserSettingsService userSettingsService;
+
     @Autowired
-    public UserService(UserDao userDao, LocalisationService localisationService) {
+    public UserService(UserDao userDao, LocalisationService localisationService, UserSettingsService userSettingsService) {
         this.userDao = userDao;
         this.localisationService = localisationService;
+        this.userSettingsService = userSettingsService;
     }
 
     public CreateOrUpdateResult createOrUpdate(User user) {
@@ -41,7 +45,13 @@ public class UserService {
         tgUser.setLocale(language);
         String state = userDao.createOrUpdate(tgUser);
 
-        return new CreateOrUpdateResult(tgUser, CreateOrUpdateResult.State.fromDesc(state));
+        CreateOrUpdateResult createOrUpdateResult = new CreateOrUpdateResult(tgUser, CreateOrUpdateResult.State.fromDesc(state));
+
+        if (createOrUpdateResult.isCreated()) {
+            userSettingsService.createDefaultSettings(user.getId());
+        }
+
+        return createOrUpdateResult;
     }
 
     public Locale getLocaleOrDefault(int userId) {

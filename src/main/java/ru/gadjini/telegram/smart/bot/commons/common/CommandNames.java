@@ -35,4 +35,6 @@ public class CommandNames {
     public static final String GLOBAL_STATS = "gstats";
 
     public static final String GET_SMART_FILE = "gsmart";
+
+    public static final String SMART_FILE_FEATURE = "smartfile";
 }
