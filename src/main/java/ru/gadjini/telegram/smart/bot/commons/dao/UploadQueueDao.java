@@ -191,10 +191,11 @@ public class UploadQueueDao extends QueueDao {
     public Format getFileFormat(int id) {
         return jdbcTemplate.query(
                 "SELECT file_format FROM upload_queue WHERE id = ?",
+                ps -> ps.setInt(1, id),
                 rs -> {
                     if (rs.next()) {
                         String fileFormat = rs.getString(UploadQueueItem.FILE_FORMAT);
-                        if (StringUtils.isBlank(fileFormat)) {
+                        if (StringUtils.isNotBlank(fileFormat)) {
                             return Format.valueOf(fileFormat);
                         }
                     }

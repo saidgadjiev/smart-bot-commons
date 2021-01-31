@@ -17,6 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.keyboard.smart.SmartUploadK
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.smart.SmartUploadMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadQueueService;
+import ru.gadjini.telegram.smart.bot.commons.service.settings.UserSettingsService;
 
 import java.util.Locale;
 import java.util.Set;
@@ -38,17 +39,20 @@ public class FileUploadService {
 
     private UserService userService;
 
+    private UserSettingsService userSettingsService;
+
     @Autowired
     public FileUploadService(UploadQueueService uploadQueueService,
                              WorkQueueDao workQueueDao, SmartUploadKeyboardService smartKeyboardService,
                              SmartUploadMessageBuilder smartUploadMessageBuilder, @Qualifier("messageLimits") MessageService messageService,
-                             UserService userService) {
+                             UserService userService, UserSettingsService userSettingsService) {
         this.uploadQueueService = uploadQueueService;
         this.workQueueDao = workQueueDao;
         this.smartKeyboardService = smartKeyboardService;
         this.smartUploadMessageBuilder = smartUploadMessageBuilder;
         this.messageService = messageService;
         this.userService = userService;
+        this.userSettingsService = userSettingsService;
     }
 
     @Autowired
@@ -61,7 +65,7 @@ public class FileUploadService {
     }
 
     public void createUpload(int userId, String method, Object body, Format fileFormat, Progress progress, int producerId, Object extra) {
-        if (isSmartFile()) {
+        if (isSmartFile(userId)) {
             UploadQueueItem upload = uploadQueueService.createUpload(userId, method, body, fileFormat, progress, workQueueDao.getQueueName(),
                     workQueueDao.getProducerName(), producerId, QueueItem.Status.BLOCKED, extra);
             sendSmartFile(upload);
@@ -91,8 +95,8 @@ public class FileUploadService {
         uploadJob.cancelUploads();
     }
 
-    private boolean isSmartFile() {
-        return true;
+    private boolean isSmartFile(int userId) {
+        return userSettingsService.isSmartFileFeatureEnabled(userId);
     }
 
     private void sendSmartFile(UploadQueueItem uploadQueueItem) {
