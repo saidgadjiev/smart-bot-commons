@@ -29,18 +29,20 @@ public class SmartBotConfiguration {
 
     public static final String PROFILE_DEV = "dev";
 
+    public static final String PROFILE_LOAD_TEST = "load-test";
+
     //Infinite
     private static final int SO_TIMEOUT = 0;
 
     @Bean
-    @Profile(PROFILE_PROD)
+    @Profile({PROFILE_PROD, PROFILE_LOAD_TEST})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
         return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
-    @Profile(PROFILE_PROD)
+    @Profile({PROFILE_PROD, PROFILE_LOAD_TEST})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());

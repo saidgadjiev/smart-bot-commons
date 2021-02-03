@@ -173,7 +173,17 @@ public enum Format {
         }
     },
     MKV(FormatCategory.VIDEO),
-    MOV(FormatCategory.VIDEO),
+    MOV(FormatCategory.VIDEO) {
+        @Override
+        public boolean canBeSentAsVideo() {
+            return true;
+        }
+
+        @Override
+        public boolean supportsStreaming() {
+            return true;
+        }
+    },
     MPEG(FormatCategory.VIDEO),
     MPG(FormatCategory.VIDEO),
     MTS(FormatCategory.VIDEO),
