@@ -56,8 +56,9 @@ public class UploadQueueDao extends QueueDao {
         jdbcTemplate.update(
                 con -> {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO upload_queue " +
-                            "(user_id, method, body, producer_table, progress, status, producer_id, extra, file_size, producer, file_format)\n" +
-                            "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
+                            "(user_id, method, body, producer_table, progress, status, " +
+                            "producer_id, extra, file_size, producer, file_format, upload_type)\n" +
+                            "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", Statement.RETURN_GENERATED_KEYS);
                     ps.setInt(1, queueItem.getUserId());
                     ps.setString(2, queueItem.getMethod());
                     ps.setString(3, gson.toJson(queueItem.getBody()));
@@ -81,6 +82,7 @@ public class UploadQueueDao extends QueueDao {
                     } else {
                         ps.setString(11, queueItem.getFileFormat().name());
                     }
+                    ps.setString(12, queueItem.getUploadType().name());
 
                     return ps;
                 },

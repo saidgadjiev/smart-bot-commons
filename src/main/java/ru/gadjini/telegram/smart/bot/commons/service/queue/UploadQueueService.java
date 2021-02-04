@@ -50,6 +50,7 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setStatus(status);
         uploadQueueItem.setFileFormat(fileFormat);
         uploadQueueItem.setExtra(extra);
+        uploadQueueItem.setUploadType(getUploadType(method, body, UploadType.DOCUMENT));
         uploadQueueItem.setFileSize(fileUploader.getInputFile(method, body).getNewMediaFile().length());
 
         uploadQueueDao.create(uploadQueueItem);
@@ -141,6 +142,19 @@ public class UploadQueueService extends QueueService {
         if (thumb != null && thumb.isNew()) {
             new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
         }
+    }
+
+    private UploadType getUploadType(String method, Object body, UploadType defaultUploadType) {
+        if (SendVideo.PATH.equals(method)) {
+            SendVideo sendVideo = (SendVideo) body;
+
+            if (sendVideo.getSupportsStreaming()) {
+                return UploadType.STREAMING_VIDEO;
+            }
+            return UploadType.VIDEO;
+        }
+
+        return defaultUploadType;
     }
 
     @Override

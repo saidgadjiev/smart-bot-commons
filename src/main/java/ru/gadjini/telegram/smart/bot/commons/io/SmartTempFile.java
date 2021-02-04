@@ -4,15 +4,13 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
-import java.io.IOException;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 
+@SuppressWarnings("PMD")
 public class SmartTempFile {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartTempFile.class);
@@ -226,16 +224,21 @@ public class SmartTempFile {
     public void smartDelete() {
         if (file != null) {
             try {
-                FileUtils.forceDelete(file);
                 if (file.exists()) {
-                    LOGGER.debug("Temp file not deleted({})", file.getAbsolutePath());
-                }
-                if (deleteParentDir) {
-                    FileUtils.deleteDirectory(file.getParentFile());
-                    if (file.getParentFile().exists()) {
-                        LOGGER.debug("Temp parent dir not deleted({})", file.getParentFile().getAbsolutePath());
+                    FileUtils.forceDelete(file);
+                    if (file.exists()) {
+                        LOGGER.debug("Temp file not deleted({})", file.getAbsolutePath());
                     }
                 }
+                if (deleteParentDir) {
+                    if (file.getParentFile().exists()) {
+                        FileUtils.deleteDirectory(file.getParentFile());
+                        if (file.getParentFile().exists()) {
+                            LOGGER.debug("Temp parent dir not deleted({})", file.getParentFile().getAbsolutePath());
+                        }
+                    }
+                }
+            } catch (FileNotFoundException ignore) {
             } catch (Exception ex) {
                 LOGGER.error(ex.getMessage(), ex);
             }

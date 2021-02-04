@@ -157,7 +157,7 @@ public class FileUploader {
                     queueItem.setMethod(SendDocument.PATH);
                 } else if (queueItem.getUploadType() == UploadType.STREAMING_VIDEO) {
                     sendVideo.setSupportsStreaming(true);
-                } else {
+                } else if (queueItem.getUploadType() == UploadType.VIDEO) {
                     sendVideo.setSupportsStreaming(null);
                 }
                 break;
