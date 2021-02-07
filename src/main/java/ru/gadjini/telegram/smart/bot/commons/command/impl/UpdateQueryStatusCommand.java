@@ -27,6 +27,8 @@ import java.util.Objects;
 @Component
 public class UpdateQueryStatusCommand implements CallbackBotCommand {
 
+    private static final int CACHE_TIME_IN_SECONDS = 30;
+
     private UpdateQueryStatusCommandMessageProvider messageProvider;
 
     private WorkQueueService queueService;
@@ -92,6 +94,7 @@ public class UpdateQueryStatusCommand implements CallbackBotCommand {
             }
             messageService.sendAnswerCallbackQuery(
                     AnswerCallbackQuery.builder().callbackQueryId(callbackQuery.getId())
+                            .cacheTime(CACHE_TIME_IN_SECONDS)
                             .text(localisationService.getMessage(MessagesProperties.UPDATED_CALLBACK_ANSWER, locale)).build());
         }
     }
