@@ -6,6 +6,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.UserSettingsDao;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 
 @Service
+@SuppressWarnings("PMD")
 public class UserSettingsService {
 
     private UserSettingsDao userSettingsDao;
@@ -19,14 +20,15 @@ public class UserSettingsService {
     }
 
     public void createDefaultSettings(int userId) {
-        userSettingsDao.createDefaultSettings(botProperties.getName(), userId);
+        //userSettingsDao.createDefaultSettings(botProperties.getName(), userId);
     }
 
     public void smartFileFeature(int userId, boolean enable) {
-        userSettingsDao.smartFileFeature(botProperties.getName(), userId, enable);
+        //userSettingsDao.smartFileFeature(botProperties.getName(), userId, enable);
     }
 
     public boolean isSmartFileFeatureEnabled(int userId) {
-        return userSettingsDao.getSmartFileFeatureEnabledOrDefault(botProperties.getName(), userId);
+        return false;
+        //return userSettingsDao.getSmartFileFeatureEnabledOrDefault(botProperties.getName(), userId);
     }
 }

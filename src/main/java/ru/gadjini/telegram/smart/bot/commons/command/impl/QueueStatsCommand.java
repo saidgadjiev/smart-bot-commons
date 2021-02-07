@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -20,6 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
+import java.util.Map;
 
 @Component
 public class QueueStatsCommand implements BotCommand {
@@ -64,7 +66,7 @@ public class QueueStatsCommand implements BotCommand {
         long errorAllTime = queueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
         long completed = queueService.countByStatusForToday(QueueItem.Status.COMPLETED);
         long activeUsers = queueService.countActiveUsersForToday();
-        ZonedDateTime minLastRunAt = queueService.getProcessingMinLastRunAt();
+        Map<String, Object> minLastRunAtValues = queueService.getProcessingMinLastRunAt();
         ZonedDateTime minCreatedAt = queueService.getWaitingMinCreatedAt();
 
         long processingDownloads = downloadQueueService.countByStatusAllTime(QueueItem.Status.PROCESSING);
@@ -81,8 +83,10 @@ public class QueueStatsCommand implements BotCommand {
         long errorAllTimeUploads = uploadQueueService.countByStatusAllTime(QueueItem.Status.EXCEPTION);
         long completedUploads = uploadQueueService.countByStatusForToday(QueueItem.Status.COMPLETED);
 
+        ZonedDateTime minLastRunAt = (ZonedDateTime) minLastRunAtValues.get(QueueDao.MIN_LAST_RUN_AT);
+        Integer id = (Integer) minLastRunAtValues.get(QueueDao.MIN_LAST_RUN_AT_ID);
         String statsMessage = localisationService.getMessage(MessagesProperties.MESSAGE_QUEUE_STATS, new Object[]{
-                processing, minLastRunAt == null ? "" : DATE_TIME_FORMATTER.format(minLastRunAt), waiting,
+                processing, minLastRunAt == null ? "" : id + "(" + DATE_TIME_FORMATTER.format(minLastRunAt) + ")", waiting,
                 minCreatedAt == null ? "" : DATE_TIME_FORMATTER.format(minCreatedAt),
                 errorForToday, completed, activeUsers, errorAllTime,
                 processingDownloads, waitingDownloads, maxNextRunAt == null ? "" : DATE_TIME_FORMATTER.format(maxNextRunAt),

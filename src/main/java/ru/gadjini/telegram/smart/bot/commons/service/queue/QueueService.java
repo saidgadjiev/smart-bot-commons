@@ -5,6 +5,7 @@ import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 
 import java.time.ZonedDateTime;
+import java.util.Map;
 import java.util.Set;
 
 public abstract class QueueService {
@@ -81,7 +82,7 @@ public abstract class QueueService {
         return getQueueDao().getWaitingMaxNextRunAt();
     }
 
-    public final ZonedDateTime getProcessingMinLastRunAt() {
+    public final Map<String, Object> getProcessingMinLastRunAt() {
         return getQueueDao().getProcessingMinLastRunAt();
     }
 

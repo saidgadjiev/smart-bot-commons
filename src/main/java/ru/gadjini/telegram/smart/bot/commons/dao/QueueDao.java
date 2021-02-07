@@ -8,10 +8,14 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public abstract class QueueDao {
+
+    public static final String MIN_LAST_RUN_AT = "last_run_at";
+
+    public static final String MIN_LAST_RUN_AT_ID = "id";
 
     public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.id ";
 
@@ -167,19 +171,24 @@ public abstract class QueueDao {
         );
     }
 
-    public ZonedDateTime getProcessingMinLastRunAt() {
+    public Map<String, Object> getProcessingMinLastRunAt() {
         return getJdbcTemplate().query(
-                "SELECT MIN(last_run_at) as last_run_at FROM " + getQueueName() + " WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause(),
+                "SELECT " + MIN_LAST_RUN_AT_ID + ", " + MIN_LAST_RUN_AT + " FROM " + getQueueName() + " WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause() +
+                        " ORDER BY last_run_at LIMIT 1",
                 rs -> {
+                    Map<String, Object> result = new HashMap<>();
+
                     if (rs.next()) {
-                        Timestamp lastRunAt = rs.getTimestamp("last_run_at");
+                        Timestamp lastRunAt = rs.getTimestamp(MIN_LAST_RUN_AT);
 
                         if (lastRunAt != null) {
-                            return ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC);
+                            result.put(MIN_LAST_RUN_AT, ZonedDateTime.of(lastRunAt.toLocalDateTime(), ZoneOffset.UTC));
                         }
+
+                        result.put(MIN_LAST_RUN_AT_ID, rs.getInt(MIN_LAST_RUN_AT_ID));
                     }
 
-                    return null;
+                    return result;
                 }
         );
     }
