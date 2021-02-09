@@ -170,6 +170,7 @@ public class FileUploader {
                 .document(sendVideo.getVideo())
                 .allowSendingWithoutReply(sendVideo.getAllowSendingWithoutReply())
                 .caption(sendVideo.getCaption())
+                .parseMode(sendVideo.getParseMode())
                 .parseMode(sendVideo.getParseMode()).build();
     }
 
@@ -178,6 +179,7 @@ public class FileUploader {
                 .video(sendDocument.getDocument())
                 .allowSendingWithoutReply(sendDocument.getAllowSendingWithoutReply())
                 .caption(sendDocument.getCaption())
+                .parseMode(sendDocument.getParseMode())
                 .parseMode(sendDocument.getParseMode()).build();
     }
 }
