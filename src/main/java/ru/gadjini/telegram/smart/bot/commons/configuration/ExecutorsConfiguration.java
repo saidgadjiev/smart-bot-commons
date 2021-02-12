@@ -38,7 +38,7 @@ public class ExecutorsConfiguration {
     @Value("${work.light.threads:2}")
     private int workQueueLightThreads;
 
-    @Value("${work.heavy.threads:6}")
+    @Value("${work.heavy.threads:4}")
     private int workQueueHeavyThreads;
 
     @Value("${download.heavy.threads:1}")
