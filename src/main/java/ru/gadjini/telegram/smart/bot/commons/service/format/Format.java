@@ -255,6 +255,7 @@ public enum Format {
     },
     RA(FormatCategory.AUDIO),
     RM(FormatCategory.AUDIO),
+    EDIT_VIDEO(FormatCategory.COMMON),
     UNKNOWN(FormatCategory.COMMON);
 
     private FormatCategory category;
