@@ -94,6 +94,8 @@ public class MessageMediaService {
             messageMedia.setFormat(format);
             messageMedia.setSource(FileSource.VIDEO);
             messageMedia.setDuration(message.getVideo().getDuration());
+            messageMedia.setWidth(message.getVideo().getWidth());
+            messageMedia.setHeight(message.getVideo().getHeight());
 
             return messageMedia;
         } else if (message.hasVideoNote()) {

@@ -1,5 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.service.format;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public enum Format {
 
     PPTX(FormatCategory.DOCUMENTS),
@@ -114,7 +117,6 @@ public enum Format {
     DOTX(FormatCategory.DOCUMENTS),
     DOTM(FormatCategory.DOCUMENTS),
     OTT(FormatCategory.DOCUMENTS),
-    SRT(FormatCategory.VIDEO),
     MERGE_PDFS(FormatCategory.DOCUMENTS) {
         @Override
         public String getName() {
@@ -294,5 +296,16 @@ public enum Format {
 
     public boolean canBeSentAsVideo() {
         return false;
+    }
+
+    public static List<Format> filter(FormatCategory category) {
+        List<Format> result = new ArrayList<>();
+        for (Format value : Format.values()) {
+            if (value.getCategory() == category) {
+                result.add(value);
+            }
+        }
+
+        return result;
     }
 }
