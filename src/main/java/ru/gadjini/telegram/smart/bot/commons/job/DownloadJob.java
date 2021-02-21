@@ -288,7 +288,8 @@ public class DownloadJob extends WorkQueueJobPusher {
         }
 
         private void floodWaitException(DownloadQueueItem downloadingQueueItem, FloodWaitException e) {
-            long sleepTime = Math.max(1, downloadingQueueItem.getAttempts()) * e.getSleepTime();
+            long sleepTime = e.getSleepTime() + Math.max(1, downloadingQueueItem.getAttempts())
+                    * fileManagerProperties.getFloodWaitPenalty();
             downloadingQueueService.setWaiting(downloadingQueueItem.getId(), sleepTime, e);
         }
     }
