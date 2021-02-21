@@ -5,7 +5,7 @@ public class FloodWaitException extends RuntimeException {
     private long sleepTime;
 
     public FloodWaitException(long sleepTime) {
-        super("Flood wait " + sleepTime);
+        this("Flood wait", sleepTime);
     }
 
     public FloodWaitException(String message, long sleepTime) {
