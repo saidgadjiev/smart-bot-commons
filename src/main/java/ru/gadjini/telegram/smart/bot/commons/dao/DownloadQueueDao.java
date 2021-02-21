@@ -223,6 +223,7 @@ public class DownloadQueueDao extends QueueDao {
         item.setProducerId(rs.getInt(DownloadQueueItem.PRODUCER_ID));
         item.setFilePath(rs.getString(DownloadQueueItem.FILE_PATH));
         item.setDeleteParentDir(rs.getBoolean(DownloadQueueItem.DELETE_PARENT_DIR));
+        item.setAttempts(rs.getInt(DownloadQueueItem.ATTEMPTS));
 
         Timestamp nextRunAt = rs.getTimestamp(DownloadQueueItem.NEXT_RUN_AT);
         if (nextRunAt != null) {

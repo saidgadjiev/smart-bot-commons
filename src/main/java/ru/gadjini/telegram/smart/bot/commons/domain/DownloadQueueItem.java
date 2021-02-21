@@ -22,6 +22,8 @@ public class DownloadQueueItem extends QueueItem {
 
     public static final String EXTRA = "extra";
 
+    public static final String ATTEMPTS = "attempts";
+
     private TgFile file;
 
     private String producerTable;
@@ -37,6 +39,8 @@ public class DownloadQueueItem extends QueueItem {
     private boolean deleteParentDir;
 
     private Object extra;
+
+    private int attempts;
 
     public TgFile getFile() {
         return file;
@@ -100,5 +104,13 @@ public class DownloadQueueItem extends QueueItem {
 
     public void setProducer(String producer) {
         this.producer = producer;
+    }
+
+    public int getAttempts() {
+        return attempts;
+    }
+
+    public void setAttempts(int attempts) {
+        this.attempts = attempts;
     }
 }
