@@ -104,6 +104,27 @@ public class DownloadQueueDao extends QueueDao {
         );
     }
 
+    public Long unusedDownloadsCount(String producer, String producerTable, SmartExecutorService.JobWeight jobWeight) {
+        return jdbcTemplate.query(
+                "select count(*) as cnt\n" +
+                        "from downloading_queue dq\n" +
+                        "         inner join " + producerTable + " cq on dq.producer_id = cq.id\n" +
+                        "WHERE dq.producer = ? and dq.status = 3 and cq.status IN (0,1)" +
+                        "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n",
+                ps -> {
+                    ps.setString(1, producer);
+                    ps.setLong(2, mediaLimitProperties.getLightFileMaxWeight());
+                },
+                rs -> {
+                    if (rs.next()) {
+                        return rs.getLong("cnt");
+                    }
+
+                    return 0L;
+                }
+        );
+    }
+
     public void setCompleted(int id, String filePath) {
         jdbcTemplate.update(
                 "UPDATE " + DownloadQueueItem.NAME + " SET status = ?, completed_at = now(), file_path = ? WHERE id = ?",

@@ -37,6 +37,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadJob.class);
 
+    private static final long AVAILABLE_UNUSED_DOWNLOADS_COUNT = 50;
+
     private static final String TAG = "down";
 
     private DownloadQueueService downloadingQueueService;
@@ -101,7 +103,7 @@ public class DownloadJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({})", job.getId());
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 5000)
     public void doDownloads() {
         super.push();
     }
@@ -128,7 +130,12 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
+        long unusedDownloadsCount = downloadingQueueService.unusedDownloadsCount(workQueueDao.getProducerName(), workQueueDao.getQueueName(), weight);
+        if (unusedDownloadsCount < AVAILABLE_UNUSED_DOWNLOADS_COUNT) {
+            return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
+        }
+
+        return List.of();
     }
 
     @Override

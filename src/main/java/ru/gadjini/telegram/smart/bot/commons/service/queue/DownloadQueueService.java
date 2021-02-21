@@ -32,6 +32,10 @@ public class DownloadQueueService extends QueueService {
         return downloadingQueueDao.poll(producer, weight, limit);
     }
 
+    public long unusedDownloadsCount(String producer, String producerTable, SmartExecutorService.JobWeight jobWeight) {
+        return downloadingQueueDao.unusedDownloadsCount(producer, producerTable, jobWeight);
+    }
+
     @Transactional
     public void create(Collection<TgFile> files, String producerTable, String producer, int producerId, int userId, Object extra) {
         for (TgFile file : files) {
