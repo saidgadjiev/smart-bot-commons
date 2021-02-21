@@ -103,7 +103,7 @@ public class DownloadJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({})", job.getId());
     }
 
-    @Scheduled(fixedDelay = 5000)
+    @Scheduled(fixedDelay = 1000)
     public void doDownloads() {
         super.push();
     }
