@@ -109,8 +109,8 @@ public class DownloadQueueDao extends QueueDao {
                 "select count(*) as cnt\n" +
                         "from downloading_queue dq\n" +
                         "         inner join " + producerTable + " cq on dq.producer_id = cq.id\n" +
-                        "WHERE dq.producer = ? and dq.status = 3 and cq.status IN (0,1)" +
-                        "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n",
+                        "WHERE dq.producer = ? and dq.status = 3 and cq.status IN (0,1) and (dq.file).size != 0 " +
+                        "AND (dq.file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n",
                 ps -> {
                     ps.setString(1, producer);
                     ps.setLong(2, mediaLimitProperties.getLightFileMaxWeight());
