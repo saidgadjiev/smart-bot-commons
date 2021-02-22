@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -87,6 +89,16 @@ public class SmartBotConfiguration {
     @Qualifier("botapi")
     public Gson gson(GsonBuilder gsonBuilder) {
         return gsonBuilder.create();
+    }
+
+    @Bean
+    public static PropertySourcesPlaceholderConfigurer placeholderConfigurer() {
+        PropertySourcesPlaceholderConfigurer c = new PropertySourcesPlaceholderConfigurer();
+        c.setLocation(new ClassPathResource("git.properties"));
+        c.setIgnoreResourceNotFound(true);
+        c.setIgnoreUnresolvablePlaceholders(true);
+
+        return c;
     }
 
     @Bean
