@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
+import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
@@ -17,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
@@ -52,7 +52,7 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public boolean isChatMember(String chatId, int userId) {
-        IsChatMember isChatMember = new IsChatMember();
+        GetChatMember isChatMember = new GetChatMember();
         isChatMember.setChatId(chatId);
         isChatMember.setUserId(userId);
 
@@ -97,7 +97,7 @@ public class MessageServiceImpl implements MessageService {
             }
         }
     }
-    
+
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
         try {

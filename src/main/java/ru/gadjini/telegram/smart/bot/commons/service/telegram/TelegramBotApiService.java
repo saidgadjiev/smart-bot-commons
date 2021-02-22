@@ -29,7 +29,6 @@ import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiExcepti
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
-import ru.gadjini.telegram.smart.bot.commons.model.bot.api.method.IsChatMember;
 import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -83,7 +82,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         }
     }
 
-    public Boolean isChatMember(IsChatMember isChatMember) {
+    public Boolean isChatMember(GetChatMember isChatMember) {
         return executeWithResult(null, () -> {
             GetChatMember getChatMember = new GetChatMember();
             getChatMember.setChatId(isChatMember.getChatId());
