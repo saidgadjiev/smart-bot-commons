@@ -13,6 +13,8 @@ public class FileManagerProperties {
 
     private int maxUploadAttempts = 2;
 
+    private long floodWaitPenalty = 20;
+
     public long getSleepTimeBeforeDownloadAttempt() {
         return sleepTimeBeforeDownloadAttempt;
     }
@@ -43,5 +45,13 @@ public class FileManagerProperties {
 
     public void setMaxUploadAttempts(int maxUploadAttempts) {
         this.maxUploadAttempts = maxUploadAttempts;
+    }
+
+    public long getFloodWaitPenalty() {
+        return floodWaitPenalty;
+    }
+
+    public void setFloodWaitPenalty(long floodWaitPenalty) {
+        this.floodWaitPenalty = floodWaitPenalty;
     }
 }
