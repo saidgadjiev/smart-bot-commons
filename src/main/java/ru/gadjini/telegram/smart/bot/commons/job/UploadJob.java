@@ -185,6 +185,8 @@ public class UploadJob extends WorkQueueJobPusher {
                         noneCriticalException(uploadQueueItem, e);
                     } else {
                         uploadQueueService.setExceptionStatus(uploadQueueItem.getId(), e);
+                        //Unknown exception. Release resources
+                        uploadQueueService.releaseResources(uploadQueueItem);
 
                         throw e;
                     }
