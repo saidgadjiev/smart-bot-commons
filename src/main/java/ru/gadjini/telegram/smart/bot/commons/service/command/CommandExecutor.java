@@ -103,9 +103,9 @@ public class CommandExecutor {
                 if (botCommand instanceof NavigableBotCommand) {
                     commandNavigator.push(message.getChatId(), (NavigableBotCommand) botCommand);
                 }
-            }
 
-            return true;
+                return true;
+            }
         }
 
         return false;
