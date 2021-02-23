@@ -38,7 +38,17 @@ public enum Format {
     STICKER(FormatCategory.IMAGES) {
         @Override
         public String getExt() {
-            return WEBP.getExt();
+            return getAssociatedFormat().getExt();
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public Format getAssociatedFormat() {
+            return WEBP;
         }
     },
     HTML(FormatCategory.WEB),
@@ -53,6 +63,11 @@ public enum Format {
         public boolean isDummy() {
             return true;
         }
+
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
     },
     TEXT(FormatCategory.DOCUMENTS) {
         @Override
@@ -63,6 +78,11 @@ public enum Format {
         @Override
         public boolean isDummy() {
             return true;
+        }
+
+        @Override
+        public boolean isUserSelectable() {
+            return false;
         }
     },
     ZIP(FormatCategory.ARCHIVE),
@@ -161,6 +181,27 @@ public enum Format {
             return "3GP";
         }
     },
+    STREAM(FormatCategory.VIDEO) {
+        @Override
+        public Format getAssociatedFormat() {
+            return MP4;
+        }
+
+        @Override
+        public String getExt() {
+            return getAssociatedFormat().getExt();
+        }
+
+        @Override
+        public String getName() {
+            return name();
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+    },
     AVI(FormatCategory.VIDEO),
     FLV(FormatCategory.VIDEO),
     M4V(FormatCategory.VIDEO) {
@@ -257,7 +298,22 @@ public enum Format {
     },
     RA(FormatCategory.AUDIO),
     RM(FormatCategory.AUDIO),
-    EDIT_VIDEO(FormatCategory.COMMON),
+    EDIT(FormatCategory.COMMON) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     UNKNOWN(FormatCategory.COMMON);
 
     private FormatCategory category;
@@ -296,6 +352,14 @@ public enum Format {
 
     public boolean canBeSentAsVideo() {
         return false;
+    }
+
+    public Format getAssociatedFormat() {
+        return this;
+    }
+
+    public boolean isUserSelectable() {
+        return true;
     }
 
     public static List<Format> filter(FormatCategory category) {

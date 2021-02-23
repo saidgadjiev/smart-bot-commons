@@ -2,6 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 
+import java.time.ZonedDateTime;
+
 public class DownloadQueueItem extends QueueItem {
 
     public static final String NAME = "downloading_queue";
@@ -24,6 +26,8 @@ public class DownloadQueueItem extends QueueItem {
 
     public static final String ATTEMPTS = "attempts";
 
+    public static final String NEXT_RUN_AT = "next_run_at";
+
     private TgFile file;
 
     private String producerTable;
@@ -41,6 +45,8 @@ public class DownloadQueueItem extends QueueItem {
     private Object extra;
 
     private int attempts;
+
+    private ZonedDateTime nextRunAt;
 
     public TgFile getFile() {
         return file;
@@ -113,4 +119,13 @@ public class DownloadQueueItem extends QueueItem {
     public void setAttempts(int attempts) {
         this.attempts = attempts;
     }
+
+    public ZonedDateTime getNextRunAt() {
+        return nextRunAt;
+    }
+
+    public void setNextRunAt(ZonedDateTime nextRunAt) {
+        this.nextRunAt = nextRunAt;
+    }
+
 }

@@ -2,6 +2,9 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
+import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
+
+import java.time.ZonedDateTime;
 
 public class UploadQueueItem extends QueueItem {
 
@@ -25,6 +28,10 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String UPLOAD_TYPE = "upload_type";
 
+    public static final String FILE_FORMAT = "file_format";
+
+    public static final String NEXT_RUN_AT = "next_run_at";
+
     private String producerTable;
 
     private String producer;
@@ -42,6 +49,10 @@ public class UploadQueueItem extends QueueItem {
     private long fileSize;
 
     private UploadType uploadType = UploadType.DOCUMENT;
+
+    private Format fileFormat;
+
+    private ZonedDateTime nextRunAt;
 
     public String getProducerTable() {
         return producerTable;
@@ -114,4 +125,21 @@ public class UploadQueueItem extends QueueItem {
     public void setUploadType(UploadType uploadType) {
         this.uploadType = uploadType;
     }
+
+    public Format getFileFormat() {
+        return fileFormat;
+    }
+
+    public void setFileFormat(Format fileFormat) {
+        this.fileFormat = fileFormat;
+    }
+
+    public ZonedDateTime getNextRunAt() {
+        return nextRunAt;
+    }
+
+    public void setNextRunAt(ZonedDateTime nextRunAt) {
+        this.nextRunAt = nextRunAt;
+    }
+
 }
