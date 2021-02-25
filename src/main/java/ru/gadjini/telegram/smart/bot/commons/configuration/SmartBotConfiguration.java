@@ -27,7 +27,9 @@ import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
 @Configuration
 public class SmartBotConfiguration {
 
-    public static final String PROFILE_PROD = "prod";
+    public static final String PROFILE_PROD_PRIMARY = "prod-primary";
+
+    public static final String PROFILE_PROD_SECONDARY = "prod-secondary";
 
     public static final String PROFILE_DEV = "dev";
 
@@ -37,14 +39,14 @@ public class SmartBotConfiguration {
     private static final int SO_TIMEOUT = 0;
 
     @Bean
-    @Profile({PROFILE_PROD, PROFILE_LOAD_TEST})
+    @Profile({PROFILE_PROD_PRIMARY, PROFILE_LOAD_TEST})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
         return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
-    @Profile({PROFILE_PROD, PROFILE_LOAD_TEST})
+    @Profile({PROFILE_PROD_PRIMARY, PROFILE_LOAD_TEST})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());

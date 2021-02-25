@@ -23,7 +23,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 @Component
-@Profile({SmartBotConfiguration.PROFILE_PROD, SmartBotConfiguration.PROFILE_LOAD_TEST})
+@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_LOAD_TEST})
 @SuppressWarnings("PMD")
 public class SmartWebhookBot extends SpringWebhookBot {
 

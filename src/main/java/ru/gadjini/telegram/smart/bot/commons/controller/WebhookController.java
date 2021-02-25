@@ -17,7 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration
 import javax.ws.rs.core.MediaType;
 
 @RestController
-@Profile({SmartBotConfiguration.PROFILE_PROD, SmartBotConfiguration.PROFILE_LOAD_TEST})
+@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_LOAD_TEST})
 @RequestMapping("/callback")
 public class WebhookController {
 
