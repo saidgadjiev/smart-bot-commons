@@ -1,31 +1,25 @@
-package ru.gadjini.telegram.smart.bot.commons.service;
+package ru.gadjini.telegram.smart.bot.commons.service.file.temp;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 
-import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.security.SecureRandom;
 
-@Service
-public class TempFileService {
+public class TempDirectoryService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TempFileService.class);
 
     private static final SecureRandom RANDOM = new SecureRandom();
 
-    @Value("${temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String tempDir;
 
-    @PostConstruct
-    public void init() {
-        LOGGER.debug("Temp dir({})", tempDir);
+    public TempDirectoryService(String tempDir) {
+        this.tempDir = tempDir;
     }
 
     public String getRootDir() {
