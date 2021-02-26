@@ -32,6 +32,8 @@ public class UploadQueueItem extends QueueItem {
 
     public static final String NEXT_RUN_AT = "next_run_at";
 
+    public static final String SYNCED = "synced";
+
     private String producerTable;
 
     private String producer;
@@ -53,6 +55,8 @@ public class UploadQueueItem extends QueueItem {
     private Format fileFormat;
 
     private ZonedDateTime nextRunAt;
+
+    private boolean synced;
 
     public String getProducerTable() {
         return producerTable;
@@ -142,4 +146,11 @@ public class UploadQueueItem extends QueueItem {
         this.nextRunAt = nextRunAt;
     }
 
+    public boolean isSynced() {
+        return synced;
+    }
+
+    public void setSynced(boolean synced) {
+        this.synced = synced;
+    }
 }

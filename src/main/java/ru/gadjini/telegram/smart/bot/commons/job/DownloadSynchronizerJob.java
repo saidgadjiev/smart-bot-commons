@@ -38,6 +38,7 @@ public class DownloadSynchronizerJob {
 
     private boolean isFullySynchronized(DownloadQueueItem downloadQueueItem) {
         File file = new File(downloadQueueItem.getFilePath());
-        return file.exists() && file.length() == downloadQueueItem.getFile().getSize();
+        return file.exists() && (file.length() == downloadQueueItem.getFile().getSize()
+                || downloadQueueItem.getFile().getSize() == 0); //May be on old thumb
     }
 }

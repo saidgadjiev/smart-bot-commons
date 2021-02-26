@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
+import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.UploadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -11,6 +12,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
@@ -26,9 +28,12 @@ public class UploadQueueService extends QueueService {
 
     private FileUploader fileUploader;
 
+    private ServerProperties serverProperties;
+
     @Autowired
-    public UploadQueueService(UploadQueueDao uploadQueueDao) {
+    public UploadQueueService(UploadQueueDao uploadQueueDao, ServerProperties serverProperties) {
         this.uploadQueueDao = uploadQueueDao;
+        this.serverProperties = serverProperties;
     }
 
     @Autowired
@@ -52,6 +57,10 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setExtra(extra);
         uploadQueueItem.setUploadType(getUploadType(method, body, UploadType.DOCUMENT));
         uploadQueueItem.setFileSize(fileUploader.getInputFile(method, body).getNewMediaFile().length());
+
+        if (serverProperties.getNumber() == SmartBotConfiguration.PRIMARY_SERVER_NUMBER) {
+            uploadQueueItem.setSynced(true);
+        }
 
         uploadQueueDao.create(uploadQueueItem);
 
