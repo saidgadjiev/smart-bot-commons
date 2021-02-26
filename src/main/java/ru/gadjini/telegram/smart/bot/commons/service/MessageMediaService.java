@@ -63,7 +63,11 @@ public class MessageMediaService {
             messageMedia.setMimeType(message.getDocument().getMimeType());
             messageMedia.setFileSize(message.getDocument().getFileSize());
             messageMedia.setSource(FileSource.DOCUMENT);
-            messageMedia.setThumb(message.getDocument().getThumb() != null ? message.getDocument().getThumb().getFileId() : null);
+            PhotoSize thumb = message.getDocument().getThumb();
+            if (thumb != null) {
+                messageMedia.setThumb(thumb.getFileId());
+                messageMedia.setThumbFileSize(thumb.getFileSize());
+            }
             messageMedia.setFormat(formatService.getFormat(messageMedia.getFileName(), messageMedia.getMimeType()));
 
             return messageMedia;
@@ -89,7 +93,13 @@ public class MessageMediaService {
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getVideo().getFileId());
             messageMedia.setFileSize(message.getVideo().getFileSize());
-            messageMedia.setThumb(message.getVideo().getThumb() != null ? message.getVideo().getThumb().getFileId() : null);
+
+            PhotoSize thumb = message.getVideo().getThumb();
+            if (thumb != null) {
+                messageMedia.setThumb(thumb.getFileId());
+                messageMedia.setThumbFileSize(thumb.getFileSize());
+            }
+
             messageMedia.setMimeType(message.getVideo().getMimeType());
             messageMedia.setFormat(format);
             messageMedia.setSource(FileSource.VIDEO);
@@ -104,7 +114,13 @@ public class MessageMediaService {
             messageMedia.setFileName(fileName);
             messageMedia.setFileId(message.getVideoNote().getFileId());
             messageMedia.setFileSize(message.getVideoNote().getFileSize());
-            messageMedia.setThumb(message.getVideoNote().getThumb() != null ? message.getVideoNote().getThumb().getFileId() : null);
+
+            PhotoSize thumb = message.getVideoNote().getThumb();
+            if (thumb != null) {
+                messageMedia.setThumb(thumb.getFileId());
+                messageMedia.setThumbFileSize(thumb.getFileSize());
+            }
+
             messageMedia.setMimeType("video/mp4");
             messageMedia.setFormat(Format.MP4);
             messageMedia.setSource(FileSource.VIDEO_NOTE);
@@ -125,7 +141,13 @@ public class MessageMediaService {
             messageMedia.setFileId(message.getAudio().getFileId());
             messageMedia.setMimeType(message.getAudio().getMimeType());
             messageMedia.setFileSize(message.getAudio().getFileSize());
-            messageMedia.setThumb(message.getAudio().getThumb() != null ? message.getAudio().getThumb().getFileId() : null);
+
+            PhotoSize thumb = message.getAudio().getThumb();
+            if (thumb != null) {
+                messageMedia.setThumb(thumb.getFileId());
+                messageMedia.setThumbFileSize(thumb.getFileSize());
+            }
+
             messageMedia.setAudioPerformer(message.getAudio().getPerformer());
             messageMedia.setAudioTitle(message.getAudio().getTitle());
             messageMedia.setSource(FileSource.AUDIO);

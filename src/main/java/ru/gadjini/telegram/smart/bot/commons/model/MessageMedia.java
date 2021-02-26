@@ -20,6 +20,8 @@ public class MessageMedia {
 
     private String thumb;
 
+    private long thumbFileSize;
+
     private String cachedFileId;
 
     private FileSource source;
@@ -138,6 +140,14 @@ public class MessageMedia {
         this.height = height;
     }
 
+    public long getThumbFileSize() {
+        return thumbFileSize;
+    }
+
+    public void setThumbFileSize(long thumbFileSize) {
+        this.thumbFileSize = thumbFileSize;
+    }
+
     public TgFile toTgFile() {
         TgFile tgFile = new TgFile();
         tgFile.setFileId(fileId);
@@ -149,6 +159,7 @@ public class MessageMedia {
         tgFile.setSource(source);
         tgFile.setAudioTitle(audioTitle);
         tgFile.setAudioPerformer(audioPerformer);
+        tgFile.setThumbSize(thumbFileSize);
 
         return tgFile;
     }

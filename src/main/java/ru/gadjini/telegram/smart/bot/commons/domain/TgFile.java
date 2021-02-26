@@ -21,6 +21,8 @@ public class TgFile {
 
     public static final String SIZE = "size";
 
+    public static final String THUMB_SIZE = "thumb_size";
+
     public static final String THUMB = "thumb";
 
     public static final String FORMAT = "format";
@@ -46,6 +48,9 @@ public class TgFile {
 
     @JsonProperty(THUMB)
     private String thumb;
+
+    @JsonProperty(THUMB_SIZE)
+    private long thumbSize;
 
     private FileSource source;
 
@@ -170,6 +175,14 @@ public class TgFile {
         this.deleteParentDir = deleteParentDir;
     }
 
+    public void setThumbSize(long thumbSize) {
+        this.thumbSize = thumbSize;
+    }
+
+    public long getThumbSize() {
+        return thumbSize;
+    }
+
     public String sql() {
         StringBuilder sql = new StringBuilder("(\"");
 
@@ -211,8 +224,11 @@ public class TgFile {
             sql.append(",");
         }
         if (duration != null) {
-            sql.append(duration);
+            sql.append(duration).append(",");
+        } else {
+            sql.append(",");
         }
+        sql.append(thumbSize);
 
         sql.append(")");
 
