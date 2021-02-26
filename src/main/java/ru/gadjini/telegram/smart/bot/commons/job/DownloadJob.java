@@ -41,8 +41,6 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadJob.class);
 
-    private static final long AVAILABLE_UNUSED_DOWNLOADS_COUNT = 50;
-
     private static final String TAG = "down";
 
     private DownloadQueueService downloadingQueueService;
@@ -71,6 +69,9 @@ public class DownloadJob extends WorkQueueJobPusher {
     @Value("${enable.jobs.logging:false}")
     private boolean enableJobsLogging;
 
+    @Value("${available.unused.downloads.count:-1}")
+    private int availableUnusedDownloadsCount;
+
     @Autowired
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
@@ -95,6 +96,7 @@ public class DownloadJob extends WorkQueueJobPusher {
     public final void init() {
         LOGGER.debug("Disable jobs {}", disableJobs);
         LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        LOGGER.debug("Available unused downloads count {}", availableUnusedDownloadsCount);
         try {
             downloadingQueueService.resetProcessing();
         } catch (Exception ex) {
@@ -134,8 +136,12 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Override
     public List<QueueItem> getTasks(SmartExecutorService.JobWeight weight, int limit) {
-        long unusedDownloadsCount = downloadingQueueService.unusedDownloadsCount(workQueueDao.getProducerName(), workQueueDao.getQueueName(), weight);
-        if (unusedDownloadsCount < AVAILABLE_UNUSED_DOWNLOADS_COUNT) {
+        if (availableUnusedDownloadsCount > 0) {
+            long unusedDownloadsCount = downloadingQueueService.unusedDownloadsCount(workQueueDao.getProducerName(), workQueueDao.getQueueName(), weight);
+            if (unusedDownloadsCount < availableUnusedDownloadsCount) {
+                return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
+            }
+        } else {
             return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
         }
 
