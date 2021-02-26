@@ -4,12 +4,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.DownloadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.io.File;
@@ -23,9 +25,12 @@ public class DownloadQueueService extends QueueService {
 
     private DownloadQueueDao downloadingQueueDao;
 
+    private ServerProperties serverProperties;
+
     @Autowired
-    public DownloadQueueService(DownloadQueueDao downloadingQueueDao) {
+    public DownloadQueueService(DownloadQueueDao downloadingQueueDao, ServerProperties serverProperties) {
         this.downloadingQueueDao = downloadingQueueDao;
+        this.serverProperties = serverProperties;
     }
 
     public List<DownloadQueueItem> poll(String producer, SmartExecutorService.JobWeight weight, int limit) {
@@ -50,8 +55,11 @@ public class DownloadQueueService extends QueueService {
             queueItem.setStatus(QueueItem.Status.WAITING);
             queueItem.setUserId(userId);
             queueItem.setExtra(extra);
+            if (serverProperties.getNumber() == SmartBotConfiguration.PRIMARY_SERVER_NUMBER) {
+                queueItem.setSynced(true);
+            }
 
-            downloadingQueueDao.create(queueItem);
+            downloadingQueueDao.create(queueItem, DownloadQueueItem.getSynchronizationColumn(serverProperties.getNumber()));
         }
     }
 

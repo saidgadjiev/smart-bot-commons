@@ -3,6 +3,9 @@ package ru.gadjini.telegram.smart.bot.commons.configuration;
 import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -18,6 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.WebhookProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
@@ -27,6 +31,8 @@ import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
 @Configuration
 public class SmartBotConfiguration {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartBotConfiguration.class);
+
     public static final String PROFILE_PROD_PRIMARY = "prod-primary";
 
     public static final String PROFILE_PROD_SECONDARY = "prod-secondary";
@@ -35,8 +41,15 @@ public class SmartBotConfiguration {
 
     public static final String PROFILE_LOAD_TEST = "load-test";
 
+    public static final int PRIMARY_SERVER_NUMBER = 1;
+
     //Infinite
     private static final int SO_TIMEOUT = 0;
+
+    @Autowired
+    public SmartBotConfiguration(ServerProperties serverProperties) {
+        LOGGER.debug("Server number({})", serverProperties.getNumber());
+    }
 
     @Bean
     @Profile({PROFILE_PROD_PRIMARY, PROFILE_LOAD_TEST})

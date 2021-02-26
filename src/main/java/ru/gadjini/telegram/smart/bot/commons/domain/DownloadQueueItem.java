@@ -28,6 +28,8 @@ public class DownloadQueueItem extends QueueItem {
 
     public static final String NEXT_RUN_AT = "next_run_at";
 
+    public static final String SYNCED = "synced_";
+
     private TgFile file;
 
     private String producerTable;
@@ -47,6 +49,8 @@ public class DownloadQueueItem extends QueueItem {
     private int attempts;
 
     private ZonedDateTime nextRunAt;
+
+    private boolean synced;
 
     public TgFile getFile() {
         return file;
@@ -128,4 +132,15 @@ public class DownloadQueueItem extends QueueItem {
         this.nextRunAt = nextRunAt;
     }
 
+    public boolean isSynced() {
+        return synced;
+    }
+
+    public void setSynced(boolean synced) {
+        this.synced = synced;
+    }
+
+    public static String getSynchronizationColumn(int serverNumber) {
+        return SYNCED + serverNumber;
+    }
 }

@@ -51,10 +51,10 @@ public class DownloadQueueDao extends QueueDao {
         this.gson = gson;
     }
 
-    public void create(DownloadQueueItem queueItem) {
+    public void create(DownloadQueueItem queueItem, String synchronizationColumn) {
         jdbcTemplate.update(
                 "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer_table, progress, status, file_path, " +
-                        "delete_parent_dir, producer_id, extra, producer)\n" +
+                        "delete_parent_dir, producer_id, extra, producer, " + synchronizationColumn + ")\n" +
                         "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
@@ -81,6 +81,7 @@ public class DownloadQueueDao extends QueueDao {
                         ps.setString(9, gson.toJson(queueItem.getExtra()));
                     }
                     ps.setString(10, queueItem.getProducer());
+                    ps.setBoolean(11, queueItem.isSynced());
                 }
         );
     }
