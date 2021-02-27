@@ -179,7 +179,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({}, {})", job.getId(), job.getWeight());
     }
 
-    public final int cancelCurrentTasks(long chatId) {
+    public void cancelCurrentTasks(long chatId) {
         List<QueueItem> queueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         if (!queueItems.isEmpty()) {
             LOGGER.debug("Cancel current tasks({}, {}, {})", chatId, queueItems.size(),
@@ -192,8 +192,6 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         fileDownloadService.cancelDownloads(queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
         fileUploadService.cancelUploads(queueItems.stream().map(QueueItem::getId).collect(Collectors.toSet()));
         applicationEventPublisher.publishEvent(new CurrentTasksCanceled((int) chatId));
-
-        return queueItems.size();
     }
 
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
