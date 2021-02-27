@@ -37,9 +37,9 @@ public class SmartBotConfiguration {
 
     public static final String PROFILE_PROD_SECONDARY = "prod-secondary";
 
-    public static final String PROFILE_DEV = "dev";
+    public static final String PROFILE_DEV_PRIMARY = "dev-primary";
 
-    public static final String PROFILE_LOAD_TEST = "load-test";
+    public static final String PROFILE_DEV_SECONDARY = "dev-secondary";
 
     public static final int PRIMARY_SERVER_NUMBER = 1;
 
@@ -52,14 +52,14 @@ public class SmartBotConfiguration {
     }
 
     @Bean
-    @Profile({PROFILE_PROD_PRIMARY, PROFILE_LOAD_TEST})
+    @Profile({PROFILE_PROD_PRIMARY})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
         return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
-    @Profile({PROFILE_PROD_PRIMARY, PROFILE_LOAD_TEST})
+    @Profile({PROFILE_PROD_PRIMARY})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());

@@ -21,7 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 @Component
-@Profile(SmartBotConfiguration.PROFILE_DEV)
+@Profile(SmartBotConfiguration.PROFILE_DEV_PRIMARY)
 @SuppressWarnings({"PMD", "CPD-START"})
 public class SmartLongPoolingBot extends TelegramLongPollingBot {
 

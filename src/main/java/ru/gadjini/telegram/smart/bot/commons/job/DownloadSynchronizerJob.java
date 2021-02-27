@@ -12,7 +12,7 @@ import java.io.File;
 import java.util.List;
 
 @Component
-@Profile(SmartBotConfiguration.PROFILE_PROD_SECONDARY)
+@Profile({SmartBotConfiguration.PROFILE_PROD_SECONDARY, SmartBotConfiguration.PROFILE_DEV_SECONDARY})
 public class DownloadSynchronizerJob {
 
     private DownloadSynchronizerService downloadSynchronizerService;

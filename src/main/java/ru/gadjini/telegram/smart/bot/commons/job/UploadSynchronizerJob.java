@@ -14,7 +14,7 @@ import java.io.File;
 import java.util.List;
 
 @Component
-@Profile(SmartBotConfiguration.PROFILE_PROD_PRIMARY)
+@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_DEV_PRIMARY})
 public class UploadSynchronizerJob {
 
     private UploadSynchronizerService uploadSynchronizerService;

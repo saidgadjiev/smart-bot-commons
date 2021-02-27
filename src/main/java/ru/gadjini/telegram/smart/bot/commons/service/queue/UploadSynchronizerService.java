@@ -10,7 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import java.util.List;
 
 @Service
-@Profile(SmartBotConfiguration.PROFILE_PROD_PRIMARY)
+@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_DEV_PRIMARY})
 public class UploadSynchronizerService {
 
     private UploadSynchronizerDao uploadSynchronizerDao;

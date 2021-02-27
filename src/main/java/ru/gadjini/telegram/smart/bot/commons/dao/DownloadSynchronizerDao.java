@@ -11,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import java.util.List;
 
 @Repository
-@Profile(SmartBotConfiguration.PROFILE_PROD_SECONDARY)
+@Profile({SmartBotConfiguration.PROFILE_PROD_SECONDARY, SmartBotConfiguration.PROFILE_DEV_SECONDARY})
 public class DownloadSynchronizerDao {
 
     private JdbcTemplate jdbcTemplate;

@@ -11,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import java.util.List;
 
 @Service
-@Profile(SmartBotConfiguration.PROFILE_PROD_SECONDARY)
+@Profile({SmartBotConfiguration.PROFILE_PROD_SECONDARY, SmartBotConfiguration.PROFILE_DEV_SECONDARY})
 public class DownloadSynchronizerService {
 
     private DownloadSynchronizerDao downloadSynchronizerDao;
