@@ -8,6 +8,12 @@ public class SmartFileUtils {
 
     }
 
+    public static void mkdirs(File file) {
+        if (!file.mkdirs()) {
+            throw new RuntimeException("Mkdirs " + file.getAbsolutePath() + " failed");
+        }
+    }
+
     public static long getLength(String filePath) {
         return new File(filePath).length();
     }

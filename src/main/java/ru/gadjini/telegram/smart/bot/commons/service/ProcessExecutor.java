@@ -8,12 +8,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
+import ru.gadjini.telegram.smart.bot.commons.utils.SmartFileUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -28,14 +28,8 @@ public class ProcessExecutor {
     @PostConstruct
     public void init() {
         LOGGER.debug("Process logging dir({})", processLoggingDir);
-        try {
-            File loggingDirFile = new File(processLoggingDir);
-            if (!loggingDirFile.exists()) {
-                Files.createDirectory(loggingDirFile.toPath());
-            }
-        } catch (IOException e) {
-            LOGGER.error(e.getMessage(), e);
-        }
+        File loggingDirFile = new File(processLoggingDir);
+        SmartFileUtils.mkdirs(loggingDirFile);
     }
 
     public String executeWithResult(String[] command) {

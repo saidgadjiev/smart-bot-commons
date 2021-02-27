@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
+import ru.gadjini.telegram.smart.bot.commons.utils.SmartFileUtils;
 
 import javax.annotation.PostConstruct;
 import java.io.File;
@@ -133,7 +134,7 @@ public class TempFileService {
 
     private String mkdirsAndGet(String parent, String child) {
         File file = new File(parent, child);
-        file.mkdirs();
+        SmartFileUtils.mkdirs(file);
 
         return file.getAbsolutePath();
     }
