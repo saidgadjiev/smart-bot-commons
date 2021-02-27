@@ -4,7 +4,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -15,6 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.WorkQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.BusyWorkerException;
 import ru.gadjini.telegram.smart.bot.commons.property.FileLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
@@ -65,11 +65,12 @@ public class WorkQueueJob extends WorkQueueJobPusher {
 
     private FileUploadService fileUploadService;
 
-    @Value("${disable.jobs:false}")
-    private boolean disableJobs;
+    private JobsProperties jobsProperties;
 
-    @Value("${enable.jobs.logging:false}")
-    private boolean enableJobsLogging;
+    @Autowired
+    public WorkQueueJob(JobsProperties jobsProperties) {
+        this.jobsProperties = jobsProperties;
+    }
 
     @Autowired
     public void setFileUploadService(FileUploadService fileUploadService) {
@@ -128,8 +129,8 @@ public class WorkQueueJob extends WorkQueueJobPusher {
 
     @PostConstruct
     public final void init() {
-        LOGGER.debug("Disable jobs {}", disableJobs);
-        LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
+        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
         applicationEventPublisher.publishEvent(new QueueJobInitialization(this));
         try {
             workQueueService.resetProcessing();
@@ -150,12 +151,12 @@ public class WorkQueueJob extends WorkQueueJobPusher {
 
     @Override
     public boolean enableJobsLogging() {
-        return enableJobsLogging;
+        return jobsProperties.isEnableLogging();
     }
 
     @Override
     public boolean disableJobs() {
-        return disableJobs;
+        return jobsProperties.isDisable();
     }
 
     @Override

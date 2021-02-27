@@ -27,7 +27,7 @@ public class UploadSynchronizerJob {
         this.fileUploader = fileUploader;
     }
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 10 * 1000)
     public void doSynchronize() {
         List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads();
 

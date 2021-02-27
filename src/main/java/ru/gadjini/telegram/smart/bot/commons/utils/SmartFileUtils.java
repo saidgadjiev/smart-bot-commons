@@ -9,7 +9,7 @@ public class SmartFileUtils {
     }
 
     public static void mkdirs(File file) {
-        if (!file.mkdirs()) {
+        if (!file.exists() && !file.mkdirs()) {
             throw new RuntimeException("Mkdirs " + file.getAbsolutePath() + " failed");
         }
     }

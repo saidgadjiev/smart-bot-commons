@@ -4,9 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
@@ -18,7 +16,9 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.ProfileProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.message.ForceMediaMessageService;
@@ -33,7 +33,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_DEV_PRIMARY})
 public class UploadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadJob.class);
@@ -54,23 +53,24 @@ public class UploadJob extends WorkQueueJobPusher {
 
     private final List<UploadQueueItem> currentUploads = new ArrayList<>();
 
-    @Value("${disable.jobs:false}")
-    private boolean disableJobs;
+    private JobsProperties jobsProperties;
 
-    @Value("${enable.jobs.logging:false}")
-    private boolean enableJobsLogging;
+    private ProfileProperties profileProperties;
 
     @Autowired
     public UploadJob(UploadQueueService uploadQueueService,
                      FileManagerProperties fileManagerProperties,
-                     MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, ApplicationEventPublisher applicationEventPublisher,
-                     FileUploader fileUploader) {
+                     MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
+                     ApplicationEventPublisher applicationEventPublisher,
+                     FileUploader fileUploader, JobsProperties jobsProperties, ProfileProperties profileProperties) {
         this.uploadQueueService = uploadQueueService;
         this.fileManagerProperties = fileManagerProperties;
         this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
         this.applicationEventPublisher = applicationEventPublisher;
         this.fileUploader = fileUploader;
+        this.jobsProperties = jobsProperties;
+        this.profileProperties = profileProperties;
     }
 
     @Autowired
@@ -80,8 +80,8 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @PostConstruct
     public final void init() {
-        LOGGER.debug("Disable jobs {}", disableJobs);
-        LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
+        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
         try {
             uploadQueueService.resetProcessing();
         } catch (Exception ex) {
@@ -96,6 +96,10 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @Scheduled(fixedDelay = 1000)
     public void doUploads() {
+        if (profileProperties.isActive(SmartBotConfiguration.PROFILE_DEV_SECONDARY,
+                SmartBotConfiguration.PROFILE_PROD_SECONDARY)) {
+            return;
+        }
         super.push();
     }
 
@@ -106,12 +110,12 @@ public class UploadJob extends WorkQueueJobPusher {
 
     @Override
     public boolean enableJobsLogging() {
-        return enableJobsLogging;
+        return jobsProperties.isEnableLogging();
     }
 
     @Override
     public boolean disableJobs() {
-        return disableJobs;
+        return jobsProperties.isDisable();
     }
 
     @Override

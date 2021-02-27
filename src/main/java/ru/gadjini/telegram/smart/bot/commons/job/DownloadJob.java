@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
@@ -18,11 +17,13 @@ import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.file.temp.TempFileService;
+import ru.gadjini.telegram.smart.bot.commons.property.ProfileProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.file.temp.FileTarget;
+import ru.gadjini.telegram.smart.bot.commons.service.file.temp.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadQueueService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.event.DownloadCompleted;
@@ -36,7 +37,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
-@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_DEV_PRIMARY})
 public class DownloadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(DownloadJob.class);
@@ -63,11 +63,9 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private FormatService formatService;
 
-    @Value("${disable.jobs:false}")
-    private boolean disableJobs;
+    private JobsProperties jobsProperties;
 
-    @Value("${enable.jobs.logging:false}")
-    private boolean enableJobsLogging;
+    private ProfileProperties profileProperties;
 
     @Value("${available.unused.downloads.count:-1}")
     private int availableUnusedDownloadsCount;
@@ -76,7 +74,8 @@ public class DownloadJob extends WorkQueueJobPusher {
     public DownloadJob(DownloadQueueService downloadingQueueService, FileDownloader fileDownloader,
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
                        MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
-                       ApplicationEventPublisher applicationEventPublisher, FormatService formatService) {
+                       ApplicationEventPublisher applicationEventPublisher, FormatService formatService,
+                       JobsProperties jobsProperties, ProfileProperties profileProperties) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -85,6 +84,8 @@ public class DownloadJob extends WorkQueueJobPusher {
         this.workQueueDao = workQueueDao;
         this.applicationEventPublisher = applicationEventPublisher;
         this.formatService = formatService;
+        this.jobsProperties = jobsProperties;
+        this.profileProperties = profileProperties;
     }
 
     @Autowired
@@ -94,8 +95,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @PostConstruct
     public final void init() {
-        LOGGER.debug("Disable jobs {}", disableJobs);
-        LOGGER.debug("Enable jobs logging {}", enableJobsLogging);
+        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
+        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
         LOGGER.debug("Available unused downloads count {}", availableUnusedDownloadsCount);
         try {
             downloadingQueueService.resetProcessing();
@@ -111,6 +112,10 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Scheduled(fixedDelay = 1000)
     public void doDownloads() {
+        if (profileProperties.isActive(SmartBotConfiguration.PROFILE_DEV_SECONDARY,
+                SmartBotConfiguration.PROFILE_PROD_SECONDARY)) {
+            return;
+        }
         super.push();
     }
 
@@ -121,12 +126,12 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @Override
     public boolean enableJobsLogging() {
-        return enableJobsLogging;
+        return jobsProperties.isEnableLogging();
     }
 
     @Override
     public boolean disableJobs() {
-        return disableJobs;
+        return jobsProperties.isDisable();
     }
 
     @Override

@@ -25,7 +25,7 @@ public class UploadSynchronizerDao {
         return jdbcTemplate.query(
                 "select id, method, body, file_size\n" +
                         "from upload_queue\n" +
-                        "where status = 3 and synced = false",
+                        "where status = 0 and synced = false",
                 (resultSet, i) -> {
                     UploadQueueItem queueItem = new UploadQueueItem();
 

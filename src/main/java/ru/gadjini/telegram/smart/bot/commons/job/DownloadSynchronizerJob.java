@@ -22,7 +22,7 @@ public class DownloadSynchronizerJob {
         this.downloadSynchronizerService = downloadSynchronizerService;
     }
 
-    @Scheduled(fixedDelay = 60 * 1000)
+    @Scheduled(fixedDelay = 10 * 1000)
     public void doSynchronize() {
         List<DownloadQueueItem> unsynchronizedDownloads = downloadSynchronizerService.getUnsynchronizedDownloads();
         for (DownloadQueueItem unsynchronizedDownload : unsynchronizedDownloads) {
