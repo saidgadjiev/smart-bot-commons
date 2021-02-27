@@ -179,7 +179,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({}, {})", job.getId(), job.getWeight());
     }
 
-    public final int removeAndCancelCurrentTasks(long chatId) {
+    public final int cancelCurrentTasks(long chatId) {
         List<QueueItem> queueItems = workQueueService.deleteAndGetProcessingOrWaitingByUserId((int) chatId);
         if (!queueItems.isEmpty()) {
             LOGGER.debug("Cancel current tasks({}, {}, {})", chatId, queueItems.size(),
