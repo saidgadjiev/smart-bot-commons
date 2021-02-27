@@ -55,7 +55,7 @@ public class DownloadQueueDao extends QueueDao {
         jdbcTemplate.update(
                 "INSERT INTO " + DownloadQueueItem.NAME + " (user_id, file, producer_table, progress, status, file_path, " +
                         "delete_parent_dir, producer_id, extra, producer, " + synchronizationColumn + ")\n" +
-                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        "    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
                 ps -> {
                     ps.setInt(1, queueItem.getUserId());
 

@@ -7,9 +7,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -24,22 +26,30 @@ public class TempFileService {
     @Value("${temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String tempDir;
 
-    @Value("${download.temp.dir:#{systemProperties['java.io.tmpdir']}}")
+    @Value("${downloads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String downloadsTempDir;
 
-    @Value("${upload.temp.dir:#{systemProperties['java.io.tmpdir']}}")
+    @Value("${uploads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String uploadsTempDir;
 
     private ServerProperties serverProperties;
 
+    private BotProperties botProperties;
+
     @Autowired
-    public TempFileService(ServerProperties serverProperties) {
+    public TempFileService(ServerProperties serverProperties, BotProperties botProperties) {
         this.serverProperties = serverProperties;
+        this.botProperties = botProperties;
     }
 
     @PostConstruct
     public void init() {
+        tempDir = mkdirsAndGet(tempDir, botProperties.getName());
+        downloadsTempDir = mkdirsAndGet(downloadsTempDir, botProperties.getName());
+        uploadsTempDir = mkdirsAndGet(uploadsTempDir, botProperties.getName());
+
         LOGGER.debug("Temp dir({},{},{})", tempDir, downloadsTempDir, uploadsTempDir);
+
         fileTypeServices.put(FileTarget.TEMP, new TempDirectoryService(tempDir));
         fileTypeServices.put(FileTarget.DOWNLOAD, new TempDirectoryService(downloadsTempDir));
         fileTypeServices.put(FileTarget.UPLOAD, new TempDirectoryService(uploadsTempDir));
@@ -119,5 +129,12 @@ public class TempFileService {
 
     private boolean isRemoteFile(String filePath) {
         return serverProperties.getNumber() != SmartBotConfiguration.PRIMARY_SERVER_NUMBER && filePath.startsWith(downloadsTempDir);
+    }
+
+    private String mkdirsAndGet(String parent, String child) {
+        File file = new File(parent, child);
+        file.mkdirs();
+
+        return file.getAbsolutePath();
     }
 }

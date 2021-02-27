@@ -39,12 +39,13 @@ public class UploadQueueDao extends QueueDao {
 
     @Autowired
     public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper,
-                          MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao) {
+                          MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, UploadQueueItemMapper queueItemMapper) {
         this.jdbcTemplate = jdbcTemplate;
         this.gson = gson;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
+        this.queueItemMapper = queueItemMapper;
     }
 
     public void create(UploadQueueItem queueItem) {
