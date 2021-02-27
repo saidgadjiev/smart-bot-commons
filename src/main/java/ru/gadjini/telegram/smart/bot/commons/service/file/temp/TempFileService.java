@@ -2,13 +2,17 @@ package ru.gadjini.telegram.smart.bot.commons.service.file.temp;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 
 import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TempFileService {
@@ -25,6 +29,13 @@ public class TempFileService {
 
     @Value("${upload.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String uploadsTempDir;
+
+    private ServerProperties serverProperties;
+
+    @Autowired
+    public TempFileService(ServerProperties serverProperties) {
+        this.serverProperties = serverProperties;
+    }
 
     @PostConstruct
     public void init() {
@@ -76,5 +87,37 @@ public class TempFileService {
 
     public SmartTempFile createTempFile(FileTarget tempFileType, String tag, String ext) {
         return createTempFile(tempFileType, 0, null, tag, ext);
+    }
+
+    public void delete(SmartTempFile file) {
+        if (isRemoteFile(file.getAbsolutePath())) {
+            deleteRemoteFile(file);
+        }
+
+        file.smartDelete();
+    }
+
+    private void deleteRemoteFile(SmartTempFile file) {
+        String filePath = file.getAbsolutePath();
+        String script = "scripts/delete_remote_file.sh";
+        if (file.isDirectory()) {
+            script = "scripts/delete_remote_dir.sh";
+        }
+        ProcessBuilder processBuilder = new ProcessBuilder("sh", script, filePath);
+        processBuilder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+        processBuilder.redirectError(ProcessBuilder.Redirect.DISCARD);
+
+        try {
+            Process start = processBuilder.start();
+            start.waitFor(5, TimeUnit.SECONDS);
+
+            LOGGER.debug("Delete remote file({},{})", start.exitValue(), filePath);
+        } catch (Throwable e) {
+            LOGGER.error("Error delete remote file " + filePath + "\n" + e.getMessage(), e);
+        }
+    }
+
+    private boolean isRemoteFile(String filePath) {
+        return serverProperties.getNumber() != SmartBotConfiguration.PRIMARY_SERVER_NUMBER && filePath.startsWith(downloadsTempDir);
     }
 }

@@ -32,6 +32,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.web.HttpCodes;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.file.temp.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import java.io.File;
@@ -65,13 +66,16 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
     private Method sendHttpPostRequestMethod;
 
+    private TempFileService tempFileService;
+
     @Autowired
     public TelegramBotApiService(BotProperties botProperties, ObjectMapper objectMapper,
-                                 DefaultBotOptions botOptions, BotApiProperties botApiProperties) {
+                                 DefaultBotOptions botOptions, BotApiProperties botApiProperties, TempFileService tempFileService) {
         super(botOptions);
         this.botProperties = botProperties;
         this.objectMapper = objectMapper;
         this.botApiProperties = botApiProperties;
+        this.tempFileService = tempFileService;
         try {
             this.createHttpRequestMethod = DefaultAbsSender.class.getDeclaredMethod("configuredHttpPost", String.class);
             this.createHttpRequestMethod.setAccessible(true);
@@ -250,7 +254,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             SmartTempFile tempFile = uploading.get(filePath);
             if (tempFile != null) {
                 try {
-                    tempFile.smartDelete();
+                    tempFileService.delete(tempFile);
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
@@ -269,7 +273,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
             SmartTempFile tempFile = downloading.get(fileId);
             if (tempFile != null) {
                 try {
-                    tempFile.smartDelete();
+                    tempFileService.delete(tempFile);
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }
@@ -293,7 +297,7 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
         try {
             for (Map.Entry<String, SmartTempFile> entry : downloading.entrySet()) {
                 try {
-                    entry.getValue().smartDelete();
+                    tempFileService.delete(entry.getValue());
                 } catch (Exception e) {
                     LOGGER.error(e.getMessage(), e);
                 }

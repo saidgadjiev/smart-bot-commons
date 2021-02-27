@@ -248,7 +248,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                 LOGGER.debug("Canceled downloading({}, {}, {})", downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getProducerTable(), downloadingQueueItem.getProducerId());
             }
             if (tempFile != null) {
-                tempFile.smartDelete();
+                tempFileService.delete(tempFile);
             }
         }
 
@@ -272,7 +272,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                 downloadingQueueItem.setFilePath(tempFile.getAbsolutePath());
                 applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } catch (Throwable e) {
-                tempFile.smartDelete();
+                tempFileService.delete(tempFile);
 
                 if (checker == null || !checker.get()) {
                     if (e instanceof FloodControlException) {

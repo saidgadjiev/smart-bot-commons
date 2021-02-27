@@ -13,6 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
+import ru.gadjini.telegram.smart.bot.commons.service.file.temp.TempFileService;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -27,10 +28,13 @@ public class DownloadQueueService extends QueueService {
 
     private ServerProperties serverProperties;
 
+    private TempFileService tempFileService;
+
     @Autowired
-    public DownloadQueueService(DownloadQueueDao downloadingQueueDao, ServerProperties serverProperties) {
+    public DownloadQueueService(DownloadQueueDao downloadingQueueDao, ServerProperties serverProperties, TempFileService tempFileService) {
         this.downloadingQueueDao = downloadingQueueDao;
         this.serverProperties = serverProperties;
+        this.tempFileService = tempFileService;
     }
 
     public List<DownloadQueueItem> poll(String producer, SmartExecutorService.JobWeight weight, int limit) {
@@ -93,7 +97,7 @@ public class DownloadQueueService extends QueueService {
     public void releaseResources(List<DownloadQueueItem> downloadQueueItems) {
         for (DownloadQueueItem downloadQueueItem : downloadQueueItems) {
             if (StringUtils.isNotBlank(downloadQueueItem.getFilePath())) {
-                new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()).smartDelete();
+                tempFileService.delete(new SmartTempFile(new File(downloadQueueItem.getFilePath()), downloadQueueItem.isDeleteParentDir()));
             }
         }
     }

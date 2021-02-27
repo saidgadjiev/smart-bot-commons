@@ -15,6 +15,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
+import ru.gadjini.telegram.smart.bot.commons.service.file.temp.TempFileService;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
 import java.util.ArrayList;
@@ -30,10 +31,13 @@ public class UploadQueueService extends QueueService {
 
     private ServerProperties serverProperties;
 
+    private TempFileService tempFileService;
+
     @Autowired
-    public UploadQueueService(UploadQueueDao uploadQueueDao, ServerProperties serverProperties) {
+    public UploadQueueService(UploadQueueDao uploadQueueDao, ServerProperties serverProperties, TempFileService tempFileService) {
         this.uploadQueueDao = uploadQueueDao;
         this.serverProperties = serverProperties;
+        this.tempFileService = tempFileService;
     }
 
     @Autowired
@@ -146,10 +150,10 @@ public class UploadQueueService extends QueueService {
         }
 
         if (inputFile != null && inputFile.isNew()) {
-            new SmartTempFile(inputFile.getNewMediaFile()).smartDelete();
+            tempFileService.delete(new SmartTempFile(inputFile.getNewMediaFile()));
         }
         if (thumb != null && thumb.isNew()) {
-            new SmartTempFile(thumb.getNewMediaFile()).smartDelete();
+            tempFileService.delete(new SmartTempFile(thumb.getNewMediaFile()));
         }
     }
 
