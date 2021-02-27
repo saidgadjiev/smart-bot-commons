@@ -121,7 +121,8 @@ public class UploadQueueDao extends QueueDao {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
                         "    UPDATE upload_queue SET " + QueueDao.POLL_UPDATE_LIST +
-                        "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
+                        "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() " +
+                        "and qu.producer = ? and synced = true " +
                         "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + " ?\n" +
                         QueueDao.POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
