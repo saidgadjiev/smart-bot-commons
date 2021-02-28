@@ -8,6 +8,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class WorkQueueService extends QueueService {
@@ -29,6 +30,10 @@ public class WorkQueueService extends QueueService {
 
     public List<QueueItem> deleteAndGetProcessingOrWaitingByUserId(int userId) {
         return queueDao.deleteAndGetProcessingOrWaitingByUserId(userId);
+    }
+
+    public QueueItem deleteByIdAndStatusesAndGet(int id, Set<QueueItem.Status> statuses) {
+        return queueDao.deleteByIdAndStatusesAndGet(id, statuses);
     }
 
     public QueueItem deleteAndGetById(int id) {

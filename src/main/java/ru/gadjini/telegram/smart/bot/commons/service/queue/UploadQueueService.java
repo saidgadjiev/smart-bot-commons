@@ -4,7 +4,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
-import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.UploadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -62,7 +61,7 @@ public class UploadQueueService extends QueueService {
         uploadQueueItem.setUploadType(getUploadType(method, body, UploadType.DOCUMENT));
         uploadQueueItem.setFileSize(fileUploader.getInputFile(method, body).getNewMediaFile().length());
 
-        if (serverProperties.getNumber() == SmartBotConfiguration.PRIMARY_SERVER_NUMBER) {
+        if (serverProperties.isPrimaryServer()) {
             uploadQueueItem.setSynced(true);
         }
 

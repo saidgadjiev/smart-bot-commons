@@ -6,7 +6,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import ru.gadjini.telegram.smart.bot.commons.job.WorkQueueJob;
-import ru.gadjini.telegram.smart.bot.commons.model.CancelTaskRequest;
 import ru.gadjini.telegram.smart.bot.commons.service.TokenValidator;
 
 @RestController
@@ -24,26 +23,12 @@ public class TasksController {
     }
 
     @PostMapping(value = "/{taskId}/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> cancel(@PathVariable("userId") long userId, @PathVariable("taskId") int taskId,
-                                    @RequestHeader("Authorization") String token,
-                                    @RequestBody CancelTaskRequest cancelTaskRequest) {
+    public ResponseEntity<?> cancel(@PathVariable("taskId") int taskId, @RequestHeader("Authorization") String token) {
         if (tokenValidator.isInvalid(token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        workQueueJob.cancel(userId, cancelTaskRequest.getMessageId(),
-                cancelTaskRequest.getCallbackQueryId(), taskId);
-
-        return ResponseEntity.ok().build();
-    }
-
-    @PostMapping(value = "/cancel", consumes = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<?> cancelUserTasks(@PathVariable("userId") long userId, @RequestHeader("Authorization") String token) {
-        if (tokenValidator.isInvalid(token)) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-
-        workQueueJob.cancelCurrentTasks(userId);
+        workQueueJob.cancel(taskId);
 
         return ResponseEntity.ok().build();
     }

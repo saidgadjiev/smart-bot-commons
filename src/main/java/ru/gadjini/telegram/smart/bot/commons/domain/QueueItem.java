@@ -52,6 +52,8 @@ public class QueueItem {
 
     private String exception;
 
+    private int server;
+
     public final int getId() {
         return id;
     }
@@ -146,6 +148,14 @@ public class QueueItem {
 
     public final void setException(String exception) {
         this.exception = exception;
+    }
+
+    public int getServer() {
+        return server;
+    }
+
+    public void setServer(int server) {
+        this.server = server;
     }
 
     public enum Status {

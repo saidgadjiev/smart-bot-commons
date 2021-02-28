@@ -4,7 +4,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.DownloadQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.dao.QueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
@@ -59,7 +58,7 @@ public class DownloadQueueService extends QueueService {
             queueItem.setStatus(QueueItem.Status.WAITING);
             queueItem.setUserId(userId);
             queueItem.setExtra(extra);
-            if (serverProperties.getNumber() == SmartBotConfiguration.PRIMARY_SERVER_NUMBER) {
+            if (serverProperties.isPrimaryServer()) {
                 queueItem.setSynced(true);
             }
 
