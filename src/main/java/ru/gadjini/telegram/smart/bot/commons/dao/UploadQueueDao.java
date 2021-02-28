@@ -13,6 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
@@ -37,15 +38,19 @@ public class UploadQueueDao extends QueueDao {
 
     private UploadQueueItemMapper queueItemMapper;
 
+    private ServerProperties serverProperties;
+
     @Autowired
     public UploadQueueDao(JdbcTemplate jdbcTemplate, @Qualifier("botapi") Gson gson, ObjectMapper objectMapper,
-                          MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao, UploadQueueItemMapper queueItemMapper) {
+                          MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
+                          UploadQueueItemMapper queueItemMapper, ServerProperties serverProperties) {
         this.jdbcTemplate = jdbcTemplate;
         this.gson = gson;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
         this.workQueueDao = workQueueDao;
         this.queueItemMapper = queueItemMapper;
+        this.serverProperties = serverProperties;
     }
 
     public void create(UploadQueueItem queueItem) {
@@ -121,7 +126,7 @@ public class UploadQueueDao extends QueueDao {
     public List<UploadQueueItem> poll(String producer, SmartExecutorService.JobWeight jobWeight, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
-                        "    UPDATE upload_queue SET " + QueueDao.POLL_UPDATE_LIST +
+                        "    UPDATE upload_queue SET " + QueueDao.getUpdateList(serverProperties.getNumber()) +
                         "WHERE id IN(SELECT id FROM upload_queue qu WHERE qu.status = 0 AND qu.next_run_at <= now() " +
                         "and qu.producer = ? and synced = true " +
                         "AND file_size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + " ?\n" +

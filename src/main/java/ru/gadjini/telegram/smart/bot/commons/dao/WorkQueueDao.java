@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorSer
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Set;
 
 @Repository
 public class WorkQueueDao extends QueueDao {
@@ -49,8 +48,8 @@ public class WorkQueueDao extends QueueDao {
         return queueDaoDelegate.deleteAndGetById(id);
     }
 
-    public QueueItem deleteByIdAndStatusesAndGet(int id, Set<QueueItem.Status> statuses) {
-        return queueDaoDelegate.deleteByIdAndStatusesAndGet(id, statuses);
+    public QueueItem deleteAndGetProcessingOrWaitingById(int id) {
+        return queueDaoDelegate.deleteAndGetProcessingOrWaitingById(id);
     }
 
     public List<QueueItem> deleteCompleted() {

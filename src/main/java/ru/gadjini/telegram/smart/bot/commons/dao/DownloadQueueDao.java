@@ -14,6 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.TgFile;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 
@@ -37,16 +38,19 @@ public class DownloadQueueDao extends QueueDao {
 
     private MediaLimitProperties mediaLimitProperties;
 
+    private ServerProperties serverProperties;
+
     private WorkQueueDao workQueueDao;
 
     private Gson gson;
 
     @Autowired
     public DownloadQueueDao(JdbcTemplate jdbcTemplate, ObjectMapper objectMapper, MediaLimitProperties mediaLimitProperties,
-                            WorkQueueDao workQueueDao, Gson gson) {
+                            ServerProperties serverProperties, WorkQueueDao workQueueDao, Gson gson) {
         this.jdbcTemplate = jdbcTemplate;
         this.objectMapper = objectMapper;
         this.mediaLimitProperties = mediaLimitProperties;
+        this.serverProperties = serverProperties;
         this.workQueueDao = workQueueDao;
         this.gson = gson;
     }
@@ -89,7 +93,7 @@ public class DownloadQueueDao extends QueueDao {
     public List<DownloadQueueItem> poll(String producer, SmartExecutorService.JobWeight jobWeight, int limit) {
         return jdbcTemplate.query(
                 "WITH r AS (\n" +
-                        "    UPDATE " + DownloadQueueItem.NAME + " SET " + QueueDao.POLL_UPDATE_LIST +
+                        "    UPDATE " + DownloadQueueItem.NAME + " SET " + QueueDao.getUpdateList(serverProperties.getNumber()) +
                         "WHERE id IN(SELECT id FROM " + DownloadQueueItem.NAME + " qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
                         "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n" +
                         " ORDER BY qu.attempts, qu.next_run_at, qu.id LIMIT " + limit + ")\n" +

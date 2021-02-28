@@ -227,7 +227,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
         LOGGER.debug("Cancel query({}, {})", chatId, jobId);
 
-        QueueItem queueItem = workQueueService.deleteByIdAndStatusesAndGet(jobId, Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
+        QueueItem queueItem = workQueueService.deleteAndGetProcessingOrWaitingById(jobId);
         if (queueItem == null) {
             messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder()
                     .callbackQueryId(queryId)

@@ -1,14 +1,18 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.apache.commons.lang3.BooleanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
+import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public abstract class QueueDao {
@@ -19,9 +23,20 @@ public abstract class QueueDao {
 
     public static final String POLL_ORDER_BY = " ORDER BY qu.attempts, qu.id ";
 
-    public static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()) ";
-
     public static final String DELETE_COMPLETED_INTERVAL = "interval '3 days'";
+
+    private ServerProperties serverProperties;
+
+    private static final String POLL_UPDATE_LIST = " status = 1, last_run_at = now(), attempts = attempts + 1, started_at = COALESCE(started_at, now()), server = %s ";
+
+    public static String getUpdateList(int serverNumber) {
+        return String.format(POLL_UPDATE_LIST, serverNumber);
+    }
+
+    @Autowired
+    public void setServerProperties(ServerProperties serverProperties) {
+        this.serverProperties = serverProperties;
+    }
 
     public final void setExceptionStatus(int id, String exception) {
         getJdbcTemplate().update(
@@ -74,7 +89,8 @@ public abstract class QueueDao {
 
     public final void resetProcessing() {
         getJdbcTemplate().update(
-                "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause()
+                "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) " +
+                        "WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause() + " AND server = " + serverProperties.getNumber()
         );
     }
 
