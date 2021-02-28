@@ -7,9 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
@@ -19,7 +17,6 @@ import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.ProfileProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.concurrent.SmartExecutorService;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileDownloader;
 import ru.gadjini.telegram.smart.bot.commons.service.file.temp.FileTarget;
@@ -65,8 +62,6 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     private JobsProperties jobsProperties;
 
-    private ProfileProperties profileProperties;
-
     @Value("${available.unused.downloads.count:-1}")
     private int availableUnusedDownloadsCount;
 
@@ -75,7 +70,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                        TempFileService tempFileService, FileManagerProperties fileManagerProperties,
                        MediaLimitProperties mediaLimitProperties, WorkQueueDao workQueueDao,
                        ApplicationEventPublisher applicationEventPublisher, FormatService formatService,
-                       JobsProperties jobsProperties, ProfileProperties profileProperties) {
+                       JobsProperties jobsProperties) {
         this.downloadingQueueService = downloadingQueueService;
         this.fileDownloader = fileDownloader;
         this.tempFileService = tempFileService;
@@ -85,7 +80,6 @@ public class DownloadJob extends WorkQueueJobPusher {
         this.applicationEventPublisher = applicationEventPublisher;
         this.formatService = formatService;
         this.jobsProperties = jobsProperties;
-        this.profileProperties = profileProperties;
     }
 
     @Autowired
@@ -110,12 +104,7 @@ public class DownloadJob extends WorkQueueJobPusher {
         LOGGER.debug("Rejected({})", job.getId());
     }
 
-    @Scheduled(fixedDelay = 1000)
     public void doDownloads() {
-        if (profileProperties.isActive(SmartBotConfiguration.PROFILE_DEV_SECONDARY,
-                SmartBotConfiguration.PROFILE_PROD_SECONDARY)) {
-            return;
-        }
         super.push();
     }
 
