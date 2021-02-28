@@ -3,10 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -34,23 +31,25 @@ public class ContentsApi {
 
     public void delete(SmartTempFile tempFile) {
         DeleteContentRequest deleteContentRequest = new DeleteContentRequest(tempFile.getAbsolutePath(), tempFile.isDeleteParentDir());
-        HttpEntity<DeleteContentRequest> entity = new HttpEntity<>(deleteContentRequest);
+        HttpEntity<DeleteContentRequest> entity = new HttpEntity<>(deleteContentRequest, authHeaders());
 
-        ResponseEntity<Void> response = restTemplate.postForEntity(buildDeleteContentUrl(), addAuthHeader(entity), Void.class);
+        ResponseEntity<Void> response = restTemplate.exchange(buildDeleteContentUrl(), HttpMethod.DELETE, entity, Void.class);
 
         if (response.getStatusCode() != HttpStatus.OK) {
             LOGGER.error("Error delete content({})", tempFile.getAbsolutePath());
         }
     }
 
-    private HttpEntity<?> addAuthHeader(HttpEntity<?> httpEntity) {
-        httpEntity.getHeaders().add(HttpHeaders.AUTHORIZATION, authProperties.getToken());
+    private HttpHeaders authHeaders() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.AUTHORIZATION, authProperties.getToken());
 
-        return httpEntity;
+        return httpHeaders;
     }
 
     private String buildDeleteContentUrl() {
         return UriComponentsBuilder.fromHttpUrl(serverProperties.getPrimaryServer())
+                .path("/contents")
                 .build()
                 .toUriString();
     }

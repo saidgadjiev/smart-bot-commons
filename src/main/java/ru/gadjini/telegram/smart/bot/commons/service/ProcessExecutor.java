@@ -32,23 +32,23 @@ public class ProcessExecutor {
         SmartFileUtils.mkdirs(loggingDirFile);
     }
 
-    public String executeWithResult(String[] command) {
+    public String executeWithResult(String[] command) throws InterruptedException {
         return execute(command, ProcessBuilder.Redirect.PIPE, null, Collections.emptySet());
     }
 
-    public void executeWithFile(String[] command, String outputFile) {
+    public void executeWithFile(String[] command, String outputFile) throws InterruptedException {
         execute(command, null, outputFile, Collections.emptySet());
     }
 
-    public void execute(String[] command, Collection<Integer> successCodes) {
+    public void execute(String[] command, Collection<Integer> successCodes) throws InterruptedException {
         execute(command, ProcessBuilder.Redirect.DISCARD, null, successCodes);
     }
 
-    public void execute(String[] command) {
+    public void execute(String[] command) throws InterruptedException {
         execute(command, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
     }
 
-    public String tryExecute(String[] command, int waitForInSeconds) {
+    public String tryExecute(String[] command, int waitForInSeconds) throws InterruptedException {
         File errorFile = getErrorLogFile();
         try {
             ProcessBuilder processBuilder = new ProcessBuilder(command);
@@ -62,6 +62,8 @@ public class ProcessExecutor {
             } finally {
                 process.destroy();
             }
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception ex) {
             if (ex instanceof ProcessException) {
                 throw (ProcessException) ex;
@@ -73,7 +75,7 @@ public class ProcessExecutor {
         }
     }
 
-    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) {
+    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) throws InterruptedException {
         File errorFile = getErrorLogFile();
         try {
             FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
@@ -106,6 +108,8 @@ public class ProcessExecutor {
             } finally {
                 process.destroy();
             }
+        } catch (InterruptedException e) {
+            throw e;
         } catch (Exception ex) {
             if (ex instanceof ProcessException) {
                 throw (ProcessException) ex;

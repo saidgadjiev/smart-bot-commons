@@ -18,14 +18,14 @@ import java.io.File;
 @RestController
 @RequestMapping("/contents")
 @Profile({SmartBotConfiguration.PROFILE_DEV_PRIMARY, SmartBotConfiguration.PROFILE_PROD_PRIMARY})
-public class ContentController {
+public class ContentsController {
 
     private TempFileService tempFileService;
 
     private TokenValidator tokenValidator;
 
     @Autowired
-    public ContentController(TempFileService tempFileService, TokenValidator tokenValidator) {
+    public ContentsController(TempFileService tempFileService, TokenValidator tokenValidator) {
         this.tempFileService = tempFileService;
         this.tokenValidator = tokenValidator;
     }

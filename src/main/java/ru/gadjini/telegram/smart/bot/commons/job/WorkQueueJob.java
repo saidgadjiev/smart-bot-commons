@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -73,6 +74,9 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     private ServerProperties serverProperties;
 
     private UserTasksApi userTasksService;
+
+    @Value("${disable.work.job:false}")
+    public boolean disableWorkJob;
 
     @Autowired
     public WorkQueueJob(JobsProperties jobsProperties, ServerProperties serverProperties, UserTasksApi userTasksService) {
@@ -150,6 +154,9 @@ public class WorkQueueJob extends WorkQueueJobPusher {
 
     @Scheduled(fixedDelay = 3000)
     public final void pushJobs() {
+        if (disableWorkJob) {
+            return;
+        }
         super.push();
     }
 
@@ -211,7 +218,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     }
 
     public void cancel(int jobId) {
-        QueueItem queueItem = workQueueService.getById(jobId);
+        QueueItem queueItem = workQueueService.deleteAndGetProcessingOrWaitingById(jobId);
 
         if (queueItem == null) {
             return;
@@ -227,7 +234,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     public void cancel(long chatId, int messageId, String queryId, int jobId) {
         LOGGER.debug("Cancel query({}, {})", chatId, jobId);
 
-        QueueItem queueItem = workQueueService.deleteAndGetProcessingOrWaitingById(jobId);
+        QueueItem queueItem = workQueueService.getById(jobId);
         if (queueItem == null) {
             messageService.sendAnswerCallbackQuery(AnswerCallbackQuery.builder()
                     .callbackQueryId(queryId)
@@ -247,6 +254,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
                 }
                 applicationEventPublisher.publishEvent(new TaskCanceled(queueItem));
             } else if (!userTasksService.cancel(queueItem.getServer(), chatId, jobId)) {
+                workQueueService.deleteById(jobId);
                 fileDownloadService.cancelDownloads(jobId);
                 fileUploadService.cancelUploads(jobId);
             }

@@ -28,6 +28,8 @@ public class QueueItem {
 
     public static final String SUPPRESS_USER_EXCEPTIONS = "suppress_user_exceptions";
 
+    public static final String SERVER = "server";
+
     private int id;
 
     private int userId;

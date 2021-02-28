@@ -32,7 +32,7 @@ public class UserTasksApi {
 
     public boolean cancel(int serverNumber, long userId, int taskId) {
         ResponseEntity<Void> responseEntity = restTemplate.postForEntity(buildCancelTaskUrl(
-                serverProperties.getServer(serverNumber), userId, taskId), addAuthHeader(new HttpEntity<>(null)), Void.class);
+                serverProperties.getServer(serverNumber), userId, taskId), new HttpEntity<>(authHeaders()), Void.class);
 
         if (responseEntity.getStatusCode() != HttpStatus.OK) {
             LOGGER.error("Cancel task failed({}, {}, {}, {})", responseEntity.getStatusCodeValue(), userId, serverNumber, taskId);
@@ -43,10 +43,11 @@ public class UserTasksApi {
         return true;
     }
 
-    private HttpEntity<?> addAuthHeader(HttpEntity<?> httpEntity) {
-        httpEntity.getHeaders().add(HttpHeaders.AUTHORIZATION, authProperties.getToken());
+    private HttpHeaders authHeaders() {
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add(HttpHeaders.AUTHORIZATION, authProperties.getToken());
 
-        return httpEntity;
+        return httpHeaders;
     }
 
     private String buildCancelTaskUrl(String server, long userId, int taskId) {
