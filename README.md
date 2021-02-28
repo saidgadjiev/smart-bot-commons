@@ -73,7 +73,10 @@ ip='host'
 source='downloads'
 destination='media/downloads'
 
-rsync -azP --delete --password-file=$password_file rsync://$user@$ip/$source $destination
+for var in $@
+do
+	rsync -azP --delete --password-file=$password_file rsync://$user@$ip/$source/$var/ $destination/$var
+done
 
 rm cron.d/rsync_downloads.lock
 ```
@@ -109,7 +112,10 @@ ip='host'
 source='media/uploads/'
 destination='uploads'
 
-rsync -azP --remove-source-files --password-file=$password_file $source rsync://$user@$ip/$destination
+for var in $@
+do
+      rsync -azP --remove-source-files --password-file=$password_file $source/$var/ rsync://$user@$ip/$destination/$var
+done
 
 rm cron.d/rsync_uploads.lock
 ```
