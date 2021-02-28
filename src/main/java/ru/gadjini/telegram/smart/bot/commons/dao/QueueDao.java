@@ -87,7 +87,7 @@ public abstract class QueueDao {
                 });
     }
 
-    public final void resetProcessing() {
+    public void resetProcessing() {
         getJdbcTemplate().update(
                 "UPDATE " + getQueueName() + " SET status = 0, attempts = GREATEST(0, attempts - 1) " +
                         "WHERE status = 1 " + getQueueDaoDelegate().getBaseAdditionalClause() + " AND server = " + serverProperties.getNumber()
