@@ -30,13 +30,17 @@ public class ContentsApi {
     }
 
     public void delete(SmartTempFile tempFile) {
-        DeleteContentRequest deleteContentRequest = new DeleteContentRequest(tempFile.getAbsolutePath(), tempFile.isDeleteParentDir());
-        HttpEntity<DeleteContentRequest> entity = new HttpEntity<>(deleteContentRequest, authHeaders());
+        try {
+            DeleteContentRequest deleteContentRequest = new DeleteContentRequest(tempFile.getAbsolutePath(), tempFile.isDeleteParentDir());
+            HttpEntity<DeleteContentRequest> entity = new HttpEntity<>(deleteContentRequest, authHeaders());
 
-        ResponseEntity<Void> response = restTemplate.exchange(buildDeleteContentUrl(), HttpMethod.DELETE, entity, Void.class);
+            ResponseEntity<Void> response = restTemplate.exchange(buildDeleteContentUrl(), HttpMethod.DELETE, entity, Void.class);
 
-        if (response.getStatusCode() != HttpStatus.OK) {
-            LOGGER.error("Error delete content({})", tempFile.getAbsolutePath());
+            if (response.getStatusCode() != HttpStatus.OK) {
+                LOGGER.error("Error delete content({})", tempFile.getAbsolutePath());
+            }
+        } catch (Exception e) {
+            LOGGER.error("Error delete content(" + tempFile.getAbsolutePath() + ") \n" + e.getMessage(), e);
         }
     }
 
