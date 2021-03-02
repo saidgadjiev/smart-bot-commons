@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.keyboard;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +26,18 @@ public class SmartReplyKeyboardService {
     public ReplyKeyboardMarkup languageKeyboard(Locale locale) {
         ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardService.replyKeyboardMarkup();
 
-        List<String> languages = new ArrayList<>();
-        for (Locale l : localisationService.getSupportedLocales()) {
-            languages.add(StringUtils.capitalize(l.getDisplayLanguage(l)));
+        List<List<String>> languages = new ArrayList<>();
+        List<List<Locale>> supportedLocalesParts = Lists.partition(localisationService.getSupportedLocales(), 2);
+        for (List<Locale> supportedLocales : supportedLocalesParts) {
+            List<String> langs = new ArrayList<>();
+            for (Locale l : supportedLocales) {
+                langs.add(StringUtils.capitalize(l.getDisplayLanguage(l)));
+            }
+            languages.add(langs);
         }
-        replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(languages.toArray(new String[0])));
+        for (List<String> langs : languages) {
+            replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(langs.toArray(new String[0])));
+        }
         replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
 
         return replyKeyboardMarkup;
