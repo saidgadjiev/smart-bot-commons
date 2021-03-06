@@ -49,6 +49,7 @@ public class SmartBotConfiguration {
     @Autowired
     public SmartBotConfiguration(ServerProperties serverProperties) {
         LOGGER.debug("Server number({})", serverProperties.getNumber());
+        LOGGER.debug("Servers({})", serverProperties.getServers());
     }
 
     @Bean
