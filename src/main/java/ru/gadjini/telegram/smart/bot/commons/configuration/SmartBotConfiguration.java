@@ -21,6 +21,7 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.WebhookProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
@@ -47,9 +48,10 @@ public class SmartBotConfiguration {
     private static final int SO_TIMEOUT = 0;
 
     @Autowired
-    public SmartBotConfiguration(ServerProperties serverProperties) {
+    public SmartBotConfiguration(ServerProperties serverProperties, JobsProperties jobsProperties) {
         LOGGER.debug("Server number({})", serverProperties.getNumber());
         LOGGER.debug("Servers({})", serverProperties.getServers());
+        LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
     }
 
     @Bean
