@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.DownloadQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.DownloadSynchronizerService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
@@ -26,10 +27,14 @@ public class DownloadSynchronizerJob {
 
     private WorkQueueService workQueueService;
 
+    private JobsProperties jobsProperties;
+
     @Autowired
-    public DownloadSynchronizerJob(DownloadSynchronizerService downloadSynchronizerService, WorkQueueService queueService) {
+    public DownloadSynchronizerJob(DownloadSynchronizerService downloadSynchronizerService,
+                                   WorkQueueService queueService, JobsProperties jobsProperties) {
         this.downloadSynchronizerService = downloadSynchronizerService;
         this.workQueueService = queueService;
+        this.jobsProperties = jobsProperties;
     }
 
     @Scheduled(fixedDelay = 10 * 1000)
@@ -57,7 +62,14 @@ public class DownloadSynchronizerJob {
             return true;
         }
         File file = new File(downloadQueueItem.getFilePath());
-        return file.exists() && (file.length() == downloadQueueItem.getFile().getSize()
+        boolean synced = file.exists() && (file.length() == downloadQueueItem.getFile().getSize()
                 || downloadQueueItem.getFile().getSize() == 0); //May be on old thumb
+
+        if (jobsProperties.isEnableLogging()) {
+            LOGGER.debug("File not found or size is less({}, {}, {}, {})", downloadQueueItem.getId(),
+                    file.length(), downloadQueueItem.getFile().getSize(), file.getAbsolutePath());
+        }
+
+        return synced;
     }
 }

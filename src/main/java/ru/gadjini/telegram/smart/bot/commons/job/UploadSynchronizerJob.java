@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
 import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadSynchronizerService;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
@@ -29,12 +30,15 @@ public class UploadSynchronizerJob {
 
     private WorkQueueService workQueueService;
 
+    private JobsProperties jobsProperties;
+
     @Autowired
     public UploadSynchronizerJob(UploadSynchronizerService uploadSynchronizerService,
-                                 FileUploader fileUploader, WorkQueueService queueService) {
+                                 FileUploader fileUploader, WorkQueueService queueService, JobsProperties jobsProperties) {
         this.uploadSynchronizerService = uploadSynchronizerService;
         this.fileUploader = fileUploader;
         this.workQueueService = queueService;
+        this.jobsProperties = jobsProperties;
     }
 
     @Scheduled(fixedDelay = 10 * 1000)
@@ -63,7 +67,14 @@ public class UploadSynchronizerJob {
         if (inputFile.isNew()) {
             File file = inputFile.getNewMediaFile();
 
-            return file.exists() && file.length() == uploadQueueItem.getFileSize();
+            boolean synced = file.exists() && file.length() == uploadQueueItem.getFileSize();
+
+            if (jobsProperties.isEnableLogging()) {
+                LOGGER.debug("File not found or size is less({}, {}, {}, {})", uploadQueueItem.getId(),
+                        file.length(), uploadQueueItem.getFileSize(), file.getAbsolutePath());
+            }
+
+            return synced;
         }
 
         return true;
