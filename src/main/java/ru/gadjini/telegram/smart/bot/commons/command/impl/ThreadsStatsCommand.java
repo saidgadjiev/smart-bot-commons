@@ -98,7 +98,7 @@ public class ThreadsStatsCommand implements BotCommand {
             ThreadsStats threadsStats = threadsStatsApi.threadsStats(server);
 
             StringBuilder processingTasks = new StringBuilder();
-            jobWeightListMap.forEach((jobWeight, integers) -> {
+            threadsStats.getProcessing().forEach((jobWeight, integers) -> {
                 processingTasks.append(jobWeight.name()).append("-").append(integers.stream().map(String::valueOf)
                         .collect(Collectors.joining(", "))).append("\n");
             });
