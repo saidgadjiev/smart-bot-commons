@@ -25,7 +25,7 @@ public class DownloadSynchronizerDao {
         return jdbcTemplate.query(
                 "select id, (file).*, file_path\n" +
                         "from downloading_queue\n" +
-                        "where status = 3 and " + synchronizationColumn + " = false and producer = '" + producer + "'  ORDER BY attemps DESC",
+                        "where status = 3 and " + synchronizationColumn + " = false and producer = '" + producer + "'  ORDER BY attempts DESC",
                 (resultSet, i) -> {
                     DownloadQueueItem queueItem = new DownloadQueueItem();
 
