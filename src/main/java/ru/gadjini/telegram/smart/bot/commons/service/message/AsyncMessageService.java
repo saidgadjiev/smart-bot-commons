@@ -4,16 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.job.TgMethodExecutor;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -22,16 +19,13 @@ import java.util.function.Consumer;
 @Qualifier("asyncMessage")
 public class AsyncMessageService implements MessageService {
 
-    private LocalisationService localisationService;
-
     private TgMethodExecutor messageSenderJob;
 
     private MessageService messageService;
 
     @Autowired
-    public AsyncMessageService(LocalisationService localisationService, TgMethodExecutor messageSenderJob,
+    public AsyncMessageService(TgMethodExecutor messageSenderJob,
                                @Qualifier("message") MessageService messageService) {
-        this.localisationService = localisationService;
         this.messageSenderJob = messageSenderJob;
         this.messageService = messageService;
     }
