@@ -83,17 +83,11 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void sendErrorMessage(long chatId, Locale locale) {
-        sendMessage(SendMessage.builder().chatId(String.valueOf(chatId))
-                .text(localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale))
-                .parseMode(ParseMode.HTML)
-                .build());
+        messageService.sendErrorMessage(chatId, locale);
     }
 
     @Override
     public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        sendMessage(SendMessage.builder()
-                .chatId(String.valueOf(chatId))
-                .text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
-                .replyMarkup(replyKeyboard).build());
+        messageService.sendBotRestartedMessage(chatId, replyKeyboard, locale);
     }
 }
