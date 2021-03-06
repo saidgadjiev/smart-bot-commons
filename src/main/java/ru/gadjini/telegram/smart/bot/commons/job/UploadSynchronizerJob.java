@@ -6,9 +6,11 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
+import ru.gadjini.telegram.smart.bot.commons.dao.WorkQueueDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.UploadQueueItem;
 import ru.gadjini.telegram.smart.bot.commons.service.file.FileUploader;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadSynchronizerService;
+import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
 import java.io.File;
 import java.util.List;
@@ -21,15 +23,20 @@ public class UploadSynchronizerJob {
 
     private FileUploader fileUploader;
 
+    private WorkQueueService workQueueService;
+
     @Autowired
-    public UploadSynchronizerJob(UploadSynchronizerService uploadSynchronizerService, FileUploader fileUploader) {
+    public UploadSynchronizerJob(UploadSynchronizerService uploadSynchronizerService,
+                                 FileUploader fileUploader, WorkQueueService queueService) {
         this.uploadSynchronizerService = uploadSynchronizerService;
         this.fileUploader = fileUploader;
+        this.workQueueService = queueService;
     }
 
     @Scheduled(fixedDelay = 10 * 1000)
     public void doSynchronize() {
-        List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads();
+        String producer = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
+        List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads(producer);
 
         for (UploadQueueItem unsynchronizedUpload : unsynchronizedUploads) {
             synchronize(unsynchronizedUpload);

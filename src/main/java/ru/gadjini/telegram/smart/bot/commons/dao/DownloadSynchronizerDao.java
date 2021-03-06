@@ -21,11 +21,11 @@ public class DownloadSynchronizerDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<DownloadQueueItem> getUnsynchronizedDownloads(String synchronizationColumn) {
+    public List<DownloadQueueItem> getUnsynchronizedDownloads(String producer, String synchronizationColumn) {
         return jdbcTemplate.query(
                 "select id, (file).*, file_path\n" +
                         "from downloading_queue\n" +
-                        "where status = 3 and " + synchronizationColumn + " = false",
+                        "where status = 3 and " + synchronizationColumn + " = false and producer = '" + producer + "'",
                 (resultSet, i) -> {
                     DownloadQueueItem queueItem = new DownloadQueueItem();
 

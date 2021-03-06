@@ -21,11 +21,11 @@ public class UploadSynchronizerDao {
         this.uploadQueueItemMapper = uploadQueueItemMapper;
     }
 
-    public List<UploadQueueItem> getUnsynchronizedUploads() {
+    public List<UploadQueueItem> getUnsynchronizedUploads(String producer) {
         return jdbcTemplate.query(
                 "select id, method, body, file_size\n" +
                         "from upload_queue\n" +
-                        "where status = 0 and synced = false",
+                        "where status = 0 and synced = false and producer ='" + producer + "'",
                 (resultSet, i) -> {
                     UploadQueueItem queueItem = new UploadQueueItem();
 

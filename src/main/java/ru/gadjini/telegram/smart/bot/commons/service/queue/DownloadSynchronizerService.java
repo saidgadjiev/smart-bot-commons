@@ -24,8 +24,8 @@ public class DownloadSynchronizerService {
         this.serverProperties = serverProperties;
     }
 
-    public List<DownloadQueueItem> getUnsynchronizedDownloads() {
-        return downloadSynchronizerDao.getUnsynchronizedDownloads(DownloadQueueItem.getSynchronizationColumn(serverProperties.getNumber()));
+    public List<DownloadQueueItem> getUnsynchronizedDownloads(String producer) {
+        return downloadSynchronizerDao.getUnsynchronizedDownloads(producer, DownloadQueueItem.getSynchronizationColumn(serverProperties.getNumber()));
     }
 
     public void synchronize(int id) {

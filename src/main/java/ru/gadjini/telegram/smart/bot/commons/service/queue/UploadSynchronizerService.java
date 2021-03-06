@@ -20,8 +20,8 @@ public class UploadSynchronizerService {
         this.uploadSynchronizerDao = uploadSynchronizerDao;
     }
 
-    public List<UploadQueueItem> getUnsynchronizedUploads() {
-        return uploadSynchronizerDao.getUnsynchronizedUploads();
+    public List<UploadQueueItem> getUnsynchronizedUploads(String producer) {
+        return uploadSynchronizerDao.getUnsynchronizedUploads(producer);
     }
 
     public void synchronize(int id) {
