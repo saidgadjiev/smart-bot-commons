@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
@@ -23,6 +25,8 @@ import java.util.stream.Collectors;
 
 @Component
 public class ThreadsStatsCommand implements BotCommand {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ThreadsStatsCommand.class);
 
     private SmartExecutorService executorService;
 
@@ -95,20 +99,24 @@ public class ThreadsStatsCommand implements BotCommand {
                 activeTasksToString.toString().trim()
         }, locale)).append("\n").append("\n");
         for (Integer server : serverProperties.getServers().keySet()) {
-            ThreadsStats threadsStats = threadsStatsApi.threadsStats(server);
+            try {
+                ThreadsStats threadsStats = threadsStatsApi.threadsStats(server);
 
-            StringBuilder processingTasks = new StringBuilder();
-            threadsStats.getProcessing().forEach((jobWeight, integers) -> {
-                processingTasks.append(jobWeight.name()).append("-").append(integers.stream().map(String::valueOf)
-                        .collect(Collectors.joining(", "))).append("\n");
-            });
+                StringBuilder processingTasks = new StringBuilder();
+                threadsStats.getProcessing().forEach((jobWeight, integers) -> {
+                    processingTasks.append(jobWeight.name()).append("-").append(integers.stream().map(String::valueOf)
+                            .collect(Collectors.joining(", "))).append("\n");
+                });
 
-            msg.append(localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[]{
-                    server, threadsStats.getHeavyCorePoolSize(), threadsStats.getLightCorePoolSize(), threadsStats.getHeavyActiveCount(),
-                    threadsStats.getLightActiveCount(), threadsStats.getProcessingHeavy(), threadsStats.getProcessingLight(),
-                    threadsStats.getReadyToCompleteHeavy(), threadsStats.getReadToCompleteLight(),
-                    processingTasks.toString()
-            }, locale)).append("\n").append("\n");
+                msg.append(localisationService.getMessage(MessagesProperties.MESSAGE_WORK_THREAD_POOL_STATS, new Object[]{
+                        server, threadsStats.getHeavyCorePoolSize(), threadsStats.getLightCorePoolSize(), threadsStats.getHeavyActiveCount(),
+                        threadsStats.getLightActiveCount(), threadsStats.getProcessingHeavy(), threadsStats.getProcessingLight(),
+                        threadsStats.getReadyToCompleteHeavy(), threadsStats.getReadToCompleteLight(),
+                        processingTasks.toString()
+                }, locale)).append("\n").append("\n");
+            } catch (Exception e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
 
         messageService.sendMessage(
