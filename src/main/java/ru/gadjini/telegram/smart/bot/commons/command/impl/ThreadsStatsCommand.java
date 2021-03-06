@@ -116,6 +116,7 @@ public class ThreadsStatsCommand implements BotCommand {
                 }, locale)).append("\n").append("\n");
             } catch (Exception e) {
                 LOGGER.error(e.getMessage(), e);
+                msg.append("Server ").append(server).append("\n502");
             }
         }
 
