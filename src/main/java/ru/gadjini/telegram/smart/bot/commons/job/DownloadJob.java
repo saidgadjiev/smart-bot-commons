@@ -254,7 +254,7 @@ public class DownloadJob extends WorkQueueJobPusher {
                 } else {
                     ext = formatService.getExt(downloadingQueueItem.getFile().getFileName(), downloadingQueueItem.getFile().getMimeType());
                 }
-                tempFile = tempFileService.createTempFile(FileTarget.DOWNLOAD, downloadingQueueItem.getUserId(),
+                tempFile = tempFileService.createTempFile(FileTarget.TEMP, downloadingQueueItem.getUserId(),
                         downloadingQueueItem.getFile().getFileId(), TAG, ext);
             } else {
                 tempFile = new SmartTempFile(new File(downloadingQueueItem.getFilePath()));
@@ -262,6 +262,7 @@ public class DownloadJob extends WorkQueueJobPusher {
             try {
                 fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(),
                         downloadingQueueItem.getProgress(), tempFile, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
+
                 downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
                 downloadingQueueItem.setFilePath(tempFile.getAbsolutePath());
                 applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
@@ -282,6 +283,10 @@ public class DownloadJob extends WorkQueueJobPusher {
                     }
                 }
             }
+        }
+
+        private void moveFileToDownloadDir() {
+
         }
 
         private void noneCriticalException(DownloadQueueItem downloadingQueueItem, Throwable e) {
