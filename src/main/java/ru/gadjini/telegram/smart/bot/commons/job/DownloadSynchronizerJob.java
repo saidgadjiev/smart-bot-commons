@@ -40,7 +40,7 @@ public class DownloadSynchronizerJob {
             try {
                 synchronize(unsynchronizedDownload);
             } catch (Exception e) {
-                LOGGER.error(e.getMessage());
+                LOGGER.error(e.getMessage(), e);
             }
         }
     }
