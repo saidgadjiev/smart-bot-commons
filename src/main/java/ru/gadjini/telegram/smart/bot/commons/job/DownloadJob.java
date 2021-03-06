@@ -263,8 +263,11 @@ public class DownloadJob extends WorkQueueJobPusher {
                 fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(),
                         downloadingQueueItem.getProgress(), tempFile, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
 
-                downloadingQueueService.setCompleted(downloadingQueueItem.getId(), tempFile.getAbsolutePath());
-                downloadingQueueItem.setFilePath(tempFile.getAbsolutePath());
+                SmartTempFile downloadedFile = tempFileService.moveTo(tempFile, FileTarget.DOWNLOAD);
+                tempFile = downloadedFile;
+
+                downloadingQueueService.setCompleted(downloadingQueueItem.getId(), downloadedFile.getAbsolutePath());
+                downloadingQueueItem.setFilePath(downloadedFile.getAbsolutePath());
                 applicationEventPublisher.publishEvent(new DownloadCompleted(downloadingQueueItem));
             } catch (Throwable e) {
                 tempFileService.delete(tempFile);

@@ -75,6 +75,12 @@ public class TempFileService {
         }
     }
 
+    public SmartTempFile moveTo(SmartTempFile srcFile, FileTarget fileTarget) {
+        File dest = moveTo(srcFile.getFile(), fileTarget);
+
+        return new SmartTempFile(dest, srcFile.isDeleteParentDir());
+    }
+
     public File moveTo(File srcFile, FileTarget fileTarget) {
         FileTarget srcTarget = getFileTarget(srcFile.getAbsolutePath());
 
