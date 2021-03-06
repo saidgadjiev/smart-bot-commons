@@ -51,6 +51,8 @@ public class SmartBotConfiguration {
     public SmartBotConfiguration(ServerProperties serverProperties, JobsProperties jobsProperties) {
         LOGGER.debug("Server number({})", serverProperties.getNumber());
         LOGGER.debug("Servers({})", serverProperties.getServers());
+        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
+        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
     }
 

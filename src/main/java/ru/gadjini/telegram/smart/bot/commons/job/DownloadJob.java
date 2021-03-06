@@ -89,8 +89,6 @@ public class DownloadJob extends WorkQueueJobPusher {
 
     @PostConstruct
     public final void init() {
-        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
-        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
         LOGGER.debug("Available unused downloads count {}", availableUnusedDownloadsCount);
         try {
             downloadingQueueService.resetProcessing();
