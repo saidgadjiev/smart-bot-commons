@@ -43,6 +43,10 @@ Allow tcp/873
 ufw allow and server hosting firewall
 ```
 
+```shell script
+sudo chmod 600 cron.d/rsyncd-client.scrt
+sudo systemctl restart rsync
+```
 #Rsync downloads client
 ```shell script
 mkdir -p cron.d
@@ -57,13 +61,13 @@ cron.d/rsync_downloads.sh:
 ```shell script
 #!/bin/bash
 
-if [ -e cron.d/rsync_downloads.lock ]
+if [ -e rsync_downloads.lock ]
 then
   echo "Rsync downloads job already running...exiting"
   exit
 fi
 
-touch cron.d/rsync_downloads.lock
+touch rsync_downloads.lock
 
 PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -78,7 +82,7 @@ do
 	rsync -azP --delete --password-file=$password_file rsync://$user@$ip/$source/$var/ $destination/$var
 done
 
-rm cron.d/rsync_downloads.lock
+rm rsync_downloads.lock
 ```
 
 crontab -e:
@@ -96,13 +100,13 @@ cron.d/rsync_uploads.sh:
 ```shell script
 #!/bin/bash
 
-if [ -e cron.d/rsync_uploads.lock ]
+if [ -e rsync_uploads.lock ]
 then
   echo "Rsync uploads job already running...exiting"
   exit
 fi
 
-touch cron.d/rsync_uploads.lock
+touch rsync_uploads.lock
 
 PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
 
@@ -117,7 +121,7 @@ do
       rsync -azP --remove-source-files --password-file=$password_file $source/$var/ rsync://$user@$ip/$destination/$var
 done
 
-rm cron.d/rsync_uploads.lock
+rm rsync_uploads.lock
 ```
 
 crontab -e:
@@ -128,5 +132,4 @@ crontab -e:
 ```shell script
 sudo chmod 600 cron.d/rsyncd-client.scrt
 sudo systemctl restart cron
-sudo systemctl restart rsync
 ```
