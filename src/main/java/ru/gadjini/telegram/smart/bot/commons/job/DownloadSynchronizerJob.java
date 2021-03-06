@@ -48,6 +48,7 @@ public class DownloadSynchronizerJob {
     private void synchronize(DownloadQueueItem downloadQueueItem) {
         if (isFullySynchronized(downloadQueueItem)) {
             downloadSynchronizerService.synchronize(downloadQueueItem.getId());
+            LOGGER.debug("Download synchronized({})", downloadQueueItem.getId());
         }
     }
 

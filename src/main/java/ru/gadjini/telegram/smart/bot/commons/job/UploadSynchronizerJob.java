@@ -54,6 +54,7 @@ public class UploadSynchronizerJob {
     private void synchronize(UploadQueueItem uploadQueueItem) {
         if (isFullySynchronized(uploadQueueItem)) {
             uploadSynchronizerService.synchronize(uploadQueueItem.getId());
+            LOGGER.debug("Upload synchronized({})", uploadQueueItem.getId());
         }
     }
 
