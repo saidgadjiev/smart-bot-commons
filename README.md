@@ -22,6 +22,8 @@ log file = /var/log/rsyncd.log
 [downloads]
     path = media/downloads/
     comment = Public downloads
+    uid = user
+    gid = user
     auth users = user
     readonly = true
     secrets file = /etc/rsyncd.scrt

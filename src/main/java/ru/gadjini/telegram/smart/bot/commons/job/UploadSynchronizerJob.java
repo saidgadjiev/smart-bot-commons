@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.job;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -18,6 +20,8 @@ import java.util.List;
 @Component
 @Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY, SmartBotConfiguration.PROFILE_DEV_PRIMARY})
 public class UploadSynchronizerJob {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(UploadSynchronizerJob.class);
 
     private UploadSynchronizerService uploadSynchronizerService;
 
@@ -39,7 +43,11 @@ public class UploadSynchronizerJob {
         List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads(producer);
 
         for (UploadQueueItem unsynchronizedUpload : unsynchronizedUploads) {
-            synchronize(unsynchronizedUpload);
+            try {
+                synchronize(unsynchronizedUpload);
+            } catch (Exception e) {
+                LOGGER.debug(e.getMessage(), e);
+            }
         }
     }
 
