@@ -69,7 +69,7 @@ public class UploadSynchronizerJob {
 
             boolean synced = file.exists() && file.length() == uploadQueueItem.getFileSize();
 
-            if (jobsProperties.isEnableLogging()) {
+            if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
                 LOGGER.debug("File not found or size is less({}, {}, {}, {})", uploadQueueItem.getId(),
                         file.length(), uploadQueueItem.getFileSize(), file.getAbsolutePath());
             }

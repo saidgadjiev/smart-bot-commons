@@ -9,6 +9,8 @@ public class JobsProperties {
 
     private boolean enableLogging;
 
+    private boolean enableDownloadUploadSynchronizerLogging;
+
     public boolean isDisable() {
         return disable;
     }
@@ -23,5 +25,13 @@ public class JobsProperties {
 
     public void setEnableLogging(boolean enableLogging) {
         this.enableLogging = enableLogging;
+    }
+
+    public boolean isEnableDownloadUploadSynchronizerLogging() {
+        return enableDownloadUploadSynchronizerLogging;
+    }
+
+    public void setEnableDownloadUploadSynchronizerLogging(boolean enableDownloadUploadSynchronizerLogging) {
+        this.enableDownloadUploadSynchronizerLogging = enableDownloadUploadSynchronizerLogging;
     }
 }
