@@ -16,6 +16,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.queue.UploadSynchronizerSer
 import ru.gadjini.telegram.smart.bot.commons.service.queue.WorkQueueService;
 
 import java.io.File;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Component
@@ -43,15 +44,24 @@ public class UploadSynchronizerJob {
 
     @Scheduled(fixedDelay = 10 * 1000)
     public void doSynchronize() {
+        if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
+            LOGGER.debug("Start synchronize({})", LocalDateTime.now());
+        }
         String producer = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
         List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads(producer);
 
         for (UploadQueueItem unsynchronizedUpload : unsynchronizedUploads) {
+            if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
+                LOGGER.debug("Start synchronize({})", unsynchronizedUpload.getId());
+            }
             try {
                 synchronize(unsynchronizedUpload);
             } catch (Exception e) {
                 LOGGER.debug(e.getMessage(), e);
             }
+        }
+        if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
+            LOGGER.debug("Finish synchronize({})", LocalDateTime.now());
         }
     }
 
