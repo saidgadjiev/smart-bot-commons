@@ -144,6 +144,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
     public final void init() {
         LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
         LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
+        LOGGER.debug("Disable work job {}", disableWorkJob);
         applicationEventPublisher.publishEvent(new QueueJobInitialization(this));
         try {
             workQueueService.resetProcessing();
