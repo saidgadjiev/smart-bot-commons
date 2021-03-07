@@ -45,6 +45,10 @@ public class DownloadSynchronizerJob {
         }
         String producer = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
         List<DownloadQueueItem> unsynchronizedDownloads = downloadSynchronizerService.getUnsynchronizedDownloads(producer);
+
+        if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
+            LOGGER.debug("Synchronize items count({})", unsynchronizedDownloads.size());
+        }
         for (DownloadQueueItem unsynchronizedDownload : unsynchronizedDownloads) {
             if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
                 LOGGER.debug("Start synchronize({}, {})", unsynchronizedDownload.getId(), unsynchronizedDownload.getFilePath());

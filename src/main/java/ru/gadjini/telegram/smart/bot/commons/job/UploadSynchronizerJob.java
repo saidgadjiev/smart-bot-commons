@@ -50,6 +50,9 @@ public class UploadSynchronizerJob {
         String producer = ((WorkQueueDao) workQueueService.getQueueDao()).getProducerName();
         List<UploadQueueItem> unsynchronizedUploads = uploadSynchronizerService.getUnsynchronizedUploads(producer);
 
+        if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
+            LOGGER.debug("Synchronize items count({})", unsynchronizedUploads.size());
+        }
         for (UploadQueueItem unsynchronizedUpload : unsynchronizedUploads) {
             if (jobsProperties.isEnableDownloadUploadSynchronizerLogging()) {
                 LOGGER.debug("Start synchronize({})", unsynchronizedUpload.getId());
