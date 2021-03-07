@@ -67,7 +67,11 @@ public class SmartExecutorService {
     public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
         executors.get(weight).setRejectedExecutionHandler((r, executor) -> {
             Job job = getJobFromFutureTask(r);
-            rejectJobHandler.reject(job);
+            try {
+                rejectJobHandler.reject(job);
+            } finally {
+                complete(job.getId());
+            }
         });
     }
 
