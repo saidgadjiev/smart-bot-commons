@@ -47,10 +47,14 @@ public class SmartExecutorService {
 
     public void execute(Job job, JobWeight jobWeight) {
         ExceptionHandlerJob toExecute = new ExceptionHandlerJob(messageService, userService, localisationService, job);
-        Future<Job> submit = executors.get(jobWeight).submit(new SmartCallable(toExecute));
-        job.setCancelChecker(submit::isCancelled);
-        processing.put(job.getId(), submit);
-        activeTasks.put(job.getId(), job);
+        try {
+            Future<Job> submit = executors.get(jobWeight).submit(new SmartCallable(toExecute));
+            job.setCancelChecker(submit::isCancelled);
+            processing.put(job.getId(), submit);
+            activeTasks.put(job.getId(), job);
+        } catch (RejectedExecutionException e) {
+            LOGGER.debug("Rejected({}, {})" + "\n" + e.getMessage(), job.getId(), jobWeight);
+        }
     }
 
     public void execute(Job job) {
@@ -67,11 +71,11 @@ public class SmartExecutorService {
     public void setRejectJobHandler(JobWeight weight, RejectJobHandler rejectJobHandler) {
         executors.get(weight).setRejectedExecutionHandler((r, executor) -> {
             Job job = getJobFromFutureTask(r);
-            try {
-                rejectJobHandler.reject(job);
-            } finally {
-                complete(job.getId());
-            }
+            rejectJobHandler.reject(job);
+
+            throw new RejectedExecutionException("Task " + r.toString() +
+                    " rejected from " +
+                    executor.toString());
         });
     }
 
