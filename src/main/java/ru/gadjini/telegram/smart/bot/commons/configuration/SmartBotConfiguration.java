@@ -20,10 +20,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.ServerProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.WebhookProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.*;
 import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
@@ -48,12 +45,13 @@ public class SmartBotConfiguration {
     private static final int SO_TIMEOUT = 0;
 
     @Autowired
-    public SmartBotConfiguration(ServerProperties serverProperties, JobsProperties jobsProperties) {
+    public SmartBotConfiguration(ServerProperties serverProperties, JobsProperties jobsProperties, AdminProperties adminProperties) {
         LOGGER.debug("Server number({})", serverProperties.getNumber());
         LOGGER.debug("Servers({})", serverProperties.getServers());
-        LOGGER.debug("Disable jobs {}", jobsProperties.isDisable());
-        LOGGER.debug("Enable jobs logging {}", jobsProperties.isEnableLogging());
+        LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
+        LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
+        LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
     }
 
     @Bean
