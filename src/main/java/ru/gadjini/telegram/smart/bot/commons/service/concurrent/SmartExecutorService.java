@@ -53,7 +53,7 @@ public class SmartExecutorService {
             processing.put(job.getId(), submit);
             activeTasks.put(job.getId(), job);
         } catch (RejectedExecutionException e) {
-            LOGGER.debug("Rejected({}, {})" + "\n" + e.getMessage(), job.getId(), jobWeight);
+            LOGGER.debug("Rejected({}, {}, {})" + "\n" + e.getMessage(), job.getId(), job.getWeight(), jobWeight);
         }
     }
 
