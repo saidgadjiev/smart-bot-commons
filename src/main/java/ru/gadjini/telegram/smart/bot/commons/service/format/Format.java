@@ -20,6 +20,12 @@ public enum Format {
     DOCX(FormatCategory.DOCUMENTS),
     RTF(FormatCategory.DOCUMENTS),
     PDF(FormatCategory.DOCUMENTS),
+    PDF_LOSSYY(FormatCategory.DOCUMENTS) {
+        @Override
+        public String getExt() {
+            return PDF.getExt();
+        }
+    },
     PNG(FormatCategory.IMAGES),
     HEIC(FormatCategory.IMAGES),
     HEIF(FormatCategory.IMAGES),
