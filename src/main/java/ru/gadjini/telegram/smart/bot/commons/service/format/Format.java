@@ -25,6 +25,11 @@ public enum Format {
         public String getExt() {
             return PDF.getExt();
         }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
     },
     PNG(FormatCategory.IMAGES),
     HEIC(FormatCategory.IMAGES),
