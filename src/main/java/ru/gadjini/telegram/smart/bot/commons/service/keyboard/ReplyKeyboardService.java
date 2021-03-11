@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.keyboard;
 
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 
 import java.util.ArrayList;
@@ -15,6 +16,13 @@ public interface ReplyKeyboardService {
     ReplyKeyboardMarkup smartFileFeatureKeyboard(long chatId, Locale locale);
 
     ReplyKeyboardMarkup languageKeyboard(long chatId, Locale locale);
+
+    default ReplyKeyboardRemove removeKeyboard(long chatId) {
+        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
+        replyKeyboardRemove.setRemoveKeyboard(true);
+
+        return replyKeyboardRemove;
+    }
 
     static KeyboardRow keyboardRow(String... buttons) {
         KeyboardRow keyboardRow = new KeyboardRow();
