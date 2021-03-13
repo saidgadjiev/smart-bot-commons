@@ -163,7 +163,7 @@ public class UploadJob extends WorkQueueJobPusher {
             try {
                 SendFileResult sendFileResult = null;
                 try {
-                    sendFileResult = fileUploader.upload(uploadQueueItem);
+                    sendFileResult = fileUploader.upload(uploadQueueItem, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
                 } catch (ZeroLengthException ignore) {
 
                 }
@@ -199,7 +199,8 @@ public class UploadJob extends WorkQueueJobPusher {
 
         @Override
         public SmartExecutorService.JobWeight getWeight() {
-            return uploadQueueItem.getFileSize() > mediaLimitProperties.getLightFileMaxWeight() ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
+            return uploadQueueItem.getFileSize() > mediaLimitProperties.getLightFileMaxWeight()
+                    ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
         }
 
         @Override

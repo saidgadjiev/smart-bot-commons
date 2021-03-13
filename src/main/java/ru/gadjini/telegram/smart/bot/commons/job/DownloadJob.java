@@ -206,7 +206,8 @@ public class DownloadJob extends WorkQueueJobPusher {
 
         @Override
         public SmartExecutorService.JobWeight getWeight() {
-            return downloadingQueueItem.getFile().getSize() > mediaLimitProperties.getLightFileMaxWeight() ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
+            return downloadingQueueItem.getFile().getSize() > mediaLimitProperties.getLightFileMaxWeight()
+                    ? SmartExecutorService.JobWeight.HEAVY : SmartExecutorService.JobWeight.LIGHT;
         }
 
         @Override

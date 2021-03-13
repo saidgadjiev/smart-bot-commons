@@ -47,7 +47,7 @@ public class ExecutorsConfiguration {
     @Value("${download.light.threads:2}")
     private int downloadLightThreads;
 
-    @Value("${upload.heavy.threads:4}")
+    @Value("${upload.heavy.threads:1}")
     private int uploadHeavyThreads;
 
     @Value("${upload.light.threads:2}")

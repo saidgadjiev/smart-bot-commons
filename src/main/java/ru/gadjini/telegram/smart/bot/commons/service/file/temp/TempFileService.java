@@ -31,7 +31,7 @@ public class TempFileService {
     @Value("${downloads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String downloadsTempDir;
 
-    @Value("${uploads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
+    @Value("${upload.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String uploadsTempDir;
 
     private ServerProperties serverProperties;
@@ -147,6 +147,7 @@ public class TempFileService {
         }
 
         file.smartDelete();
+        LOGGER.debug("Delete({})", file.getAbsolutePath());
     }
 
     private boolean isRemoteFile(String filePath) {
