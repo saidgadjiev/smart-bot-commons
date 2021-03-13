@@ -8,7 +8,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -21,7 +20,6 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
-import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
@@ -117,12 +115,5 @@ public class SmartBotConfiguration {
         c.setIgnoreUnresolvablePlaceholders(true);
 
         return c;
-    }
-
-    @Bean
-    @ConditionalOnMissingBean
-    public QueueJobConfigurator queueJobConfigurator() {
-        return new QueueJobConfigurator() {
-        };
     }
 }
