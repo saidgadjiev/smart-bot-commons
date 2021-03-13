@@ -132,6 +132,8 @@ public class DownloadJob extends WorkQueueJobPusher {
             long unusedDownloadsCount = downloadingQueueService.unusedDownloadsCount(workQueueDao.getProducerName(), workQueueDao.getQueueName(), weight);
             if (unusedDownloadsCount < availableUnusedDownloadsCount) {
                 return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
+            } else if (jobsProperties.isEnableLogging()) {
+                LOGGER.debug("No available downloads({}, {})", availableUnusedDownloadsCount, unusedDownloadsCount);
             }
         } else {
             return (List<QueueItem>) (Object) downloadingQueueService.poll(workQueueDao.getProducerName(), weight, limit);
