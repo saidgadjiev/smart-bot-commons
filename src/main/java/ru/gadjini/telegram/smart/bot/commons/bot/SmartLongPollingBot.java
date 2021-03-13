@@ -23,9 +23,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 @Component
 @Profile(SmartBotConfiguration.PROFILE_DEV_PRIMARY)
 @SuppressWarnings({"PMD", "CPD-START"})
-public class SmartLongPoolingBot extends TelegramLongPollingBot {
+public class SmartLongPollingBot extends TelegramLongPollingBot {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(SmartLongPoolingBot.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(SmartLongPollingBot.class);
 
     private BotProperties botProperties;
 
@@ -36,7 +36,7 @@ public class SmartLongPoolingBot extends TelegramLongPollingBot {
     private UserService userService;
 
     @Autowired
-    public SmartLongPoolingBot(BotProperties botProperties, BotFilter botFilter,
+    public SmartLongPollingBot(BotProperties botProperties, BotFilter botFilter,
                                @Qualifier("messageLimits") MessageService messageService,
                                UserService userService,
                                DefaultBotOptions botOptions) {
