@@ -37,6 +37,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
 import javax.annotation.PostConstruct;
 import java.util.List;
+import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -250,6 +251,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
             );
             if (serverProperties.isMe(queueItem.getServer())) {
                 if (!executor.cancel(jobId, true)) {
+                    workQueueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
                     fileDownloadService.cancelDownloads(jobId);
                     fileUploadService.cancelUploads(jobId);
                 }
