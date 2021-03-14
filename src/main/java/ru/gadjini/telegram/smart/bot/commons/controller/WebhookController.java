@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.gadjini.telegram.smart.bot.commons.bot.SmartWebhookBot;
-import ru.gadjini.telegram.smart.bot.commons.configuration.SmartBotConfiguration;
+import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 
 import javax.ws.rs.core.MediaType;
 
 @RestController
-@Profile({SmartBotConfiguration.PROFILE_PROD_PRIMARY})
+@Profile({Profiles.PROFILE_PROD_PRIMARY})
 @RequestMapping("/callback")
 public class WebhookController {
 

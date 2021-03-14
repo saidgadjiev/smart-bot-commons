@@ -13,7 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMediaService;
 
 @Service
 @Qualifier("media")
@@ -22,12 +22,12 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     private MessageMediaService fileService;
 
-    private TelegramBotApiService telegramLocalBotApiService;
+    private TelegramMediaService telegramMediaService;
 
     @Autowired
-    public MediaMessageServiceImpl(MessageMediaService fileService, TelegramBotApiService telegramLocalBotApiService) {
+    public MediaMessageServiceImpl(MessageMediaService fileService, TelegramMediaService telegramMediaService) {
         this.fileService = fileService;
-        this.telegramLocalBotApiService = telegramLocalBotApiService;
+        this.telegramMediaService = telegramMediaService;
     }
 
     @Override
@@ -35,7 +35,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         if (StringUtils.isNotBlank(editMessageMedia.getMedia().getCaption())) {
             editMessageMedia.getMedia().setParseMode(ParseMode.HTML);
         }
-        Message message = telegramLocalBotApiService.editMessageMedia(editMessageMedia);
+        Message message = telegramMediaService.editMessageMedia(editMessageMedia);
 
         return new EditMediaResult(fileService.getFileId(message));
     }
@@ -47,7 +47,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         }
 
         sendDocument.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendDocument(sendDocument, progress);
+        Message message = telegramMediaService.sendDocument(sendDocument, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -83,7 +83,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     @Override
     public SendFileResult sendPhoto(SendPhoto sendPhoto) {
         sendPhoto.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendPhoto(sendPhoto);
+        Message message = telegramMediaService.sendPhoto(sendPhoto);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -94,7 +94,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
             sendVideo.setParseMode(ParseMode.HTML);
         }
         sendVideo.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendVideo(sendVideo, progress);
+        Message message = telegramMediaService.sendVideo(sendVideo, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -106,7 +106,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         }
 
         sendAudio.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendAudio(sendAudio, progress);
+        Message message = telegramMediaService.sendAudio(sendAudio, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -118,7 +118,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         }
 
         sendVoice.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendVoice(sendVoice, progress);
+        Message message = telegramMediaService.sendVoice(sendVoice, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }
@@ -126,7 +126,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     @Override
     public SendFileResult sendSticker(SendSticker sendSticker, Progress progress) {
         sendSticker.setAllowSendingWithoutReply(true);
-        Message message = telegramLocalBotApiService.sendSticker(sendSticker, progress);
+        Message message = telegramMediaService.sendSticker(sendSticker, progress);
 
         return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
     }

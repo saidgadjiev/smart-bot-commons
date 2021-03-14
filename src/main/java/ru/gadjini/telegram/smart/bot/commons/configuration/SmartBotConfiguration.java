@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.configuration;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.*;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
@@ -8,18 +9,24 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
+import org.telegram.telegrambots.Constants;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMethodExecutor;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMediaService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMediaService;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
@@ -29,23 +36,8 @@ public class SmartBotConfiguration {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartBotConfiguration.class);
 
-    public static final String PROFILE_PROD_PRIMARY = "prod-primary";
-
-    public static final String PROFILE_PROD_SECONDARY = "prod-secondary";
-
-    public static final String PROFILE_DEV_PRIMARY = "dev-primary";
-
-    public static final String PROFILE_DEV_SECONDARY = "dev-secondary";
-
-    public static final int PRIMARY_SERVER_NUMBER = 1;
-
-    //Infinite
-    private static final int SO_TIMEOUT = 0;
-
     @Autowired
-    public SmartBotConfiguration(ServerProperties serverProperties, JobsProperties jobsProperties, AdminProperties adminProperties) {
-        LOGGER.debug("Server number({})", serverProperties.getNumber());
-        LOGGER.debug("Servers({})", serverProperties.getServers());
+    public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties) {
         LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
         LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
@@ -53,14 +45,14 @@ public class SmartBotConfiguration {
     }
 
     @Bean
-    @Profile({PROFILE_PROD_PRIMARY})
+    @Profile({Profiles.PROFILE_PROD_PRIMARY})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
         return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
-    @Profile({PROFILE_PROD_PRIMARY})
+    @Profile({Profiles.PROFILE_PROD_PRIMARY})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public TelegramBotsApi telegramBotsApi() throws TelegramApiException {
         return new TelegramBotsApi(DummyBotSession.class, new DummyWebhook());
@@ -76,9 +68,9 @@ public class SmartBotConfiguration {
         }
         defaultBotOptions.setRequestConfig(
                 RequestConfig.copy(RequestConfig.custom().build())
-                        .setSocketTimeout(SO_TIMEOUT)
-                        .setConnectTimeout(SO_TIMEOUT)
-                        .setConnectionRequestTimeout(SO_TIMEOUT).build());
+                        .setSocketTimeout(Constants.SOCKET_TIMEOUT)
+                        .setConnectTimeout(Constants.SOCKET_TIMEOUT)
+                        .setConnectionRequestTimeout(Constants.SOCKET_TIMEOUT).build());
 
         return defaultBotOptions;
     }
@@ -115,5 +107,13 @@ public class SmartBotConfiguration {
         c.setIgnoreUnresolvablePlaceholders(true);
 
         return c;
+    }
+
+    @Bean
+    @ConditionalOnMissingBean
+    public TelegramMediaService telegramMediaService(BotProperties botProperties, ObjectMapper objectMapper,
+                                                     DefaultBotOptions options, BotApiProperties botApiProperties,
+                                                     TelegramBotApiMethodExecutor exceptionHandler) {
+        return new TelegramBotApiMediaService(botProperties, objectMapper, options, botApiProperties, exceptionHandler);
     }
 }
