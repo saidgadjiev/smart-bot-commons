@@ -31,7 +31,7 @@ public class TempFileService {
     @Value("${downloads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String downloadsTempDir;
 
-    @Value("${upload.temp.dir:#{systemProperties['java.io.tmpdir']}}")
+    @Value("${uploads.temp.dir:#{systemProperties['java.io.tmpdir']}}")
     private String uploadsTempDir;
 
     private ServerProperties serverProperties;
