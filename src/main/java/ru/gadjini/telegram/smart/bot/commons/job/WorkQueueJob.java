@@ -251,7 +251,7 @@ public class WorkQueueJob extends WorkQueueJobPusher {
             );
             if (serverProperties.isMe(queueItem.getServer())) {
                 if (!executor.cancel(jobId, true)) {
-                    workQueueService.deleteByIdAndStatuses(queueItem.getId(), Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
+                    workQueueService.deleteByIdAndStatuses(jobId, Set.of(QueueItem.Status.WAITING, QueueItem.Status.PROCESSING));
                     fileDownloadService.cancelDownloads(jobId);
                     fileUploadService.cancelUploads(jobId);
                 }
