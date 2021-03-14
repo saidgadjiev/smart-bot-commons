@@ -142,12 +142,16 @@ public class TempFileService {
     }
 
     public void delete(SmartTempFile file) {
-        if (isRemoteFile(file.getAbsolutePath())) {
-            contentApi.delete(file);
-        }
+        try {
+            if (isRemoteFile(file.getAbsolutePath())) {
+                contentApi.delete(file);
+            }
 
-        file.smartDelete();
-        LOGGER.debug("Delete({})", file.getAbsolutePath());
+            file.smartDelete();
+            LOGGER.debug("Delete({})", file.getAbsolutePath());
+        } catch (Throwable e) {
+            LOGGER.error("Error delete({}, {})", file.getAbsolutePath(), e.getMessage());
+        }
     }
 
     private boolean isRemoteFile(String filePath) {

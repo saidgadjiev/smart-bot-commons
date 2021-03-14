@@ -79,5 +79,7 @@ public class MessagesProperties {
 
     public static final String DISABLE_COMMAND_NAME = "disable.command.name";
 
+    public static final String RED_CIRCLE_ICON = "red.circle.icon";
+
     public static final String MESSAGE_SMART_FILE_FEATURE_CHOOSE_STATUS = "message.smart.file.feature.choose.status";
 }
