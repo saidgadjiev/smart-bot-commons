@@ -30,6 +30,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @Component
+@SuppressWarnings("PMD")
 public class UploadJob extends WorkQueueJobPusher {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(UploadJob.class);
@@ -128,6 +129,12 @@ public class UploadJob extends WorkQueueJobPusher {
 
     public void cancelUploads(String producer, Set<Integer> producerIds) {
         deleteUploads(producer, producerIds);
+    }
+
+    public void cancelUploadsByUserId(String producer, int userId) {
+        List<UploadQueueItem> deleted = uploadQueueService.deleteAndGetProcessingOrWaitingByUserId(producer, userId);
+        uploadTasksExecutor.cancel(deleted.stream().map(UploadQueueItem::getId).collect(Collectors.toList()), true);
+        uploadQueueService.releaseResources(deleted);
     }
 
     public void deleteUploads(String producer, Set<Integer> producerIds) {

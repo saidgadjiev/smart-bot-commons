@@ -27,7 +27,7 @@ import java.util.Objects;
 @Component
 public class UpdateQueryStatusCommand implements CallbackBotCommand {
 
-    private static final int CACHE_TIME_IN_SECONDS = 30;
+    private static final int CACHE_TIME_IN_SECONDS = 60;
 
     private UpdateQueryStatusCommandMessageProvider messageProvider;
 

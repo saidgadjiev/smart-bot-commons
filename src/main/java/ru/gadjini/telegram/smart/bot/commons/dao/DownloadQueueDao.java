@@ -153,6 +153,17 @@ public class DownloadQueueDao extends QueueDao {
         );
     }
 
+    public long getDownloadedFilesCount(String producer, int producerId) {
+        return jdbcTemplate.query(
+                "SELECT COUNT(*) as cnt FROM " + DownloadQueueItem.NAME + " WHERE producer = ? AND producer_id = ?",
+                ps -> {
+                    ps.setString(1, producer);
+                    ps.setInt(2, producerId);
+                },
+                (rs) -> rs.next() ? rs.getLong("cnt") : 0
+        );
+    }
+
     public List<DownloadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
         if (producerIds.isEmpty()) {
             return Collections.emptyList();
@@ -164,6 +175,20 @@ public class DownloadQueueDao extends QueueDao {
                         + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ") RETURNING *)\n" +
                         "SELECT *, (file).* FROM del",
                 ps -> ps.setString(1, producer),
+                (rs, rowNum) -> map(rs)
+        );
+    }
+
+    public List<DownloadQueueItem> deleteAndGetProcessingOrWaitingByUserId(String producer, int userId) {
+        return jdbcTemplate.query(
+                "WITH del AS (DELETE\n" +
+                        "FROM " + DownloadQueueItem.NAME + "\n" +
+                        "WHERE producer = ? AND user_id = ? AND status IN(0, 1) RETURNING *)\n" +
+                        "SELECT *, (file).* FROM del",
+                ps -> {
+                    ps.setString(1, producer);
+                    ps.setInt(2, userId);
+                },
                 (rs, rowNum) -> map(rs)
         );
     }

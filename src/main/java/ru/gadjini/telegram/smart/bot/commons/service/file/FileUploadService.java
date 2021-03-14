@@ -95,11 +95,15 @@ public class FileUploadService {
     }
 
     public void cancelUploads(int producerId) {
-        uploadJob.cancelUploads(workQueueDao.getQueueName(), producerId);
+        uploadJob.cancelUploads(workQueueDao.getProducerName(), producerId);
     }
 
     public void cancelUploads(Set<Integer> producerIds) {
-        uploadJob.cancelUploads(workQueueDao.getQueueName(), producerIds);
+        uploadJob.cancelUploads(workQueueDao.getProducerName(), producerIds);
+    }
+
+    public void cancelUploadsByUserId(int userId) {
+        uploadJob.cancelUploadsByUserId(workQueueDao.getProducerName(), userId);
     }
 
     public void cancelUploads() {
