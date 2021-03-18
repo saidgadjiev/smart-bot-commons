@@ -2,9 +2,9 @@ package ru.gadjini.telegram.smart.bot.commons.dao;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.concurrent.TimeUnit;
@@ -19,7 +19,7 @@ public class SubscriptionDao {
     private MessageService messageService;
 
     @Autowired
-    public SubscriptionDao(StringRedisTemplate stringRedisTemplate, @Qualifier("messageLimits") MessageService messageService) {
+    public SubscriptionDao(StringRedisTemplate stringRedisTemplate, @TgMessageLimitsControl MessageService messageService) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.messageService = messageService;
     }

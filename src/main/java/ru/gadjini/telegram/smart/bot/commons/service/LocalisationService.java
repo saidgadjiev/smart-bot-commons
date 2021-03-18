@@ -27,13 +27,15 @@ public class LocalisationService {
     @Autowired
     public LocalisationService(MessageSource messageSource) {
         this.messageSource = messageSource;
-        Properties properties = new Properties();
-        try (InputStream stream = LocalisationService.class.getClassLoader().getResourceAsStream(COMMON_MESSAGES)) {
-            properties.load(stream);
+        if (messageSource instanceof AbstractMessageSource) {
+            Properties properties = new Properties();
+            try (InputStream stream = LocalisationService.class.getClassLoader().getResourceAsStream(COMMON_MESSAGES)) {
+                properties.load(stream);
 
-            ((AbstractMessageSource) messageSource).setCommonMessages(properties);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+                ((AbstractMessageSource) messageSource).setCommonMessages(properties);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 

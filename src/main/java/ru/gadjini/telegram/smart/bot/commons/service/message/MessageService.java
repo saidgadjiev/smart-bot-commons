@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.service.message;
 
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -39,4 +40,9 @@ public interface MessageService {
 
     void sendErrorMessage(long chatId, Locale locale);
 
+    void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback);
+
+    default void sendInvoice(SendInvoice sendInvoice) {
+        sendInvoice(sendInvoice, null);
+    }
 }

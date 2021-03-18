@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.service.telegram;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,6 +7,7 @@ import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
@@ -24,16 +24,14 @@ public class TelegramBotApiService extends DefaultAbsSender {
 
     private final BotProperties botProperties;
 
-    private ObjectMapper objectMapper;
-
     private TelegramBotApiMethodExecutor exceptionHandler;
 
     @Autowired
-    public TelegramBotApiService(BotProperties botProperties, ObjectMapper objectMapper,
-                                 DefaultBotOptions botOptions, TelegramBotApiMethodExecutor exceptionHandler) {
+    public TelegramBotApiService(BotProperties botProperties,
+                                 DefaultBotOptions botOptions,
+                                 TelegramBotApiMethodExecutor exceptionHandler) {
         super(botOptions);
         this.botProperties = botProperties;
-        this.objectMapper = objectMapper;
         this.exceptionHandler = exceptionHandler;
     }
 
@@ -50,40 +48,40 @@ public class TelegramBotApiService extends DefaultAbsSender {
     }
 
     public Boolean sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
-        return exceptionHandler.executeWithResult(null, () -> {
-            return execute(objectMapper.convertValue(answerCallbackQuery, AnswerCallbackQuery.class));
-        });
+        return exceptionHandler.executeWithResult(null, () -> execute(answerCallbackQuery));
     }
 
     public Message sendMessage(SendMessage sendMessage) {
-        return exceptionHandler.executeWithResult(sendMessage.getChatId(), () -> {
-            Message execute = execute(objectMapper.convertValue(sendMessage, SendMessage.class));
-
-            return objectMapper.convertValue(execute, Message.class);
-        });
+        return exceptionHandler.executeWithResult(sendMessage.getChatId(), () -> execute(sendMessage));
     }
 
     public void editReplyMarkup(EditMessageReplyMarkup editMessageReplyMarkup) {
         exceptionHandler.executeWithoutResult(editMessageReplyMarkup.getChatId(), () -> {
-            execute(objectMapper.convertValue(editMessageReplyMarkup, EditMessageReplyMarkup.class));
+            execute(editMessageReplyMarkup);
         });
     }
 
     public void editMessageText(EditMessageText editMessageText) {
         exceptionHandler.executeWithoutResult(editMessageText.getChatId(), () -> {
-            execute(objectMapper.convertValue(editMessageText, EditMessageText.class));
+            execute(editMessageText);
         });
     }
 
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
         exceptionHandler.executeWithoutResult(editMessageCaption.getChatId(), () -> {
-            execute(objectMapper.convertValue(editMessageCaption, EditMessageCaption.class));
+            execute(editMessageCaption);
         });
     }
 
     public Boolean deleteMessage(DeleteMessage deleteMessage) {
         return exceptionHandler.executeWithResult(deleteMessage.getChatId(), () -> {
-            return execute(objectMapper.convertValue(deleteMessage, DeleteMessage.class));
+            return execute(deleteMessage);
+        });
+    }
+
+    public Message sendInvoice(SendInvoice sendInvoice) {
+        return exceptionHandler.executeWithResult(String.valueOf(sendInvoice.getChatId()), () -> {
+            return execute(sendInvoice);
         });
     }
 

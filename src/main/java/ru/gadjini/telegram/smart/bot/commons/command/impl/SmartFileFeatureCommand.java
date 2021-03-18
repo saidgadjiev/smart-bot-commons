@@ -1,10 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
@@ -35,8 +36,8 @@ public class SmartFileFeatureCommand implements BotCommand, NavigableBotCommand 
 
     @Autowired
     public SmartFileFeatureCommand(UserSettingsService userSettingsService,
-                                   @Qualifier("messageLimits") MessageService messageService,
-                                   UserService userService, @Qualifier("curr") ReplyKeyboardService replyKeyboardService,
+                                   @TgMessageLimitsControl MessageService messageService,
+                                   UserService userService, @KeyboardHolder ReplyKeyboardService replyKeyboardService,
                                    LocalisationService localisationService) {
         this.userSettingsService = userSettingsService;
         this.messageService = messageService;

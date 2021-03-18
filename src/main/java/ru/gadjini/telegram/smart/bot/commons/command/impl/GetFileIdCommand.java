@@ -1,10 +1,10 @@
 package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
@@ -25,7 +25,7 @@ public class GetFileIdCommand implements BotCommand, NavigableBotCommand {
     private MessageMediaService messageMediaService;
 
     @Autowired
-    public GetFileIdCommand(@Qualifier("messageLimits") MessageService messageService,
+    public GetFileIdCommand(@TgMessageLimitsControl MessageService messageService,
                             UserService userService, MessageMediaService messageMediaService) {
         this.messageService = messageService;
         this.userService = userService;

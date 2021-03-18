@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
@@ -49,7 +50,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Autowired
-    public void setMediaMessageService(@Qualifier("messageLimits") MessageService messageService) {
+    public void setMediaMessageService(@TgMessageLimitsControl MessageService messageService) {
         this.messageService = messageService;
     }
 

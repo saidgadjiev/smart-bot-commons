@@ -22,14 +22,16 @@ public class ProcessExecutor {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ProcessExecutor.class);
 
-    @Value("${process.logging.dir}")
+    @Value("${process.logging.dir:#{null}}")
     private String processLoggingDir;
 
     @PostConstruct
     public void init() {
-        LOGGER.debug("Process logging dir({})", processLoggingDir);
-        File loggingDirFile = new File(processLoggingDir);
-        SmartFileUtils.mkdirs(loggingDirFile);
+        if (StringUtils.isNotBlank(processLoggingDir)) {
+            LOGGER.debug("Process logging dir({})", processLoggingDir);
+            File loggingDirFile = new File(processLoggingDir);
+            SmartFileUtils.mkdirs(loggingDirFile);
+        }
     }
 
     public String executeWithResult(String[] command) throws InterruptedException {

@@ -1,9 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.service.smart;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.model.UploadType;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -82,7 +82,7 @@ public class UploadTypeValidator {
     );
 
     @Autowired
-    public UploadTypeValidator(@Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService) {
+    public UploadTypeValidator(@TgMessageLimitsControl MessageService messageService, LocalisationService localisationService) {
         this.messageService = messageService;
         this.localisationService = localisationService;
     }

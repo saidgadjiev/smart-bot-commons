@@ -7,6 +7,8 @@ public class MessagesProperties {
 
     public static final String MESSAGE_ERROR = "message.error";
 
+    public static final String MESSAGE_UNKNOWN_COMMAND = "message.unknown.command";
+
     public static final String MESSAGE_CHOOSE_LANGUAGE = "message.choose.language";
 
     public static final String LANGUAGE_COMMAND_NAME = "language.command.name";

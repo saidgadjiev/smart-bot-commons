@@ -3,13 +3,13 @@ package ru.gadjini.telegram.smart.bot.commons.filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -37,7 +37,7 @@ public class SubscriptionFilter extends BaseBotFilter {
     private boolean checkSubscription;
 
     @Autowired
-    public SubscriptionFilter(@Qualifier("messageLimits") MessageService messageService,
+    public SubscriptionFilter(@TgMessageLimitsControl MessageService messageService,
                               LocalisationService localisationService, UserService userService,
                               SubscriptionService subscriptionService) {
         this.messageService = messageService;

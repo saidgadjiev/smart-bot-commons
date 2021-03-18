@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
@@ -136,6 +137,15 @@ public class MessageServiceImpl implements MessageService {
         sendMessage(SendMessage.builder().chatId(String.valueOf(chatId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
                 .parseMode(ParseMode.HTML)
                 .replyMarkup(replyKeyboard).build());
+    }
+
+    @Override
+    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
+        Message message = telegramService.sendInvoice(sendInvoice);
+
+        if (callback != null) {
+            callback.accept(message);
+        }
     }
 
     private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {

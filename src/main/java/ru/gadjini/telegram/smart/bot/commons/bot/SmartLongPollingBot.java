@@ -3,7 +3,6 @@ package ru.gadjini.telegram.smart.bot.commons.bot;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
@@ -11,6 +10,7 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
@@ -37,7 +37,7 @@ public class SmartLongPollingBot extends TelegramLongPollingBot {
 
     @Autowired
     public SmartLongPollingBot(BotProperties botProperties, BotFilter botFilter,
-                               @Qualifier("messageLimits") MessageService messageService,
+                               @TgMessageLimitsControl MessageService messageService,
                                UserService userService,
                                DefaultBotOptions botOptions) {
         super(botOptions);

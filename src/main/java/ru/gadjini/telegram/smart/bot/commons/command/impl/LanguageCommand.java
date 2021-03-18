@@ -1,10 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
@@ -36,8 +37,8 @@ public class LanguageCommand implements KeyboardBotCommand, NavigableBotCommand,
     private CommandNavigator commandNavigator;
 
     @Autowired
-    public LanguageCommand(LocalisationService localisationService, @Qualifier("messageLimits") MessageService messageService,
-                           UserService userService, @Qualifier("curr") ReplyKeyboardService replyKeyboardService) {
+    public LanguageCommand(LocalisationService localisationService, @TgMessageLimitsControl MessageService messageService,
+                           UserService userService, @KeyboardHolder ReplyKeyboardService replyKeyboardService) {
         this.localisationService = localisationService;
         this.messageService = messageService;
         this.userService = userService;

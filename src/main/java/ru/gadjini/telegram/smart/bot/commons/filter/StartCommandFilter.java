@@ -1,12 +1,13 @@
 package ru.gadjini.telegram.smart.bot.commons.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
@@ -38,8 +39,8 @@ public class StartCommandFilter extends BaseBotFilter {
 
     @Autowired
     public StartCommandFilter(CommandParser commandParser, UserService userService,
-                              @Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService,
-                              @Qualifier("curr") ReplyKeyboardService replyKeyboardService, CommandNavigator commandNavigator, CommandMessageBuilder commandMessageBuilder) {
+                              @TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
+                              @KeyboardHolder ReplyKeyboardService replyKeyboardService, CommandNavigator commandNavigator, CommandMessageBuilder commandMessageBuilder) {
         this.commandParser = commandParser;
         this.userService = userService;
         this.messageService = messageService;

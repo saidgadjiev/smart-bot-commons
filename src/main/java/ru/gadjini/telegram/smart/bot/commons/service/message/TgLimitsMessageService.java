@@ -5,12 +5,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +20,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 @Service
-@Qualifier("messageLimits")
+@TgMessageLimitsControl
 public class TgLimitsMessageService implements MessageService {
 
     public static final int TEXT_LENGTH_LIMIT = 4000;
@@ -89,6 +91,11 @@ public class TgLimitsMessageService implements MessageService {
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
         messageService.editKeyboard(editMessageReplyMarkup, ignoreException);
+    }
+
+    @Override
+    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
+        messageService.sendInvoice(sendInvoice, callback);
     }
 
     @Override

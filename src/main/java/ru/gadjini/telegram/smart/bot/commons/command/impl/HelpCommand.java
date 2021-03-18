@@ -1,11 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
@@ -33,7 +33,7 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
     private CommandMessageBuilder commandMessageBuilder;
 
     @Autowired
-    public HelpCommand(@Qualifier("messageLimits") MessageService messageService, LocalisationService localisationService,
+    public HelpCommand(@TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
                        UserService userService, CommandMessageBuilder commandMessageBuilder) {
         this.messageService = messageService;
         this.localisationService = localisationService;

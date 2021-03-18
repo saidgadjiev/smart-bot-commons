@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -63,6 +64,11 @@ public class AsyncMessageService implements MessageService {
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
         messageSenderJob.push(() -> messageService.editKeyboard(editMessageReplyMarkup, ignoreException));
+    }
+
+    @Override
+    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
+        messageSenderJob.push(() -> messageService.sendInvoice(sendInvoice, callback));
     }
 
     @Override
