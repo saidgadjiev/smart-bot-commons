@@ -37,11 +37,14 @@ public class SmartBotConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartBotConfiguration.class);
 
     @Autowired
-    public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties) {
+    public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties,
+                                 SubscriptionProperties subscriptionProperties) {
         LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
         LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
         LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
+        LOGGER.debug("Channel subscription({})", subscriptionProperties.isCheckChannelSubscription());
+        LOGGER.debug("Paid subscription({})", subscriptionProperties.isCheckPaidSubscription());
     }
 
     @Bean

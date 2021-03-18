@@ -11,9 +11,18 @@ public interface MyBotCommand {
         return true;
     }
 
-   default boolean accept(Message message) {
+    default boolean accept(Message message) {
         return true;
     }
 
-    default void cancel(long chatId, String queryId) {}
+    default void cancel(long chatId, String queryId) {
+    }
+
+    default boolean isChannelSubscriptionRequired() {
+        return true;
+    }
+
+    default boolean isPaidSubscriptionRequired() {
+        return true;
+    }
 }

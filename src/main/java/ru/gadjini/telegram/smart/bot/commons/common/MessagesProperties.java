@@ -5,6 +5,10 @@ public class MessagesProperties {
     private MessagesProperties() {
     }
 
+    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "";
+
+    public static final String MESSAGE_TRIAL_PERIOD_STARTED = "";
+
     public static final String MESSAGE_ERROR = "message.error";
 
     public static final String MESSAGE_UNKNOWN_COMMAND = "message.unknown.command";
@@ -29,7 +33,9 @@ public class MessagesProperties {
 
     public static final String MESSAGE_BOT_RESTARTED = "message.bot.restarted";
 
-    public static final String MESSAGE_NEED_SUBSCRIPTION = "message.need.subscription";
+    public static final String MESSAGE_CHANNEL_SUBSCRIPTION_REQUIRED = "message.channel.subscription.required";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_REQUIRED = "message.paid.subscription.required";
 
     public static final String MESSAGE_SESSION_EXPIRED = "message.session.expired";
 

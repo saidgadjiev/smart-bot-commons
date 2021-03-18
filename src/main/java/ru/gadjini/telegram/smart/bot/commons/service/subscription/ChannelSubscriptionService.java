@@ -1,23 +1,23 @@
-package ru.gadjini.telegram.smart.bot.commons.service;
+package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.dao.SubscriptionDao;
+import ru.gadjini.telegram.smart.bot.commons.dao.subscription.channel.ChannelSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.common.CommonConstants;
 
 import java.util.concurrent.TimeUnit;
 
 @Service
-public class SubscriptionService {
+public class ChannelSubscriptionService {
 
-    private SubscriptionDao subscriptionDao;
+    private ChannelSubscriptionDao subscriptionDao;
 
     @Autowired
-    public SubscriptionService(SubscriptionDao subscriptionDao) {
+    public ChannelSubscriptionService(ChannelSubscriptionDao subscriptionDao) {
         this.subscriptionDao = subscriptionDao;
     }
 
-    public boolean isChatMember(int userId) {
+    public boolean isSubscriptionExists(int userId) {
         return subscriptionDao.isChatMember(CommonConstants.SMART_FILE_UTILS_CHANNEL, userId, 1, TimeUnit.DAYS);
     }
 }

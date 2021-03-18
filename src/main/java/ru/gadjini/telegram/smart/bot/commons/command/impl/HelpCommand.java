@@ -69,6 +69,16 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
         return false;
     }
 
+    @Override
+    public boolean isChannelSubscriptionRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isPaidSubscriptionRequired() {
+        return false;
+    }
+
     private void sendHelpMessage(int userId, Locale locale) {
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_HELP,

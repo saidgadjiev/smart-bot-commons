@@ -20,6 +20,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandExecutor;
+import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardHolderService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -44,16 +45,20 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
 
     private ReplyKeyboardHolderService replyKeyboardService;
 
+    private CommandsContainer commandsContainer;
+
     @Autowired
     public DefaultUpdatesHandler(@TgMessageLimitsControl MessageService messageService, CommandExecutor commandExecutor,
                                  LocalisationService localisationService, UserService userService,
-                                 CommandNavigator commandNavigator, @KeyboardHolder ReplyKeyboardHolderService replyKeyboardService) {
+                                 CommandNavigator commandNavigator, @KeyboardHolder ReplyKeyboardHolderService replyKeyboardService,
+                                 CommandsContainer commandsContainer) {
         this.messageService = messageService;
         this.commandExecutor = commandExecutor;
         this.localisationService = localisationService;
         this.userService = userService;
         this.commandNavigator = commandNavigator;
         this.replyKeyboardService = replyKeyboardService;
+        this.commandsContainer = commandsContainer;
     }
 
     @Override
@@ -66,13 +71,13 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
                 return;
             }
             String text = getText(update.getMessage());
-            if (commandExecutor.isKeyboardCommand(update.getMessage().getChatId(), text)) {
+            if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
                 if (isOnCurrentMenu(update.getMessage().getChatId(), text)) {
                     commandExecutor.executeKeyBoardCommand(update.getMessage(), text);
 
                     return;
                 }
-            } else if (commandExecutor.isBotCommand(update.getMessage())) {
+            } else if (commandsContainer.isBotCommand(update.getMessage())) {
                 if (commandExecutor.executeBotCommand(update.getMessage())) {
                     return;
                 } else {
@@ -105,7 +110,7 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
         }
         if (commandNavigator.isEmpty(chatId)) {
             LOGGER.debug("Bot restarted({}, {})", chatId, command);
-            commandNavigator.zeroRestore(chatId, (NavigableBotCommand) commandExecutor.getBotCommand(CommandNames.START_COMMAND_NAME));
+            commandNavigator.zeroRestore(chatId, (NavigableBotCommand) commandsContainer.getBotCommand(CommandNames.START_COMMAND_NAME));
             Locale locale = userService.getLocaleOrDefault((int) chatId);
             messageService.sendBotRestartedMessage(chatId, replyKeyboardService.removeKeyboard(chatId), locale);
 

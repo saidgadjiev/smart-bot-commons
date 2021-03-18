@@ -1,4 +1,4 @@
-package ru.gadjini.telegram.smart.bot.commons.dao;
+package ru.gadjini.telegram.smart.bot.commons.dao.subscription.channel;
 
 import org.apache.commons.lang3.BooleanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import java.util.concurrent.TimeUnit;
 
 @Repository
-public class SubscriptionDao {
+public class ChannelSubscriptionDao {
 
     private static final String KEY = "sub";
 
@@ -19,7 +19,7 @@ public class SubscriptionDao {
     private MessageService messageService;
 
     @Autowired
-    public SubscriptionDao(StringRedisTemplate stringRedisTemplate, @TgMessageLimitsControl MessageService messageService) {
+    public ChannelSubscriptionDao(StringRedisTemplate stringRedisTemplate, @TgMessageLimitsControl MessageService messageService) {
         this.stringRedisTemplate = stringRedisTemplate;
         this.messageService = messageService;
     }

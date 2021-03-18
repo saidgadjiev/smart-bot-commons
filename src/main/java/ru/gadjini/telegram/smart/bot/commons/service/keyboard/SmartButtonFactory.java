@@ -10,6 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.request.Arg;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TgUrlBuilder;
 
 import java.util.Locale;
 
@@ -73,6 +74,13 @@ public class SmartButtonFactory {
                         .serialize(CommandParser.COMMAND_ARG_SEPARATOR));
 
         return inlineKeyboardButton;
+    }
+
+    public InlineKeyboardButton goToPaymentBot(String paymentBotName) {
+        InlineKeyboardButton button = new InlineKeyboardButton();
+        button.setUrl(new TgUrlBuilder().tMe(paymentBotName));
+
+        return button;
     }
 
     public InlineKeyboardButton video(int uploadId, Locale locale) {
