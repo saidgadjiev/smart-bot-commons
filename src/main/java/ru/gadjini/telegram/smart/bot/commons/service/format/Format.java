@@ -20,7 +20,7 @@ public enum Format {
     DOCX(FormatCategory.DOCUMENTS),
     RTF(FormatCategory.DOCUMENTS),
     PDF(FormatCategory.DOCUMENTS),
-    PDF_LOSSYY(FormatCategory.DOCUMENTS) {
+    PDF_LOSSLESS(FormatCategory.DOCUMENTS) {
         @Override
         public String getExt() {
             return PDF.getExt();
