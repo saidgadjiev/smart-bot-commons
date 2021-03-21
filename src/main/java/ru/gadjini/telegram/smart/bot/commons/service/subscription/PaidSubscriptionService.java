@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
@@ -38,5 +39,9 @@ public class PaidSubscriptionService {
         paidSubscription.setEndDate(LocalDate.now(ZoneOffset.UTC).plusDays(subscriptionProperties.getTrialPeriod()));
 
         paidSubscriptionDao.create(paidSubscription);
+    }
+
+    public LocalDate renewSubscription(int userId, int planId, Period period) {
+        return paidSubscriptionDao.updateEndDate(subscriptionProperties.getPaymentBotName(), userId, planId, period);
     }
 }

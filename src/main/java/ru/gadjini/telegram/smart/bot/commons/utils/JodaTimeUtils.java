@@ -8,6 +8,21 @@ public class JodaTimeUtils {
     private JodaTimeUtils() {
     }
 
+
+    public static PGInterval toPgInterval(Period period) {
+        if (period == null) {
+            return null;
+        }
+
+        return new PGInterval(
+                period.getYears(),
+                period.getMonths(),
+                period.getDays() + period.getWeeks() * 7,
+                period.getHours(),
+                period.getMinutes(), period.getSeconds()
+        );
+    }
+
     public static Period toPeriod(PGInterval interval) {
         if (interval == null) {
             return null;

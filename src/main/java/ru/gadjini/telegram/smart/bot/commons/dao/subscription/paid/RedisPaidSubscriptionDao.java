@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -38,11 +39,13 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         this.objectMapper = objectMapper;
     }
 
+    @Override
     public void create(PaidSubscription paidSubscription) {
         paidSubscriptionDao.create(paidSubscription);
         storeToRedis(paidSubscription);
     }
 
+    @Override
     public PaidSubscription getPaidSubscription(String botName, int userId) {
         PaidSubscription fromRedis = getFromRedis(botName, userId);
 
@@ -56,6 +59,15 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         }
 
         return fromDb;
+    }
+
+    @Override
+    public LocalDate updateEndDate(String botName, int userId, int planId, Period period) {
+        LocalDate result = paidSubscriptionDao.updateEndDate(botName, userId, planId, period);
+
+        redisTemplate.opsForHash().putAll(getKey(botName, userId), Map.of(PaidSubscription.PLAN_ID, planId, PaidSubscription.END_DATE, result));
+
+        return result;
     }
 
     private PaidSubscription getFromRedis(String botName, int userId) {
