@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import org.telegram.telegrambots.meta.api.objects.payments.PreCheckoutQuery;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.CallbackBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
@@ -24,8 +25,12 @@ public class CommandExecutor {
     private CommandsContainer commandsContainer;
 
     @Autowired
-    public CommandExecutor(CommandParser commandParser, CommandsContainer commandsContainer) {
+    public CommandExecutor(CommandParser commandParser) {
         this.commandParser = commandParser;
+    }
+
+    @Autowired
+    public void setCommandsContainer(CommandsContainer commandsContainer) {
         this.commandsContainer = commandsContainer;
     }
 
@@ -48,6 +53,14 @@ public class CommandExecutor {
         if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(message)) {
             navigableBotCommand.processNonCommandUpdate(message, text);
         }
+    }
+
+    public void processPreCheckoutQuery(PreCheckoutQuery preCheckoutQuery) {
+        commandsContainer.getPaymentsHandler().preCheckout(preCheckoutQuery);
+    }
+
+    public void processSuccessfulPayment(Message message) {
+        commandsContainer.getPaymentsHandler().successfulPayment(message);
     }
 
     public boolean executeBotCommand(Message message) {

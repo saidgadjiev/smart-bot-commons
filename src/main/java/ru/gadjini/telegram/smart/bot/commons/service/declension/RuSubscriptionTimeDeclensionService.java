@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 
 @Service
-public class RuTimeDeclensionService implements TimeDeclensionService {
+public class RuSubscriptionTimeDeclensionService implements SubscriptionTimeDeclensionService {
 
     @Override
     public String getLocale() {
@@ -14,7 +14,7 @@ public class RuTimeDeclensionService implements TimeDeclensionService {
     @Override
     public String day(int days) {
         if (days == 1) {
-            return "день";
+            return "1 день";
         }
         if (days >= 2 && days <= 4) {
             return days + " дня";
@@ -26,7 +26,7 @@ public class RuTimeDeclensionService implements TimeDeclensionService {
     @Override
     public String months(int months) {
         if (months == 1) {
-            return "месяц";
+            return "1 месяц";
         }
         if (months >= 2 && months <= 4) {
             return months + " месяца";

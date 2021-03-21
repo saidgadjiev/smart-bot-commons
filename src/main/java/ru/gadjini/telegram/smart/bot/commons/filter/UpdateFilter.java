@@ -6,21 +6,27 @@ import org.springframework.util.CollectionUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.AdminProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.UpdateFilterProperties;
 
 @Component
 public class UpdateFilter extends BaseBotFilter {
 
     private AdminProperties adminProperties;
 
+    private UpdateFilterProperties updateFilterProperties;
+
     @Autowired
-    public UpdateFilter(AdminProperties adminProperties) {
+    public UpdateFilter(AdminProperties adminProperties, UpdateFilterProperties updateFilterProperties) {
         this.adminProperties = adminProperties;
+        this.updateFilterProperties = updateFilterProperties;
     }
 
     @Override
     public void doFilter(Update update) {
         if (update.hasMessage() && update.getMessage().getChat().isUserChat()
-                || update.hasCallbackQuery() && update.getCallbackQuery().getMessage().getChat().isUserChat()) {
+                || update.hasCallbackQuery() && update.getCallbackQuery().getMessage().getChat().isUserChat()
+                || doAdditionalFiltering(update)
+        ) {
             if (!CollectionUtils.isEmpty(adminProperties.getWhiteList())) {
                 long chatId = TgMessage.getChatId(update);
 
@@ -31,5 +37,9 @@ public class UpdateFilter extends BaseBotFilter {
 
             super.doFilter(update);
         }
+    }
+
+    private boolean doAdditionalFiltering(Update update) {
+        return updateFilterProperties.isAcceptPayments() && update.hasPreCheckoutQuery();
     }
 }

@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
@@ -41,6 +42,11 @@ public class MessageServiceImpl implements MessageService {
                               TelegramBotApiService telegramService) {
         this.localisationService = localisationService;
         this.telegramService = telegramService;
+    }
+
+    @Override
+    public void sendAnswerPreCheckoutQuery(AnswerPreCheckoutQuery answerPreCheckoutQuery) {
+        telegramService.sendAnswerPreCheckoutQuery(answerPreCheckoutQuery);
     }
 
     @Override

@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -49,6 +50,10 @@ public class TelegramBotApiService extends DefaultAbsSender {
 
     public Boolean sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery) {
         return exceptionHandler.executeWithResult(null, () -> execute(answerCallbackQuery));
+    }
+
+    public Boolean sendAnswerPreCheckoutQuery(AnswerPreCheckoutQuery answerPreCheckoutQuery) {
+        return exceptionHandler.executeWithResult(null, () -> execute(answerPreCheckoutQuery));
     }
 
     public Message sendMessage(SendMessage sendMessage) {

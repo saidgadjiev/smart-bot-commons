@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
@@ -29,6 +30,11 @@ public class AsyncMessageService implements MessageService {
                                @Qualifier("message") MessageService messageService) {
         this.messageSenderJob = messageSenderJob;
         this.messageService = messageService;
+    }
+
+    @Override
+    public void sendAnswerPreCheckoutQuery(AnswerPreCheckoutQuery answerPreCheckoutQuery) {
+        messageService.sendAnswerPreCheckoutQuery(answerPreCheckoutQuery);
     }
 
     @Override

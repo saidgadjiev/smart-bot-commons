@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
@@ -11,7 +12,6 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
-import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -53,7 +53,7 @@ public class StartCommandFilter extends BaseBotFilter {
     @Override
     public void doFilter(Update update) {
         if (isStartCommand(update)) {
-            CreateOrUpdateResult createOrUpdateResult = doStart(TgMessage.from(update));
+            CreateOrUpdateResult createOrUpdateResult = doStart(update.getMessage());
 
             if (createOrUpdateResult.isCreated()) {
                 return;
@@ -73,8 +73,8 @@ public class StartCommandFilter extends BaseBotFilter {
         return false;
     }
 
-    private CreateOrUpdateResult doStart(TgMessage message) {
-        CreateOrUpdateResult createOrUpdateResult = userService.createOrUpdate(message.getUser());
+    private CreateOrUpdateResult doStart(Message message) {
+        CreateOrUpdateResult createOrUpdateResult = userService.createOrUpdate(message.getFrom());
 
         if (createOrUpdateResult.isCreated()) {
             String text = localisationService.getMessage(MessagesProperties.MESSAGE_WELCOME,

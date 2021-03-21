@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.service.message;
 
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
+import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
@@ -13,6 +14,8 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 public interface MessageService {
+
+    void sendAnswerPreCheckoutQuery(AnswerPreCheckoutQuery answerPreCheckoutQuery);
 
     void sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery);
 

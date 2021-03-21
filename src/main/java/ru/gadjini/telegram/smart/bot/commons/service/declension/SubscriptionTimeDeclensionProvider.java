@@ -8,16 +8,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
-public class TimeDeclensionProvider {
+public class SubscriptionTimeDeclensionProvider {
 
-    private Map<String, TimeDeclensionService> declensionServiceMap = new HashMap<>();
+    private Map<String, SubscriptionTimeDeclensionService> declensionServiceMap = new HashMap<>();
 
     @Autowired
-    public TimeDeclensionProvider(Collection<TimeDeclensionService> declensionServices) {
+    public SubscriptionTimeDeclensionProvider(Collection<SubscriptionTimeDeclensionService> declensionServices) {
         declensionServices.forEach(timeDeclensionService -> declensionServiceMap.put(timeDeclensionService.getLocale(), timeDeclensionService));
     }
 
-    public TimeDeclensionService getService(String language) {
+    public SubscriptionTimeDeclensionService getService(String language) {
         return declensionServiceMap.get(language);
     }
 }

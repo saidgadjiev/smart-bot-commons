@@ -23,6 +23,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.command.CommandExecutor;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardHolderService;
+import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.Collections;
@@ -43,22 +44,33 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
 
     private CommandNavigator commandNavigator;
 
-    private ReplyKeyboardHolderService replyKeyboardService;
+    private ReplyKeyboardService replyKeyboardService;
 
     private CommandsContainer commandsContainer;
 
     @Autowired
-    public DefaultUpdatesHandler(@TgMessageLimitsControl MessageService messageService, CommandExecutor commandExecutor,
+    public DefaultUpdatesHandler(@TgMessageLimitsControl MessageService messageService,
                                  LocalisationService localisationService, UserService userService,
-                                 CommandNavigator commandNavigator, @KeyboardHolder ReplyKeyboardHolderService replyKeyboardService,
-                                 CommandsContainer commandsContainer) {
+                                 @KeyboardHolder ReplyKeyboardService replyKeyboardService) {
         this.messageService = messageService;
-        this.commandExecutor = commandExecutor;
         this.localisationService = localisationService;
         this.userService = userService;
-        this.commandNavigator = commandNavigator;
         this.replyKeyboardService = replyKeyboardService;
+    }
+
+    @Autowired
+    public void setCommandNavigator(CommandNavigator commandNavigator) {
+        this.commandNavigator = commandNavigator;
+    }
+
+    @Autowired
+    public void setCommandsContainer(CommandsContainer commandsContainer) {
         this.commandsContainer = commandsContainer;
+    }
+
+    @Autowired
+    public void setCommandExecutor(CommandExecutor commandExecutor) {
+        this.commandExecutor = commandExecutor;
     }
 
     @Override
@@ -70,29 +82,36 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
             )) {
                 return;
             }
-            String text = getText(update.getMessage());
-            if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
-                if (isOnCurrentMenu(update.getMessage().getChatId(), text)) {
-                    commandExecutor.executeKeyBoardCommand(update.getMessage(), text);
+            Message message = update.getMessage();
+            if (message.hasSuccessfulPayment()) {
+                commandExecutor.processSuccessfulPayment(message);
+            } else {
+                String text = getText(update.getMessage());
+                if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
+                    if (isOnCurrentMenu(update.getMessage().getChatId(), text)) {
+                        commandExecutor.executeKeyBoardCommand(update.getMessage(), text);
 
-                    return;
+                        return;
+                    }
+                } else if (commandsContainer.isBotCommand(update.getMessage())) {
+                    if (commandExecutor.executeBotCommand(update.getMessage())) {
+                        return;
+                    } else {
+                        messageService.sendMessage(
+                                SendMessage.builder().chatId(String.valueOf(update.getMessage().getChatId()))
+                                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_UNKNOWN_COMMAND,
+                                                userService.getLocaleOrDefault(update.getMessage().getFrom().getId())))
+                                        .parseMode(ParseMode.HTML)
+                                        .build());
+                        return;
+                    }
                 }
-            } else if (commandsContainer.isBotCommand(update.getMessage())) {
-                if (commandExecutor.executeBotCommand(update.getMessage())) {
-                    return;
-                } else {
-                    messageService.sendMessage(
-                            SendMessage.builder().chatId(String.valueOf(update.getMessage().getChatId()))
-                                    .text(localisationService.getMessage(MessagesProperties.MESSAGE_UNKNOWN_COMMAND,
-                                            userService.getLocaleOrDefault(update.getMessage().getFrom().getId())))
-                                    .parseMode(ParseMode.HTML)
-                                    .build());
-                    return;
-                }
+                commandExecutor.processNonCommandUpdate(update.getMessage(), text);
             }
-            commandExecutor.processNonCommandUpdate(update.getMessage(), text);
         } else if (update.hasCallbackQuery()) {
             commandExecutor.executeCallbackCommand(update.getCallbackQuery());
+        } else if (update.hasPreCheckoutQuery()) {
+            commandExecutor.processPreCheckoutQuery(update.getPreCheckoutQuery());
         }
     }
 
@@ -121,7 +140,7 @@ public class DefaultUpdatesHandler implements UpdatesHandler {
     }
 
     private boolean isOnCurrentMenu(long chatId, String commandText) {
-        ReplyKeyboardMarkup replyKeyboardMarkup = replyKeyboardService.getCurrentReplyKeyboard(chatId);
+        ReplyKeyboardMarkup replyKeyboardMarkup = ((ReplyKeyboardHolderService) replyKeyboardService).getCurrentReplyKeyboard(chatId);
 
         if (replyKeyboardMarkup == null) {
             return true;

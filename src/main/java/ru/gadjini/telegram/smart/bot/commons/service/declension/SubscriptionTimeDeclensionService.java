@@ -1,6 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.declension;
 
-public interface TimeDeclensionService {
+public interface SubscriptionTimeDeclensionService {
 
     String getLocale();
 

@@ -2,13 +2,13 @@ package ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 
 @Repository
-@Qualifier("redis")
+@Redis
 public class RedisKeyboardDao implements ReplyKeyboardDao {
 
     private static final String KEY = "keyboard";

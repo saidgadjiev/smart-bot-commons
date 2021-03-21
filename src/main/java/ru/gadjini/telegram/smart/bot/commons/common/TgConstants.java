@@ -9,4 +9,5 @@ public class TgConstants {
     //2000 MB
     public static final long LARGE_FILE_SIZE = 2000 * 1024 * 1024;
 
+    public static final int PAYMENTS_USD_FACTOR = 100;
 }

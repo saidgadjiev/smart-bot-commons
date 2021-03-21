@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.CallbackBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaymentsHandler;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -20,6 +21,13 @@ public class CommandsContainer {
     private Collection<KeyboardBotCommand> keyboardBotCommands;
 
     private final Map<String, CallbackBotCommand> callbackBotCommands = new HashMap<>();
+
+    private PaymentsHandler paymentsHandler;
+
+    @Autowired
+    public void setPaymentsHandler(PaymentsHandler paymentsHandler) {
+        this.paymentsHandler = paymentsHandler;
+    }
 
     @Autowired
     public void setBotCommands(Set<BotCommand> commands) {
@@ -52,6 +60,10 @@ public class CommandsContainer {
 
     public BotCommand getBotCommand(String startCommandName) {
         return botCommands.get(startCommandName);
+    }
+
+    public PaymentsHandler getPaymentsHandler() {
+        return paymentsHandler;
     }
 
     public KeyboardBotCommand getKeyboardBotCommand(long chatId, String commandName) {

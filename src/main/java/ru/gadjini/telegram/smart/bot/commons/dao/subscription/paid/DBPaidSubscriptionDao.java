@@ -15,7 +15,7 @@ import java.sql.SQLException;
 
 @Repository
 @DB
-public class DBPaidSubscriptionDao {
+public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
     private JdbcTemplate jdbcTemplate;
 
@@ -24,12 +24,14 @@ public class DBPaidSubscriptionDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
     public void create(PaidSubscription paidSubscription) {
         new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName(PaidSubscription.TABLE)
                 .execute(sqlParameterSource(paidSubscription));
     }
 
+    @Override
     public PaidSubscription getPaidSubscription(String botName, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM paid_subscription WHERE bot_name = '" + botName + "' AND user_id = ?",

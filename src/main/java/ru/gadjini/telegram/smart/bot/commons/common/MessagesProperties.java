@@ -88,4 +88,6 @@ public class MessagesProperties {
     public static final String MESSAGE_SMART_FILE_FEATURE_CHOOSE_STATUS = "message.smart.file.feature.choose.status";
 
     public static final String MESSAGES_BUY_SUBSCRIPTION_COMMAND_DESCRIPTION = "messages.buy.subscription.command.description";
+
+    public static final String MESSAGE_MAIN_MENU = "message.main.menu";
 }

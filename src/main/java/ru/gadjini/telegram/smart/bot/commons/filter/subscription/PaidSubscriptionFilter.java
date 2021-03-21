@@ -16,8 +16,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
-import ru.gadjini.telegram.smart.bot.commons.service.declension.TimeDeclensionProvider;
-import ru.gadjini.telegram.smart.bot.commons.service.declension.TimeDeclensionService;
+import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionProvider;
+import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
@@ -45,14 +45,14 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private SmartInlineKeyboardService inlineKeyboardService;
 
-    private TimeDeclensionProvider timeDeclensionProvider;
+    private SubscriptionTimeDeclensionProvider timeDeclensionProvider;
 
     @Autowired
     public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
                                   CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService, SmartInlineKeyboardService inlineKeyboardService,
-                                  TimeDeclensionProvider timeDeclensionProvider) {
+                                  SubscriptionTimeDeclensionProvider timeDeclensionProvider) {
         this.subscriptionProperties = subscriptionProperties;
         this.commandParser = commandParser;
         this.commandsContainer = commandsContainer;
@@ -97,7 +97,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private void sendTrialSubscriptionStarted(User user) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
-        TimeDeclensionService declensionService = timeDeclensionProvider.getService(locale.getLanguage());
+        SubscriptionTimeDeclensionService declensionService = timeDeclensionProvider.getService(locale.getLanguage());
 
         int userId = user.getId();
         messageService.sendMessage(
