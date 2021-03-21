@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
-import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
+import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
@@ -70,7 +70,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendDocument(sendDocument, progress);
         }
 
-        throw new ZeroLengthException();
+        throw new InvalidMediaMessageException();
     }
 
     @Override
@@ -89,7 +89,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendVideo(sendVideo, progress);
         }
 
-        throw new ZeroLengthException();
+        throw new InvalidMediaMessageException();
     }
 
     @Override
@@ -98,7 +98,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendAudio(sendAudio, progress);
         }
 
-        throw new ZeroLengthException();
+        throw new InvalidMediaMessageException();
     }
 
     @Override
@@ -107,7 +107,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
             return mediaMessageService.sendVoice(sendVoice, progress);
         }
 
-        throw new ZeroLengthException();
+        throw new InvalidMediaMessageException();
     }
 
     private boolean validate(String chatId, InputFile inputFile, ReplyKeyboard replyKeyboard, Integer replyMessageId) {

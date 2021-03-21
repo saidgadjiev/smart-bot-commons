@@ -76,8 +76,8 @@ public class SmartButtonFactory {
         return inlineKeyboardButton;
     }
 
-    public InlineKeyboardButton goToPaymentBot(String paymentBotName) {
-        InlineKeyboardButton button = new InlineKeyboardButton();
+    public InlineKeyboardButton goToPaymentBot(String paymentBotName, Locale locale) {
+        InlineKeyboardButton button = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.MESSAGES_BUY_SUBSCRIPTION_COMMAND_DESCRIPTION, locale));
         button.setUrl(new TgUrlBuilder().tMe(paymentBotName));
 
         return button;

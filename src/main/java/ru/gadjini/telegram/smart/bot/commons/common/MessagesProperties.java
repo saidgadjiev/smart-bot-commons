@@ -5,9 +5,7 @@ public class MessagesProperties {
     private MessagesProperties() {
     }
 
-    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "";
-
-    public static final String MESSAGE_TRIAL_PERIOD_STARTED = "";
+    public static final String MESSAGE_TRIAL_PERIOD_STARTED = "message.trial.period.started";
 
     public static final String MESSAGE_ERROR = "message.error";
 
@@ -88,4 +86,6 @@ public class MessagesProperties {
     public static final String DISABLE_COMMAND_NAME = "disable.command.name";
 
     public static final String MESSAGE_SMART_FILE_FEATURE_CHOOSE_STATUS = "message.smart.file.feature.choose.status";
+
+    public static final String MESSAGES_BUY_SUBSCRIPTION_COMMAND_DESCRIPTION = "messages.buy.subscription.command.description";
 }

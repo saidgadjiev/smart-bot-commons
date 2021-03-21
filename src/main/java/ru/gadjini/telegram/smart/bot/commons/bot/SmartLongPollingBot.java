@@ -13,7 +13,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
-import ru.gadjini.telegram.smart.bot.commons.exception.ZeroLengthException;
+import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -61,7 +61,7 @@ public class SmartLongPollingBot extends TelegramLongPollingBot {
     public void onUpdateReceived(Update update) {
         try {
             botFilter.doFilter(update);
-        } catch (ZeroLengthException ignore) {
+        } catch (InvalidMediaMessageException ignore) {
 
         } catch (UserException ex) {
             if (ex.isPrintLog()) {

@@ -115,8 +115,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         Locale locale = userService.getLocaleOrDefault(userId);
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_SUBSCRIPTION_EXPIRED, locale))
-                        .replyMarkup(inlineKeyboardService.getPaymentKeyboard(subscriptionProperties.getPaymentBotName()))
+                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED, locale))
+                        .replyMarkup(inlineKeyboardService.getPaymentKeyboard(subscriptionProperties.getPaymentBotName(), locale))
                         .build()
         );
     }

@@ -31,9 +31,9 @@ public class SmartInlineKeyboardService {
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup getPaymentKeyboard(String paymentBotName) {
+    public InlineKeyboardMarkup getPaymentKeyboard(String paymentBotName, Locale locale) {
         InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboardMarkup();
-        inlineKeyboardMarkup.getKeyboard().add(List.of(buttonFactory.goToPaymentBot(paymentBotName)));
+        inlineKeyboardMarkup.getKeyboard().add(List.of(buttonFactory.goToPaymentBot(paymentBotName, locale)));
 
         return inlineKeyboardMarkup;
     }
