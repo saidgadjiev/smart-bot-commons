@@ -66,7 +66,9 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
                     new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate())},
                     locale);
         } else {
-            return localisationService.getMessage(MessagesProperties.MESSAGE_SESSION_EXPIRED, locale);
+            return localisationService.getMessage(MessagesProperties.MESSAGE_SESSION_EXPIRED,
+                    new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate())},
+                    locale);
         }
     }
 }
