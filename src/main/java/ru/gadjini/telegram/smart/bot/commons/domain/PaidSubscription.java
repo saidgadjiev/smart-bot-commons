@@ -11,11 +11,15 @@ public class PaidSubscription {
 
     public static final String END_DATE = "end_date";
 
+    public static final String PURCHASE_DATE = "purchase_date";
+
     public static final String PLAN_ID = "plan_id";
 
     private int userId;
 
     private LocalDate endDate;
+
+    private LocalDate purchaseDate;
 
     private String botName;
 
@@ -49,6 +53,18 @@ public class PaidSubscription {
         return planId;
     }
 
+    public void setPlanId(Integer planId) {
+        this.planId = planId;
+    }
+
+    public LocalDate getPurchaseDate() {
+        return purchaseDate;
+    }
+
+    public void setPurchaseDate(LocalDate purchaseDate) {
+        this.purchaseDate = purchaseDate;
+    }
+
     public boolean isTrial() {
         return planId == null;
     }
@@ -57,7 +73,4 @@ public class PaidSubscription {
         return LocalDate.now(ZoneOffset.UTC).isBefore(endDate);
     }
 
-    public void setPlanId(Integer planId) {
-        this.planId = planId;
-    }
 }

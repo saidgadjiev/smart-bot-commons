@@ -73,11 +73,13 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
                     locale);
         } else if (paidSubscription.isActive()) {
             return localisationService.getMessage(MessagesProperties.MESSAGE_ACTIVE_SUBSCRIPTION,
-                    new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate())},
+                    new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
+                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate())},
                     locale);
         } else {
             return localisationService.getMessage(MessagesProperties.MESSAGE_SUBSCRIPTION_EXPIRED,
-                    new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate())},
+                    new Object[]{PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
+                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate())},
                     locale);
         }
     }

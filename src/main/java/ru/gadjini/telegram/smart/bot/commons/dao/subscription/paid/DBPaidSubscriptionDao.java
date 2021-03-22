@@ -77,6 +77,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
         paidSubscription.setEndDate(rs.getDate(PaidSubscription.END_DATE).toLocalDate());
+        paidSubscription.setPurchaseDate(rs.getDate(PaidSubscription.PURCHASE_DATE).toLocalDate());
 
         return paidSubscription;
     }

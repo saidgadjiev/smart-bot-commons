@@ -11,6 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -75,13 +76,14 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
 
         if (redisTemplate.hasKey(key)) {
             List<Object> objects = stringRedisTemplate.opsForHash()
-                    .multiGet(key, List.of(PaidSubscription.PLAN_ID, PaidSubscription.END_DATE));
+                    .multiGet(key, List.of(PaidSubscription.PLAN_ID, PaidSubscription.END_DATE, PaidSubscription.PURCHASE_DATE));
 
             try {
                 PaidSubscription subscription = new PaidSubscription();
 
                 subscription.setPlanId(objects.get(0) == null ? null : objectMapper.readValue((String) objects.get(0), Integer.class));
                 subscription.setEndDate(objectMapper.readValue((String) objects.get(1), LocalDate.class));
+                subscription.setPurchaseDate(objectMapper.readValue((String) objects.get(2), LocalDate.class));
                 subscription.setUserId(userId);
 
                 return subscription;
@@ -101,6 +103,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
             values.put(PaidSubscription.PLAN_ID, subscription.getPlanId());
         }
         values.put(PaidSubscription.END_DATE, subscription.getEndDate());
+        values.put(PaidSubscription.PURCHASE_DATE, LocalDate.now(ZoneOffset.UTC));
 
         redisTemplate.opsForHash().putAll(key, values);
         redisTemplate.expire(key, 1, TimeUnit.DAYS);
