@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import java.time.LocalDate;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 public class PaidSubscription {
 
@@ -46,6 +48,14 @@ public class PaidSubscription {
 
     public Integer getPlanId() {
         return planId;
+    }
+
+    public boolean isTrial() {
+        return planId == null;
+    }
+
+    public boolean isActive() {
+        return LocalDate.now(ZoneOffset.UTC).isBefore(endDate);
     }
 
     public void setPlanId(Integer planId) {

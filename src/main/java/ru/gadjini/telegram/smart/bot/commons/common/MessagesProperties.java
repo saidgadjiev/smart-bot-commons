@@ -90,4 +90,12 @@ public class MessagesProperties {
     public static final String MESSAGES_BUY_SUBSCRIPTION_COMMAND_DESCRIPTION = "messages.buy.subscription.command.description";
 
     public static final String MESSAGE_MAIN_MENU = "message.main.menu";
+
+    public static final String MESSAGE_ACTIVE_SUBSCRIPTION = "message.active.subscription";
+
+    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "message.subscription.expired";
+
+    public static final String MESSAGE_SUBSCRIPTION_NOT_FOUND = "message.subscription.not.found";
+
+    public static final String MESSAGE_TRIAL_SUBSCRIPTION = "message.trial.subscription";
 }

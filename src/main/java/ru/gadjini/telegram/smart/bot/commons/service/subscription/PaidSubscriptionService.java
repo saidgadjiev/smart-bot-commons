@@ -11,9 +11,12 @@ import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
 
 @Service
 public class PaidSubscriptionService {
+
+    public static final DateTimeFormatter PAID_SUBSCRIPTION_END_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
     private BotProperties botProperties;
 
