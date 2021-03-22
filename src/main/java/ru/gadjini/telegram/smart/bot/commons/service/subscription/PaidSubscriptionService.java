@@ -7,7 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -22,11 +22,11 @@ public class PaidSubscriptionService {
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
-    private SubscriptionProperties subscriptionProperties;
+    private PaidSubscriptionProperties subscriptionProperties;
 
     @Autowired
     public PaidSubscriptionService(BotProperties botProperties, @Caching PaidSubscriptionDao paidSubscriptionDao,
-                                   SubscriptionProperties subscriptionProperties) {
+                                   PaidSubscriptionProperties subscriptionProperties) {
         this.botProperties = botProperties;
         this.paidSubscriptionDao = paidSubscriptionDao;
         this.subscriptionProperties = subscriptionProperties;

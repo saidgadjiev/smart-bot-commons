@@ -11,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
@@ -29,7 +29,7 @@ import java.util.Locale;
 @Component
 public class PaidSubscriptionFilter extends BaseBotFilter {
 
-    private SubscriptionProperties subscriptionProperties;
+    private PaidSubscriptionProperties subscriptionProperties;
 
     private CommandParser commandParser;
 
@@ -48,7 +48,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private SubscriptionTimeDeclensionProvider timeDeclensionProvider;
 
     @Autowired
-    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
+    public PaidSubscriptionFilter(PaidSubscriptionProperties subscriptionProperties, CommandParser commandParser,
                                   CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService, SmartInlineKeyboardService inlineKeyboardService,

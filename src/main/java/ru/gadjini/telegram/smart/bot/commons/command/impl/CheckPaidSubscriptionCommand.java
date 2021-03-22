@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
+import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -27,14 +28,23 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
 
     private PaidSubscriptionService paidSubscriptionService;
 
+    private PaidSubscriptionProperties paidSubscriptionProperties;
+
     @Autowired
     public CheckPaidSubscriptionCommand(@TgMessageLimitsControl MessageService messageService,
                                         LocalisationService localisationService, UserService userService,
-                                        PaidSubscriptionService paidSubscriptionService) {
+                                        PaidSubscriptionService paidSubscriptionService,
+                                        PaidSubscriptionProperties paidSubscriptionProperties) {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
         this.paidSubscriptionService = paidSubscriptionService;
+        this.paidSubscriptionProperties = paidSubscriptionProperties;
+    }
+
+    @Override
+    public boolean accept(Message message) {
+        return paidSubscriptionProperties.isCheckPaidSubscription();
     }
 
     @Override

@@ -38,7 +38,7 @@ public class SmartBotConfiguration {
 
     @Autowired
     public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties,
-                                 SubscriptionProperties subscriptionProperties) {
+                                 PaidSubscriptionProperties subscriptionProperties) {
         LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
         LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
