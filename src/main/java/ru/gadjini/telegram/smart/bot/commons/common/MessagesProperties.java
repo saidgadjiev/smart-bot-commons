@@ -98,4 +98,10 @@ public class MessagesProperties {
     public static final String MESSAGE_SUBSCRIPTION_NOT_FOUND = "message.subscription.not.found";
 
     public static final String MESSAGE_TRIAL_SUBSCRIPTION = "message.trial.subscription";
+
+    public static final String START_COMMAND_DESCRIPTION = "start.command.description";
+
+    public static final String HELP_COMMAND_DESCRIPTION = "help.command.description";
+
+    public static final String SUBSCRIPTION_COMMAND_DESCRIPTION = "subscription.command.description";
 }

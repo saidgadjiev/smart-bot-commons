@@ -23,8 +23,8 @@ public class DummyConfiguration {
 
     @Bean
     @ConditionalOnMissingBean(CommandMessageBuilder.class)
-    public CommandMessageBuilder commandMessageBuilder() {
-        return new DummyCommandMessageBuilder();
+    public CommandMessageBuilder commandMessageBuilder(LocalisationService localisationService) {
+        return new DummyCommandMessageBuilder(localisationService);
     }
 
     @Bean

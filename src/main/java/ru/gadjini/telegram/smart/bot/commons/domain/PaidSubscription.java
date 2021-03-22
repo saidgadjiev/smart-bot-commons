@@ -2,7 +2,6 @@ package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
-import java.time.format.DateTimeFormatter;
 
 public class PaidSubscription {
 

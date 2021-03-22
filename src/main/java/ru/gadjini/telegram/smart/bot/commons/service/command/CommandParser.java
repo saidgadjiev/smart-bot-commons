@@ -16,6 +16,8 @@ public class CommandParser {
 
     public static final String COMMAND_NAME_SEPARATOR = ":";
 
+    public static final String COMMAND_START_CHAR = "/";
+
     private RequestParamsParser requestParamsParser;
 
     @Autowired
