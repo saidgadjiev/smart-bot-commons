@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageTe
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
@@ -147,7 +146,7 @@ public class MessageServiceImpl implements MessageService {
             if (callback != null) {
                 callback.accept(message);
             }
-        } catch (TelegramApiRequestException ex) {
+        } catch (Exception ex) {
             LOGGER.error("Error send message({})", sendMessage);
             throw ex;
         }
