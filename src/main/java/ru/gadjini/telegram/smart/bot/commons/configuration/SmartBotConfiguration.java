@@ -5,22 +5,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.http.HttpMessageConverters;
-import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.boot.web.client.RestTemplateCustomizer;
-import org.springframework.boot.web.client.RestTemplateRequestCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.annotation.Scope;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
@@ -31,13 +25,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.queue.QueueJobConfigurator;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
-
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
-import java.util.Collection;
-import java.util.List;
-import java.util.function.BiFunction;
-import java.util.stream.Collectors;
 
 @Configuration
 public class SmartBotConfiguration {
@@ -137,36 +124,5 @@ public class SmartBotConfiguration {
     public QueueJobConfigurator queueJobConfigurator() {
         return new QueueJobConfigurator() {
         };
-    }
-
-    @Bean
-    public RestTemplateBuilder restTemplateBuilder(ObjectProvider<HttpMessageConverters> messageConverters,
-                                                   ObjectProvider<RestTemplateCustomizer> restTemplateCustomizers,
-                                                   ObjectProvider<RestTemplateRequestCustomizer<?>> restTemplateRequestCustomizers) {
-        RestTemplateBuilder builder = new RestTemplateBuilder();
-        builder.setReadTimeout(Duration.of(2, ChronoUnit.SECONDS));
-        builder.setConnectTimeout(Duration.of(2, ChronoUnit.SECONDS));
-
-        HttpMessageConverters converters = messageConverters.getIfUnique();
-        if (converters != null) {
-            builder = builder.messageConverters(converters.getConverters());
-        }
-        builder = addCustomizers(builder, restTemplateCustomizers, RestTemplateBuilder::customizers);
-        builder = addCustomizers(builder, restTemplateRequestCustomizers, RestTemplateBuilder::requestCustomizers);
-        return builder;
-    }
-
-    @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder restTemplateBuilder) {
-        return restTemplateBuilder.build();
-    }
-
-    private <T> RestTemplateBuilder addCustomizers(RestTemplateBuilder builder, ObjectProvider<T> objectProvider,
-                                                   BiFunction<RestTemplateBuilder, Collection<T>, RestTemplateBuilder> method) {
-        List<T> customizers = objectProvider.orderedStream().collect(Collectors.toList());
-        if (!customizers.isEmpty()) {
-            return method.apply(builder, customizers);
-        }
-        return builder;
     }
 }
