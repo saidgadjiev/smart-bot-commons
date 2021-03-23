@@ -14,6 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.QueueItem;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodControlException;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
+import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.FileManagerProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.MediaLimitProperties;
@@ -268,7 +269,7 @@ public class DownloadJob extends WorkQueueJobPusher {
             }
             try {
                 fileDownloader.downloadFileByFileId(downloadingQueueItem.getFile().getFileId(), downloadingQueueItem.getFile().getSize(),
-                        downloadingQueueItem.getProgress(), tempFile, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
+                        getProgress(), tempFile, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
 
                 SmartTempFile downloadedFile = tempFileService.moveTo(tempFile, FileTarget.DOWNLOAD);
                 tempFile = downloadedFile;
@@ -295,8 +296,8 @@ public class DownloadJob extends WorkQueueJobPusher {
             }
         }
 
-        private void moveFileToDownloadDir() {
-
+        private Progress getProgress() {
+            return downloadingQueueItem.getAttempts() == 1 ? downloadingQueueItem.getProgress() : null;
         }
 
         private void noneCriticalException(DownloadQueueItem downloadingQueueItem, Throwable e) {

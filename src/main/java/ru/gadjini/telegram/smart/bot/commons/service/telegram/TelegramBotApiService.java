@@ -383,10 +383,8 @@ public class TelegramBotApiService extends DefaultAbsSender implements TelegramM
 
         try {
             updateProgressBeforeStart(progress);
-            V result = executeWithResult(chatId, executable);
-            updateProgressAfterComplete(progress);
 
-            return result;
+            return executeWithResult(chatId, executable);
         } finally {
             if (inputFile.isNew()) {
                 uploading.remove(inputFile.getNewMediaFile().getAbsolutePath());

@@ -168,6 +168,7 @@ public class UploadJob extends WorkQueueJobPusher {
         public void execute() {
             currentUploads.add(uploadQueueItem);
             try {
+                updateProgress();
                 SendFileResult sendFileResult = null;
                 try {
                     sendFileResult = fileUploader.upload(uploadQueueItem, getWeight().equals(SmartExecutorService.JobWeight.HEAVY));
@@ -242,6 +243,12 @@ public class UploadJob extends WorkQueueJobPusher {
                 uploadQueueService.deleteById(uploadQueueItem.getId());
                 uploadQueueService.releaseResources(uploadQueueItem);
                 LOGGER.debug("Canceled upload({}, {}, {})", uploadQueueItem.getMethod(), uploadQueueItem.getProducerTable(), uploadQueueItem.getProducerId());
+            }
+        }
+
+        private void updateProgress() {
+            if (uploadQueueItem.getAttempts() != 1) {
+                uploadQueueItem.setProgress(null);
             }
         }
 
