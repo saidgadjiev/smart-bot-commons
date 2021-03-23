@@ -96,7 +96,7 @@ public class DownloadQueueDao extends QueueDao {
                         "    UPDATE " + DownloadQueueItem.NAME + " SET " + QueueDao.getUpdateList(serverProperties.getNumber()) +
                         "WHERE id IN(SELECT id FROM " + DownloadQueueItem.NAME + " qu WHERE qu.status = 0 AND qu.next_run_at <= now() and qu.producer = ? " +
                         "AND (file).size " + (jobWeight.equals(SmartExecutorService.JobWeight.LIGHT) ? "<=" : ">") + "  ?\n" +
-                        " ORDER BY qu.attempts, qu.next_run_at, qu.id LIMIT " + limit + ")\n" +
+                        POLL_ORDER_BY + " LIMIT " + limit + ")\n" +
                         "RETURNING *\n" +
                         ")\n" +
                         "SELECT *, (file).*\n" +

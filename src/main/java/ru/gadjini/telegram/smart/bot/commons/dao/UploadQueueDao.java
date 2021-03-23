@@ -96,18 +96,6 @@ public class UploadQueueDao extends QueueDao {
         queueItem.setId(id);
     }
 
-    public List<UploadQueueItem> getUploads(String producer, Set<Integer> producerIds) {
-        if (producerIds.isEmpty()) {
-            return Collections.emptyList();
-        }
-        return jdbcTemplate.query(
-                "SELECT * FROM upload_queue WHERE producer = ? AND producer_id IN("
-                        + producerIds.stream().map(String::valueOf).collect(Collectors.joining(",")) + ")",
-                ps -> ps.setString(1, producer),
-                (rs, rowNum) -> map(rs)
-        );
-    }
-
     public List<UploadQueueItem> deleteByProducerIdsWithReturning(String producer, Set<Integer> producerIds) {
         if (producerIds.isEmpty()) {
             return Collections.emptyList();
