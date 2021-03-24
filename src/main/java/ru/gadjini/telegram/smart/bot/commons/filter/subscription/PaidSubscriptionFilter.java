@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
+import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
@@ -20,6 +21,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTime
 import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 
 import java.time.LocalDate;
@@ -43,6 +45,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private PaidSubscriptionService paidSubscriptionService;
 
+    private PaidSubscriptionPlanService paidSubscriptionPlanService;
+
     private SmartInlineKeyboardService inlineKeyboardService;
 
     private SubscriptionTimeDeclensionProvider timeDeclensionProvider;
@@ -51,7 +55,9 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     public PaidSubscriptionFilter(PaidSubscriptionProperties subscriptionProperties, CommandParser commandParser,
                                   CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
-                                  PaidSubscriptionService paidSubscriptionService, SmartInlineKeyboardService inlineKeyboardService,
+                                  PaidSubscriptionService paidSubscriptionService,
+                                  PaidSubscriptionPlanService paidSubscriptionPlanService,
+                                  SmartInlineKeyboardService inlineKeyboardService,
                                   SubscriptionTimeDeclensionProvider timeDeclensionProvider) {
         this.subscriptionProperties = subscriptionProperties;
         this.commandParser = commandParser;
@@ -60,6 +66,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         this.localisationService = localisationService;
         this.userService = userService;
         this.paidSubscriptionService = paidSubscriptionService;
+        this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.inlineKeyboardService = inlineKeyboardService;
         this.timeDeclensionProvider = timeDeclensionProvider;
     }
@@ -98,6 +105,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private void sendTrialSubscriptionStarted(User user) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
         SubscriptionTimeDeclensionService declensionService = timeDeclensionProvider.getService(locale.getLanguage());
+        PaidSubscriptionPlan activePlan = paidSubscriptionPlanService.getActivePlan();
 
         int userId = user.getId();
         messageService.sendMessage(
@@ -105,7 +113,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                         .text(
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
-                                                declensionService.day(subscriptionProperties.getTrialPeriod())
+                                                declensionService.day(subscriptionProperties.getTrialPeriod()),
+                                                String.valueOf(activePlan.getPrice())
                                         }, locale))
                         .build()
         );
