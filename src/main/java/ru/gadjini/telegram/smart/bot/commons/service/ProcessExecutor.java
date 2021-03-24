@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
+import ru.gadjini.telegram.smart.bot.commons.exception.ProcessTimedOutException;
 import ru.gadjini.telegram.smart.bot.commons.utils.SmartFileUtils;
 
 import javax.annotation.PostConstruct;
@@ -35,19 +36,23 @@ public class ProcessExecutor {
     }
 
     public String executeWithResult(String[] command) throws InterruptedException {
-        return execute(command, ProcessBuilder.Redirect.PIPE, null, Collections.emptySet());
+        return execute(command, null, ProcessBuilder.Redirect.PIPE, null, Collections.emptySet());
     }
 
     public void executeWithFile(String[] command, String outputFile) throws InterruptedException {
-        execute(command, null, outputFile, Collections.emptySet());
+        execute(command, null, null, outputFile, Collections.emptySet());
     }
 
     public void execute(String[] command, Collection<Integer> successCodes) throws InterruptedException {
-        execute(command, ProcessBuilder.Redirect.DISCARD, null, successCodes);
+        execute(command, null, ProcessBuilder.Redirect.DISCARD, null, successCodes);
     }
 
     public void execute(String[] command) throws InterruptedException {
-        execute(command, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
+        execute(command, null, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
+    }
+
+    public void execute(String[] command, int waitForSeconds) throws InterruptedException {
+        execute(command, waitForSeconds, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
     }
 
     public String tryExecute(String[] command, int waitForInSeconds) throws InterruptedException {
@@ -77,7 +82,8 @@ public class ProcessExecutor {
         }
     }
 
-    private String execute(String[] command, ProcessBuilder.Redirect redirectOutput, String outputRedirectFile, Collection<Integer> successCodes) throws InterruptedException {
+    private String execute(String[] command, Integer waitForSeconds, ProcessBuilder.Redirect redirectOutput,
+                           String outputRedirectFile, Collection<Integer> successCodes) throws InterruptedException {
         File errorFile = getErrorLogFile();
         try {
             FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
@@ -92,7 +98,15 @@ public class ProcessExecutor {
             try {
                 Set<Integer> codes = new HashSet<>(successCodes);
                 codes.add(0);
-                int exitValue = process.waitFor();
+                int exitValue;
+                if (waitForSeconds == null) {
+                    exitValue = process.waitFor();
+                } else {
+                    exitValue = process.waitFor(waitForSeconds, TimeUnit.SECONDS) ? 0 : 1;
+                    if (exitValue == 1) {
+                        throw new ProcessTimedOutException();
+                    }
+                }
                 if (!codes.contains(exitValue)) {
                     LOGGER.error("Error({}, {}, {})", process.exitValue(), Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
                     throw new ProcessException(exitValue, "Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\nLogs: " + (errorFile != null ? errorFile.getName() : "404"));
@@ -110,7 +124,7 @@ public class ProcessExecutor {
             } finally {
                 process.destroy();
             }
-        } catch (InterruptedException e) {
+        } catch (ProcessTimedOutException | InterruptedException e) {
             throw e;
         } catch (Exception ex) {
             if (ex instanceof ProcessException) {
