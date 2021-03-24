@@ -163,7 +163,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @SuppressWarnings("PMD")
-    private void updateProgressAfterComplete(Progress progress) {
+    final void updateProgressAfterComplete(Progress progress) {
         if (progress == null || StringUtils.isBlank(progress.getAfterProgressCompletionMessage())) {
             return;
         }
@@ -182,7 +182,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @SuppressWarnings("PMD")
-    private void updateProgressBeforeStart(Progress progress) {
+    final void updateProgressBeforeStart(Progress progress) {
         if (progress == null) {
             return;
         }
