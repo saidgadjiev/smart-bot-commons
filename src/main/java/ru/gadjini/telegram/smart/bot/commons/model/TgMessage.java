@@ -6,6 +6,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import org.telegram.telegrambots.meta.api.objects.payments.PreCheckoutQuery;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class TgMessage {
 
     private long chatId;
@@ -91,11 +94,52 @@ public class TgMessage {
         return update.getMessage().getFrom();
     }
 
+    public static List<MetaType> getMetaTypes(Message message) {
+        List<MetaType> metaTypes = new ArrayList<>();
+
+        if (message.hasDocument()) {
+            metaTypes.add(MetaType.DOCUMENT);
+        }
+        if (message.hasText()) {
+            metaTypes.add(MetaType.TEXT);
+        }
+        if (message.hasPhoto()) {
+            metaTypes.add(MetaType.PHOTO);
+        }
+        if (message.hasVideo()) {
+            metaTypes.add(MetaType.VIDEO);
+        }
+        if (message.hasAudio()) {
+            metaTypes.add(MetaType.AUDIO);
+        }
+
+        return metaTypes;
+    }
+
     @Override
     public String toString() {
         return "TgMessage{" +
                 "chatId=" + chatId +
                 ", user=" + user +
                 '}';
+    }
+
+    public enum MetaType {
+
+        TEXT,
+
+        DOCUMENT,
+
+        AUDIO,
+
+        VIDEO,
+
+        PHOTO,
+
+        VOICE,
+
+        CONTACT,
+
+        LOCATION
     }
 }
