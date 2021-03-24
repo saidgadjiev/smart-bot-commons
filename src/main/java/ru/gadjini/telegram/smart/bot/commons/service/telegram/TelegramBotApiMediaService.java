@@ -158,14 +158,12 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
     private <V> V uploadFile(String chatId, TelegramBotApiMethodExecutor.Callable<V> executable, Progress progress) {
         updateProgressBeforeStart(progress);
-        V result = exceptionHandler.executeWithResult(chatId, executable);
-        updateProgressAfterComplete(progress);
 
-        return result;
+        return exceptionHandler.executeWithResult(chatId, executable);
     }
 
     @SuppressWarnings("PMD")
-    final void updateProgressAfterComplete(Progress progress) {
+    private void updateProgressAfterComplete(Progress progress) {
         if (progress == null || StringUtils.isBlank(progress.getAfterProgressCompletionMessage())) {
             return;
         }
@@ -184,7 +182,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @SuppressWarnings("PMD")
-    final void updateProgressBeforeStart(Progress progress) {
+    private void updateProgressBeforeStart(Progress progress) {
         if (progress == null) {
             return;
         }
