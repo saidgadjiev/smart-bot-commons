@@ -26,10 +26,10 @@ public class CallbackDelegate implements CallbackBotCommand {
     }
 
     @Override
-    public void processMessage(CallbackQuery callbackQuery, RequestParams requestParams) {
+    public void processCallbackQuery(CallbackQuery callbackQuery, RequestParams requestParams) {
         String delegateCommand = requestParams.getString(ARG_NAME);
         CallbackBotCommand callbackCommand = commandsContainer.getCallbackCommand(delegateCommand);
 
-        callbackCommand.processNonCommandCallback(callbackQuery, requestParams);
+        callbackCommand.processNonCommandCallbackQuery(callbackQuery, requestParams);
     }
 }

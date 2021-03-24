@@ -27,7 +27,7 @@ public class GoBackCallbackCommand implements CallbackBotCommand {
     }
 
     @Override
-    public void processMessage(CallbackQuery callbackQuery, RequestParams requestParams) {
+    public void processCallbackQuery(CallbackQuery callbackQuery, RequestParams requestParams) {
         String prevCommandName = requestParams.getString(ARG_NAME);
 
         callbackCommandNavigator.popTo(TgMessage.from(callbackQuery), prevCommandName, requestParams);

@@ -99,6 +99,6 @@ public class CommandExecutor {
         CallbackBotCommand botCommand = commandsContainer.getCallbackBotCommand(parseResult.getCommandName());
 
         LOGGER.debug("Callback({}, {})", callbackQuery.getFrom().getId(), botCommand.getClass().getSimpleName());
-        botCommand.processMessage(callbackQuery, parseResult.getRequestParams());
+        botCommand.processCallbackQuery(callbackQuery, parseResult.getRequestParams());
     }
 }

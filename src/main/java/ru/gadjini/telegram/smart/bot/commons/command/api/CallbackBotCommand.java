@@ -10,11 +10,11 @@ public interface CallbackBotCommand extends MyBotCommand {
     /**
      *
      */
-    default void processMessage(CallbackQuery callbackQuery, RequestParams requestParams) {
+    default void processCallbackQuery(CallbackQuery callbackQuery, RequestParams requestParams) {
 
     }
 
-    default void processNonCommandCallback(CallbackQuery callbackQuery, RequestParams requestParams) {
+    default void processNonCommandCallbackQuery(CallbackQuery callbackQuery, RequestParams requestParams) {
 
     }
 }
