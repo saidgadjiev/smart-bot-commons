@@ -47,7 +47,7 @@ public class SmartWebhookBot extends SpringWebhookBot {
         this.messageService = messageService;
         this.userService = userService;
 
-        LOGGER.debug("Webhook url({})", setWebhook.getUrl());
+        LOGGER.debug("Webhook bot({})", setWebhook.getUrl());
     }
 
     @Override

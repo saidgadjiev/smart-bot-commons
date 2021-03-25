@@ -45,6 +45,8 @@ public class SmartLongPollingBot extends TelegramLongPollingBot {
         this.botFilter = botFilter;
         this.messageService = messageService;
         this.userService = userService;
+
+        LOGGER.debug("Long polling bot");
     }
 
     @Override

@@ -24,7 +24,7 @@ public class CommandsContainer {
 
     private PaymentsHandler paymentsHandler;
 
-    @Autowired
+    @Autowired(required = false)
     public void setPaymentsHandler(PaymentsHandler paymentsHandler) {
         this.paymentsHandler = paymentsHandler;
     }
