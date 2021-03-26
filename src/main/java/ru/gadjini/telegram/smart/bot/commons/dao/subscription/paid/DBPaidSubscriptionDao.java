@@ -3,9 +3,6 @@ package ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.namedparam.SqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
@@ -29,9 +26,19 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
     @Override
     public void create(PaidSubscription paidSubscription) {
-        new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName(PaidSubscription.TABLE)
-                .execute(sqlParameterSource(paidSubscription));
+        jdbcTemplate.update(
+                "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id) VALUES (?, ?, ?, ?)",
+                ps -> {
+                    ps.setInt(1, paidSubscription.getUserId());
+                    ps.setString(2, paidSubscription.getBotName());
+                    ps.setDate(3, Date.valueOf(paidSubscription.getEndDate()));
+                    if (paidSubscription.getPlanId() == null) {
+                        ps.setNull(4, Types.INTEGER);
+                    } else {
+                        ps.setInt(4, paidSubscription.getPlanId());
+                    }
+                }
+        );
     }
 
     @Override
@@ -68,17 +75,11 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         return endDate.toLocalDate();
     }
 
-    private SqlParameterSource sqlParameterSource(PaidSubscription paidSubscription) {
-        return new MapSqlParameterSource()
-                .addValue(PaidSubscription.USER_ID, paidSubscription.getUserId())
-                .addValue(PaidSubscription.END_DATE, Date.valueOf(paidSubscription.getEndDate()))
-                .addValue(PaidSubscription.PLAN_ID, paidSubscription.getPlanId());
-    }
-
     private PaidSubscription map(ResultSet rs) throws SQLException {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
         paidSubscription.setEndDate(rs.getDate(PaidSubscription.END_DATE).toLocalDate());
+        paidSubscription.setBotName(rs.getString(PaidSubscription.BOT_NAME));
         paidSubscription.setPurchaseDate(rs.getDate(PaidSubscription.PURCHASE_DATE).toLocalDate());
 
         return paidSubscription;

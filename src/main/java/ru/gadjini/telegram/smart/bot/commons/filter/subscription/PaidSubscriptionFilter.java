@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.filter.subscription;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
@@ -12,7 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
@@ -31,7 +32,7 @@ import java.util.Locale;
 @Component
 public class PaidSubscriptionFilter extends BaseBotFilter {
 
-    private PaidSubscriptionProperties subscriptionProperties;
+    private SubscriptionProperties subscriptionProperties;
 
     private CommandParser commandParser;
 
@@ -52,7 +53,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private SubscriptionTimeDeclensionProvider timeDeclensionProvider;
 
     @Autowired
-    public PaidSubscriptionFilter(PaidSubscriptionProperties subscriptionProperties, CommandParser commandParser,
+    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
                                   CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService,
@@ -116,6 +117,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                                 declensionService.day(subscriptionProperties.getTrialPeriod()),
                                                 String.valueOf(activePlan.getPrice())
                                         }, locale))
+                        .parseMode(ParseMode.HTML)
                         .build()
         );
     }
@@ -126,6 +128,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                 SendMessage.builder().chatId(String.valueOf(userId))
                         .text(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED, locale))
                         .replyMarkup(inlineKeyboardService.getPaymentKeyboard(subscriptionProperties.getPaymentBotName(), locale))
+                        .parseMode(ParseMode.HTML)
                         .build()
         );
     }

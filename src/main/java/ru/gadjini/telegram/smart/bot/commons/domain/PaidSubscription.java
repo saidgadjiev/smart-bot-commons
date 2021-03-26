@@ -11,6 +11,8 @@ public class PaidSubscription {
 
     public static final String END_DATE = "end_date";
 
+    public static final String BOT_NAME = "bot_name";
+
     public static final String PURCHASE_DATE = "purchase_date";
 
     public static final String PLAN_ID = "plan_id";

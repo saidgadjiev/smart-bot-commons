@@ -11,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.ChannelSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -36,13 +36,13 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
 
     private CommandsContainer commandsContainer;
 
-    private PaidSubscriptionProperties subscriptionProperties;
+    private SubscriptionProperties subscriptionProperties;
 
     @Autowired
     public ChannelSubscriptionFilter(@TgMessageLimitsControl MessageService messageService,
                                      LocalisationService localisationService, UserService userService,
                                      ChannelSubscriptionService subscriptionService, CommandParser commandParser,
-                                     CommandsContainer commandsContainer, PaidSubscriptionProperties subscriptionProperties) {
+                                     CommandsContainer commandsContainer, SubscriptionProperties subscriptionProperties) {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;

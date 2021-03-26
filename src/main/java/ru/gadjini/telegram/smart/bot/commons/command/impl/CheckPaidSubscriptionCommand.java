@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
@@ -10,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
-import ru.gadjini.telegram.smart.bot.commons.property.PaidSubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -30,7 +31,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
 
     private PaidSubscriptionService paidSubscriptionService;
 
-    private PaidSubscriptionProperties paidSubscriptionProperties;
+    private SubscriptionProperties paidSubscriptionProperties;
 
     private PaidSubscriptionPlanService paidSubscriptionPlanService;
 
@@ -38,7 +39,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
     public CheckPaidSubscriptionCommand(@TgMessageLimitsControl MessageService messageService,
                                         LocalisationService localisationService, UserService userService,
                                         PaidSubscriptionService paidSubscriptionService,
-                                        PaidSubscriptionProperties paidSubscriptionProperties,
+                                        SubscriptionProperties paidSubscriptionProperties,
                                         PaidSubscriptionPlanService paidSubscriptionPlanService) {
         this.messageService = messageService;
         this.localisationService = localisationService;
@@ -61,6 +62,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
                 SendMessage.builder()
                         .chatId(String.valueOf(message.getChatId()))
                         .text(getSubscriptionMessage(paidSubscription, locale))
+                        .parseMode(ParseMode.HTML)
                         .build()
         );
     }
