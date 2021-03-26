@@ -49,7 +49,9 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("UPDATE subscription SET end_date = end_date + ?, plan_id = ? WHERE user_id = ? RETURNING end_date", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement("UPDATE subscription " +
+                            "SET end_date = GREATEST(end_date, now()) + ?, plan_id = ? " +
+                            "WHERE user_id = ? RETURNING end_date", Statement.RETURN_GENERATED_KEYS);
 
                     ps.setObject(1, JodaTimeUtils.toPgInterval(period));
                     ps.setInt(2, planId);

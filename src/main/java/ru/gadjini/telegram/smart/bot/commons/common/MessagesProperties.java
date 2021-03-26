@@ -105,5 +105,7 @@ public class MessagesProperties {
 
     public static final String HELP_COMMAND_DESCRIPTION = "help.command.description";
 
+    public static final String LANGUAGE_COMMAND_DESCRIPTION = "language.command.description";
+
     public static final String SUBSCRIPTION_COMMAND_DESCRIPTION = "subscription.command.description";
 }
