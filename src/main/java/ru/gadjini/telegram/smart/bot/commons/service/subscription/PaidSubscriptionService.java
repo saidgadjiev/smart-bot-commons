@@ -36,13 +36,15 @@ public class PaidSubscriptionService {
         return paidSubscriptionDao.getPaidSubscription(botProperties.getName(), userId);
     }
 
-    public void createTrialSubscription(int userId) {
+    public LocalDate createTrialSubscription(int userId) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botProperties.getName());
         paidSubscription.setEndDate(LocalDate.now(ZoneOffset.UTC).plusDays(subscriptionProperties.getTrialPeriod()));
 
         paidSubscriptionDao.create(paidSubscription);
+
+        return paidSubscription.getEndDate();
     }
 
     public LocalDate renewSubscription(int userId, int planId, Period period) {

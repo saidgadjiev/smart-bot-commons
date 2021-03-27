@@ -18,8 +18,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
-import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionProvider;
-import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
@@ -50,16 +48,13 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private SmartInlineKeyboardService inlineKeyboardService;
 
-    private SubscriptionTimeDeclensionProvider timeDeclensionProvider;
-
     @Autowired
     public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
                                   CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService,
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
-                                  SmartInlineKeyboardService inlineKeyboardService,
-                                  SubscriptionTimeDeclensionProvider timeDeclensionProvider) {
+                                  SmartInlineKeyboardService inlineKeyboardService) {
         this.subscriptionProperties = subscriptionProperties;
         this.commandParser = commandParser;
         this.commandsContainer = commandsContainer;
@@ -69,7 +64,6 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         this.paidSubscriptionService = paidSubscriptionService;
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.inlineKeyboardService = inlineKeyboardService;
-        this.timeDeclensionProvider = timeDeclensionProvider;
     }
 
     @Override
@@ -89,8 +83,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         PaidSubscription subscription = paidSubscriptionService.getSubscription(user.getId());
 
         if (subscription == null) {
-            paidSubscriptionService.createTrialSubscription(user.getId());
-            sendTrialSubscriptionStarted(user);
+            LocalDate trialSubscriptionEndDate = paidSubscriptionService.createTrialSubscription(user.getId());
+            sendTrialSubscriptionStarted(user, trialSubscriptionEndDate);
 
             return false;
         }
@@ -103,9 +97,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         return true;
     }
 
-    private void sendTrialSubscriptionStarted(User user) {
+    private void sendTrialSubscriptionStarted(User user, LocalDate trialSubscriptionEndDate) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
-        SubscriptionTimeDeclensionService declensionService = timeDeclensionProvider.getService(locale.getLanguage());
         PaidSubscriptionPlan activePlan = paidSubscriptionPlanService.getActivePlan();
 
         int userId = user.getId();
@@ -114,7 +107,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                         .text(
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
-                                                declensionService.day(subscriptionProperties.getTrialPeriod()),
+                                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscriptionEndDate),
                                                 String.valueOf(activePlan.getPrice())
                                         }, locale))
                         .parseMode(ParseMode.HTML)
