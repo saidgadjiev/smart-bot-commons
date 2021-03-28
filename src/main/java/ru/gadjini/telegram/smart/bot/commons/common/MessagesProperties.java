@@ -101,6 +101,8 @@ public class MessagesProperties {
 
     public static final String MESSAGE_TRIAL_SUBSCRIPTION = "message.trial.subscription";
 
+    public static final String MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED = "message.trial.subscription.expired";
+
     public static final String START_COMMAND_DESCRIPTION = "start.command.description";
 
     public static final String HELP_COMMAND_DESCRIPTION = "help.command.description";

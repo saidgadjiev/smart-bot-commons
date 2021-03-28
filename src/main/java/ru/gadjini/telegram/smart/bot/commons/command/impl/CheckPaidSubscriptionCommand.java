@@ -50,6 +50,16 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
     }
 
     @Override
+    public boolean isChannelSubscriptionRequired() {
+        return false;
+    }
+
+    @Override
+    public boolean isPaidSubscriptionRequired() {
+        return false;
+    }
+
+    @Override
     public boolean accept(Message message) {
         return paidSubscriptionProperties.isCheckPaidSubscription();
     }
@@ -82,13 +92,23 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
                     locale
             );
         } else if (paidSubscription.isTrial()) {
-            return localisationService.getMessage(
-                    MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
-                    new Object[]{
-                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
-                            String.valueOf(activePlan.getPrice())
-                    },
-                    locale);
+            if (paidSubscription.isActive()) {
+                return localisationService.getMessage(
+                        MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
+                        new Object[]{
+                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
+                                String.valueOf(activePlan.getPrice())
+                        },
+                        locale);
+            } else {
+                return localisationService.getMessage(
+                        MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED,
+                        new Object[]{
+                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
+                                String.valueOf(activePlan.getPrice())
+                        },
+                        locale);
+            }
         } else if (paidSubscription.isActive()) {
             return localisationService.getMessage(
                     MessagesProperties.MESSAGE_ACTIVE_SUBSCRIPTION,
