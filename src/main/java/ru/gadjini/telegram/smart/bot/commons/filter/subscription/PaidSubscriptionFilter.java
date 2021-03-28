@@ -24,7 +24,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscripti
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.util.Locale;
 
 @Component
@@ -80,15 +79,15 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     }
 
     private boolean checkSubscriptionOrStartTrial(User user) {
-        PaidSubscription subscription = paidSubscriptionService.getSubscription(user.getId());
+        PaidSubscription subscription = paidSubscriptionService.getSubscription(subscriptionProperties.getPaidBotName(), user.getId());
 
         if (subscription == null) {
-            LocalDate trialSubscriptionEndDate = paidSubscriptionService.createTrialSubscription(user.getId());
+            LocalDate trialSubscriptionEndDate = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
             sendTrialSubscriptionStarted(user, trialSubscriptionEndDate);
 
             return false;
         }
-        if (subscription.getEndDate().isBefore(LocalDate.now(ZoneOffset.UTC))) {
+        if (!subscription.isActive()) {
             sendSubscriptionExpired(user.getId());
 
             return false;

@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.impl.StartCommand;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard.ReplyKeyboardDao;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.DummyCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -17,6 +18,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.keyboard.DummyReplyKeyboard
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.CheckPaidSubscriptionMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.DefaultCheckPaidSubscriptionMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 
 @Configuration
 public class DummyConfiguration {
@@ -41,5 +45,15 @@ public class DummyConfiguration {
     public StartCommand startCommand(@TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
                                      UserService userService, @KeyboardHolder ReplyKeyboardService replyKeyboardService) {
         return new StartCommand(messageService, localisationService, userService, replyKeyboardService);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(CheckPaidSubscriptionMessageBuilder.class)
+    public DefaultCheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder(
+            PaidSubscriptionPlanService paidSubscriptionPlanService,
+            LocalisationService localisationService,
+            SubscriptionProperties subscriptionProperties
+    ) {
+        return new DefaultCheckPaidSubscriptionMessageBuilder(paidSubscriptionPlanService, localisationService, subscriptionProperties);
     }
 }

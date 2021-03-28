@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 
 import java.time.LocalDate;
@@ -18,36 +17,37 @@ public class PaidSubscriptionService {
 
     public static final DateTimeFormatter PAID_SUBSCRIPTION_END_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
 
-    private BotProperties botProperties;
-
     private PaidSubscriptionDao paidSubscriptionDao;
 
     private SubscriptionProperties subscriptionProperties;
 
     @Autowired
-    public PaidSubscriptionService(BotProperties botProperties, @Caching PaidSubscriptionDao paidSubscriptionDao,
+    public PaidSubscriptionService(@Caching PaidSubscriptionDao paidSubscriptionDao,
                                    SubscriptionProperties subscriptionProperties) {
-        this.botProperties = botProperties;
         this.paidSubscriptionDao = paidSubscriptionDao;
         this.subscriptionProperties = subscriptionProperties;
     }
 
-    public PaidSubscription getSubscription(int userId) {
-        return paidSubscriptionDao.getPaidSubscription(botProperties.getName(), userId);
+    public PaidSubscription getSubscription(String botName, int userId) {
+        return paidSubscriptionDao.getPaidSubscription(botName, userId);
     }
 
-    public LocalDate createTrialSubscription(int userId) {
+    public LocalDate createTrialSubscription(String botName, int userId) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
-        paidSubscription.setBotName(botProperties.getName());
-        paidSubscription.setEndDate(LocalDate.now(ZoneOffset.UTC).plusDays(subscriptionProperties.getTrialPeriod()));
+        paidSubscription.setBotName(botName);
+        paidSubscription.setEndDate(getTrialPeriodEndDate());
 
         paidSubscriptionDao.create(paidSubscription);
 
         return paidSubscription.getEndDate();
     }
 
-    public LocalDate renewSubscription(int userId, int planId, Period period) {
-        return paidSubscriptionDao.updateEndDate(botProperties.getName(), userId, planId, period);
+    public LocalDate renewSubscription(String botName, int userId, int planId, Period period) {
+        return paidSubscriptionDao.updateEndDate(botName, userId, planId, period);
+    }
+
+    private LocalDate getTrialPeriodEndDate() {
+        return LocalDate.now(ZoneOffset.UTC).plusDays(subscriptionProperties.getTrialPeriod());
     }
 }

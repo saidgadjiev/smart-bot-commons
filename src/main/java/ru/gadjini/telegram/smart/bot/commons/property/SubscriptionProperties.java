@@ -18,6 +18,9 @@ public class SubscriptionProperties {
     @Value("${payment.bot.name}")
     private String paymentBotName;
 
+    @Value("#{'${paid.bot.name:${bot.name}}'}")
+    private String paidBotName;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -48,5 +51,13 @@ public class SubscriptionProperties {
 
     public void setPaymentBotName(String paymentBotName) {
         this.paymentBotName = paymentBotName;
+    }
+
+    public String getPaidBotName() {
+        return paidBotName;
+    }
+
+    public void setPaidBotName(String paidBotName) {
+        this.paidBotName = paidBotName;
     }
 }

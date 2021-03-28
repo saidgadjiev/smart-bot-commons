@@ -11,6 +11,8 @@ import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneOffset;
 import java.util.Map;
 
 @Repository
@@ -39,6 +41,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
                     }
                 }
         );
+        paidSubscription.setPurchaseDate(LocalDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
@@ -56,8 +59,8 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("UPDATE subscription " +
-                            "SET end_date = GREATEST(end_date, now()) + ?, plan_id = ? " +
+                    PreparedStatement ps = con.prepareStatement("UPDATE paid_subscription " +
+                            "SET purchase_date = now(), end_date = GREATEST(end_date, now()) + ?, plan_id = ? " +
                             "WHERE user_id = ? RETURNING end_date", Statement.RETURN_GENERATED_KEYS);
 
                     ps.setObject(1, JodaTimeUtils.toPgInterval(period));
@@ -80,7 +83,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
         paidSubscription.setEndDate(rs.getDate(PaidSubscription.END_DATE).toLocalDate());
         paidSubscription.setBotName(rs.getString(PaidSubscription.BOT_NAME));
-        paidSubscription.setPurchaseDate(rs.getDate(PaidSubscription.PURCHASE_DATE).toLocalDate());
+        paidSubscription.setPurchaseDate(rs.getTimestamp(PaidSubscription.PURCHASE_DATE).toLocalDateTime());
 
         return paidSubscription;
     }

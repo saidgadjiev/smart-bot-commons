@@ -8,24 +8,21 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.CheckPaidSubscriptionMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 
 import java.util.Locale;
+import java.util.Objects;
 
 @Component
 public class CheckPaidSubscriptionCommand implements BotCommand {
 
     private MessageService messageService;
-
-    private LocalisationService localisationService;
 
     private UserService userService;
 
@@ -33,20 +30,23 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
 
     private SubscriptionProperties paidSubscriptionProperties;
 
-    private PaidSubscriptionPlanService paidSubscriptionPlanService;
+    private CheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder;
+
+    private BotProperties botProperties;
 
     @Autowired
     public CheckPaidSubscriptionCommand(@TgMessageLimitsControl MessageService messageService,
-                                        LocalisationService localisationService, UserService userService,
+                                        UserService userService,
                                         PaidSubscriptionService paidSubscriptionService,
                                         SubscriptionProperties paidSubscriptionProperties,
-                                        PaidSubscriptionPlanService paidSubscriptionPlanService) {
+                                        CheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder,
+                                        BotProperties botProperties) {
         this.messageService = messageService;
-        this.localisationService = localisationService;
         this.userService = userService;
         this.paidSubscriptionService = paidSubscriptionService;
         this.paidSubscriptionProperties = paidSubscriptionProperties;
-        this.paidSubscriptionPlanService = paidSubscriptionPlanService;
+        this.checkPaidSubscriptionMessageBuilder = checkPaidSubscriptionMessageBuilder;
+        this.botProperties = botProperties;
     }
 
     @Override
@@ -61,17 +61,20 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
 
     @Override
     public boolean accept(Message message) {
-        return paidSubscriptionProperties.isCheckPaidSubscription();
+        return paidSubscriptionProperties.isCheckPaidSubscription()
+                || Objects.equals(botProperties.getName(), paidSubscriptionProperties.getPaymentBotName());
     }
 
     @Override
     public void processMessage(Message message, String[] params) {
-        PaidSubscription paidSubscription = paidSubscriptionService.getSubscription(message.getFrom().getId());
+        PaidSubscription paidSubscription = paidSubscriptionService.getSubscription(
+                paidSubscriptionProperties.getPaidBotName(),
+                message.getFrom().getId());
         Locale locale = userService.getLocaleOrDefault(message.getFrom().getId());
         messageService.sendMessage(
                 SendMessage.builder()
                         .chatId(String.valueOf(message.getChatId()))
-                        .text(getSubscriptionMessage(paidSubscription, locale))
+                        .text(checkPaidSubscriptionMessageBuilder.getMessage(paidSubscription, locale))
                         .parseMode(ParseMode.HTML)
                         .build()
         );
@@ -80,52 +83,5 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
     @Override
     public String getCommandIdentifier() {
         return CommandNames.SUBSCRIPTION;
-    }
-
-    private String getSubscriptionMessage(PaidSubscription paidSubscription, Locale locale) {
-        PaidSubscriptionPlan activePlan = paidSubscriptionPlanService.getActivePlan();
-
-        if (paidSubscription == null) {
-            return localisationService.getMessage(
-                    MessagesProperties.MESSAGE_SUBSCRIPTION_NOT_FOUND,
-                    new Object[]{String.valueOf(activePlan.getPrice())},
-                    locale
-            );
-        } else if (paidSubscription.isTrial()) {
-            if (paidSubscription.isActive()) {
-                return localisationService.getMessage(
-                        MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
-                        new Object[]{
-                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
-                                String.valueOf(activePlan.getPrice())
-                        },
-                        locale);
-            } else {
-                return localisationService.getMessage(
-                        MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED,
-                        new Object[]{
-                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
-                                String.valueOf(activePlan.getPrice())
-                        },
-                        locale);
-            }
-        } else if (paidSubscription.isActive()) {
-            return localisationService.getMessage(
-                    MessagesProperties.MESSAGE_ACTIVE_SUBSCRIPTION,
-                    new Object[]{
-                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
-                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
-                            String.valueOf(activePlan.getPrice())},
-                    locale);
-        } else {
-            return localisationService.getMessage(
-                    MessagesProperties.MESSAGE_SUBSCRIPTION_EXPIRED,
-                    new Object[]{
-                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
-                            PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
-                            String.valueOf(activePlan.getPrice())
-                    },
-                    locale);
-        }
     }
 }
