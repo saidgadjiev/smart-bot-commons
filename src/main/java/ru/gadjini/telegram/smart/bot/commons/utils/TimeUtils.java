@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.utils;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneOffset;

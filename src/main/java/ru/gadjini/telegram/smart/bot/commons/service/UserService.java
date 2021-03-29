@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.User;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.dao.UserDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
@@ -27,7 +28,8 @@ public class UserService {
     private UserSettingsService userSettingsService;
 
     @Autowired
-    public UserService(UserDao userDao, LocalisationService localisationService, UserSettingsService userSettingsService) {
+    public UserService(@Caching UserDao userDao, LocalisationService localisationService,
+                       UserSettingsService userSettingsService) {
         this.userDao = userDao;
         this.localisationService = localisationService;
         this.userSettingsService = userSettingsService;
@@ -105,6 +107,6 @@ public class UserService {
     }
 
     public void changeLocale(int userId, Locale locale) {
-        userDao.updateLocale(userId, locale);
+        userDao.updateLocale(userId, locale.getLanguage());
     }
 }
