@@ -75,5 +75,4 @@ public class PaidSubscription {
     public boolean isActive() {
         return LocalDate.now(ZoneOffset.UTC).isBefore(endDate);
     }
-
 }

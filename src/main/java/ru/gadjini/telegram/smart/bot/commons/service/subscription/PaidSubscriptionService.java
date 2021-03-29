@@ -7,6 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 
 import java.time.LocalDate;
 import java.time.ZoneOffset;
@@ -29,7 +30,7 @@ public class PaidSubscriptionService {
     }
 
     public PaidSubscription getSubscription(String botName, int userId) {
-        return paidSubscriptionDao.getPaidSubscription(botName, userId);
+        return paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
     }
 
     public LocalDate createTrialSubscription(String botName, int userId) {
@@ -44,7 +45,15 @@ public class PaidSubscriptionService {
     }
 
     public LocalDate renewSubscription(String botName, int userId, int planId, Period period) {
-        return paidSubscriptionDao.updateEndDate(botName, userId, planId, period);
+        PaidSubscription paidSubscription = new PaidSubscription();
+        paidSubscription.setUserId(userId);
+        paidSubscription.setBotName(botName);
+        paidSubscription.setPlanId(planId);
+        paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(ZoneOffset.UTC), period));
+
+        paidSubscriptionDao.createOrRenew(paidSubscription, period);
+
+        return paidSubscription.getEndDate();
     }
 
     private LocalDate getTrialPeriodEndDate() {

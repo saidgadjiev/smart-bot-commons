@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 
 import java.sql.*;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.Map;
@@ -29,23 +28,14 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     @Override
     public void create(PaidSubscription paidSubscription) {
         jdbcTemplate.update(
-                "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id) VALUES (?, ?, ?, ?)",
-                ps -> {
-                    ps.setInt(1, paidSubscription.getUserId());
-                    ps.setString(2, paidSubscription.getBotName());
-                    ps.setDate(3, Date.valueOf(paidSubscription.getEndDate()));
-                    if (paidSubscription.getPlanId() == null) {
-                        ps.setNull(4, Types.INTEGER);
-                    } else {
-                        ps.setInt(4, paidSubscription.getPlanId());
-                    }
-                }
+                "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id) VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
+                ps -> setPaidSubscriptionCreateValues(ps, paidSubscription)
         );
         paidSubscription.setPurchaseDate(LocalDateTime.now(ZoneOffset.UTC));
     }
 
     @Override
-    public PaidSubscription getPaidSubscription(String botName, int userId) {
+    public PaidSubscription getByBotNameAndUserId(String botName, int userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM paid_subscription WHERE bot_name = '" + botName + "' AND user_id = ?",
                 ps -> ps.setInt(1, userId),
@@ -54,18 +44,19 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public LocalDate updateEndDate(String botName, int userId, int planId, Period period) {
+    public void createOrRenew(PaidSubscription paidSubscription, Period period) {
         GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("UPDATE paid_subscription " +
-                            "SET purchase_date = now(), end_date = GREATEST(end_date, now()) + ?, plan_id = ? " +
-                            "WHERE user_id = ? RETURNING end_date", Statement.RETURN_GENERATED_KEYS);
+                    PreparedStatement ps = con.prepareStatement("INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id) " +
+                            "VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE " +
+                            "SET purchase_date = now(), end_date = GREATEST(paid_subscription.end_date, now()) + ?, plan_id = ? " +
+                            "RETURNING end_date", Statement.RETURN_GENERATED_KEYS);
 
-                    ps.setObject(1, JodaTimeUtils.toPgInterval(period));
-                    ps.setInt(2, planId);
-                    ps.setInt(3, userId);
+                    setPaidSubscriptionCreateValues(ps, paidSubscription);
+                    ps.setObject(5, JodaTimeUtils.toPgInterval(period));
+                    ps.setInt(6, paidSubscription.getPlanId());
 
                     return ps;
                 },
@@ -75,7 +66,19 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         Map<String, Object> keys = generatedKeyHolder.getKeys();
         Date endDate = (Date) keys.get(PaidSubscription.END_DATE);
 
-        return endDate.toLocalDate();
+        paidSubscription.setEndDate(endDate.toLocalDate());
+        paidSubscription.setPurchaseDate(LocalDateTime.now(ZoneOffset.UTC));
+    }
+
+    private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
+        ps.setInt(1, paidSubscription.getUserId());
+        ps.setString(2, paidSubscription.getBotName());
+        ps.setDate(3, Date.valueOf(paidSubscription.getEndDate()));
+        if (paidSubscription.getPlanId() == null) {
+            ps.setNull(4, Types.INTEGER);
+        } else {
+            ps.setInt(4, paidSubscription.getPlanId());
+        }
     }
 
     private PaidSubscription map(ResultSet rs) throws SQLException {
@@ -83,6 +86,10 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
         paidSubscription.setEndDate(rs.getDate(PaidSubscription.END_DATE).toLocalDate());
         paidSubscription.setBotName(rs.getString(PaidSubscription.BOT_NAME));
+        int planId = rs.getInt(PaidSubscription.PLAN_ID);
+        if (!rs.wasNull()) {
+            paidSubscription.setPlanId(planId);
+        }
         paidSubscription.setPurchaseDate(rs.getTimestamp(PaidSubscription.PURCHASE_DATE).toLocalDateTime());
 
         return paidSubscription;

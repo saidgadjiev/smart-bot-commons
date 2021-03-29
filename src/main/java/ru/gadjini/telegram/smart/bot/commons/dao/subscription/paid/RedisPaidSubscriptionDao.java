@@ -47,13 +47,13 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getPaidSubscription(String botName, int userId) {
+    public PaidSubscription getByBotNameAndUserId(String botName, int userId) {
         PaidSubscription fromRedis = getFromRedis(botName, userId);
 
         if (fromRedis != null) {
             return fromRedis;
         }
-        PaidSubscription fromDb = paidSubscriptionDao.getPaidSubscription(botName, userId);
+        PaidSubscription fromDb = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
 
         if (fromDb != null) {
             storeToRedis(fromDb);
@@ -63,12 +63,9 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public LocalDate updateEndDate(String botName, int userId, int planId, Period period) {
-        LocalDate result = paidSubscriptionDao.updateEndDate(botName, userId, planId, period);
-
-        redisTemplate.opsForHash().putAll(getKey(botName, userId), Map.of(PaidSubscription.PLAN_ID, planId, PaidSubscription.END_DATE, result));
-
-        return result;
+    public void createOrRenew(PaidSubscription paidSubscription, Period period) {
+        paidSubscriptionDao.createOrRenew(paidSubscription, period);
+        storeToRedis(paidSubscription);
     }
 
     private PaidSubscription getFromRedis(String botName, int userId) {
@@ -84,6 +81,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
                 subscription.setPlanId(objects.get(0) == null ? null : objectMapper.readValue((String) objects.get(0), Integer.class));
                 subscription.setEndDate(objectMapper.readValue((String) objects.get(1), LocalDate.class));
                 subscription.setPurchaseDate(objectMapper.readValue((String) objects.get(2), LocalDateTime.class));
+                subscription.setBotName(botName);
                 subscription.setUserId(userId);
 
                 return subscription;
