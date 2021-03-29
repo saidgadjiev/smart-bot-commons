@@ -10,12 +10,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
-import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
-import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.StartCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -29,25 +27,24 @@ public class StartCommandFilter extends BaseBotFilter {
 
     private MessageService messageService;
 
-    private LocalisationService localisationService;
-
     private ReplyKeyboardService replyKeyboardService;
 
     private CommandNavigator commandNavigator;
 
-    private CommandMessageBuilder commandMessageBuilder;
+    private StartCommandMessageBuilder startCommandMessageBuilder;
 
     @Autowired
     public StartCommandFilter(CommandParser commandParser, UserService userService,
-                              @TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
-                              @KeyboardHolder ReplyKeyboardService replyKeyboardService, CommandNavigator commandNavigator, CommandMessageBuilder commandMessageBuilder) {
+                              @TgMessageLimitsControl MessageService messageService,
+                              @KeyboardHolder ReplyKeyboardService replyKeyboardService,
+                              CommandNavigator commandNavigator,
+                              StartCommandMessageBuilder startCommandMessageBuilder) {
         this.commandParser = commandParser;
         this.userService = userService;
         this.messageService = messageService;
-        this.localisationService = localisationService;
         this.replyKeyboardService = replyKeyboardService;
         this.commandNavigator = commandNavigator;
-        this.commandMessageBuilder = commandMessageBuilder;
+        this.startCommandMessageBuilder = startCommandMessageBuilder;
     }
 
     @Override
@@ -77,9 +74,7 @@ public class StartCommandFilter extends BaseBotFilter {
         CreateOrUpdateResult createOrUpdateResult = userService.createOrUpdate(message.getFrom());
 
         if (createOrUpdateResult.isCreated()) {
-            String text = localisationService.getMessage(MessagesProperties.MESSAGE_WELCOME,
-                    new Object[]{commandMessageBuilder.getCommandsInfo(createOrUpdateResult.getUser().getLocale())},
-                    createOrUpdateResult.getUser().getLocale());
+            String text = startCommandMessageBuilder.getWelcomeMessage(createOrUpdateResult.getUser().getLocale());
             ReplyKeyboard mainMenu = replyKeyboardService.mainMenuKeyboard(message.getChatId(), createOrUpdateResult.getUser().getLocale());
             messageService.sendMessage(
                     SendMessage.builder().chatId(String.valueOf(message.getChatId())).text(text)

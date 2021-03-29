@@ -10,9 +10,9 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.HelpCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.HashSet;
@@ -24,21 +24,18 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
 
     private final MessageService messageService;
 
-    private LocalisationService localisationService;
-
     private UserService userService;
 
     private Set<String> names = new HashSet<>();
 
-    private CommandMessageBuilder commandMessageBuilder;
+    private HelpCommandMessageBuilder helpCommandMessageBuilder;
 
     @Autowired
     public HelpCommand(@TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
-                       UserService userService, CommandMessageBuilder commandMessageBuilder) {
+                       UserService userService, HelpCommandMessageBuilder helpCommandMessageBuilder) {
         this.messageService = messageService;
-        this.localisationService = localisationService;
         this.userService = userService;
-        this.commandMessageBuilder = commandMessageBuilder;
+        this.helpCommandMessageBuilder = helpCommandMessageBuilder;
         for (Locale locale : localisationService.getSupportedLocales()) {
             String message = localisationService.getMessage(MessagesProperties.HELP_COMMAND_NAME, locale, null);
             if (message != null) {
@@ -81,8 +78,8 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand {
 
     private void sendHelpMessage(int userId, Locale locale) {
         messageService.sendMessage(
-                SendMessage.builder().chatId(String.valueOf(userId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_HELP,
-                        new Object[]{commandMessageBuilder.getCommandsInfo(locale)},
-                        locale)).parseMode(ParseMode.HTML).build());
+                SendMessage.builder().chatId(String.valueOf(userId))
+                        .text(helpCommandMessageBuilder.getWelcomeMessage(locale))
+                        .parseMode(ParseMode.HTML).build());
     }
 }

@@ -14,6 +14,10 @@ import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.DummyCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultHelpCommandMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultStartCommandMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.HelpCommandMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.command.message.StartCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.DummyReplyKeyboardHolderService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartReplyKeyboardService;
@@ -55,5 +59,19 @@ public class DummyConfiguration {
             SubscriptionProperties subscriptionProperties
     ) {
         return new DefaultCheckPaidSubscriptionMessageBuilder(paidSubscriptionPlanService, localisationService, subscriptionProperties);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(HelpCommandMessageBuilder.class)
+    public HelpCommandMessageBuilder helpCommandMessageBuilder(LocalisationService localisationService,
+                                                               CommandMessageBuilder commandMessageBuilder) {
+        return new DefaultHelpCommandMessageBuilder(localisationService, commandMessageBuilder);
+    }
+
+    @Bean
+    @ConditionalOnMissingBean(StartCommandMessageBuilder.class)
+    public StartCommandMessageBuilder startCommandMessageBuilder(LocalisationService localisationService,
+                                                                 CommandMessageBuilder commandMessageBuilder) {
+        return new DefaultStartCommandMessageBuilder(localisationService, commandMessageBuilder);
     }
 }
