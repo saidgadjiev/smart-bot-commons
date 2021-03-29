@@ -9,6 +9,7 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -104,7 +105,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         values.put(PaidSubscription.PURCHASE_DATE, subscription.getPurchaseDate());
 
         redisTemplate.opsForHash().putAll(key, values);
-        redisTemplate.expire(key, 1, TimeUnit.DAYS);
+        redisTemplate.expire(key, TimeUtils.getSecondsToTheEndOfTheCurrentDay(), TimeUnit.SECONDS);
     }
 
     private String getKey(String botName, int userId) {

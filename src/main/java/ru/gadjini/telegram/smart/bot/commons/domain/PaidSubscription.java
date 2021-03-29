@@ -73,6 +73,7 @@ public class PaidSubscription {
     }
 
     public boolean isActive() {
-        return LocalDate.now(ZoneOffset.UTC).isBefore(endDate);
+        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+        return now.isBefore(endDate) || now.isEqual(endDate);
     }
 }
