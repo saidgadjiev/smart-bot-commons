@@ -99,7 +99,7 @@ public class RedisUserDao implements UserDao {
     private void setLastActivityUpdatedMarker(int userId) {
         String key = getLastActivityUpdatedKey(userId);
         redisTemplate.opsForValue().set(key, true);
-        redisTemplate.expire(key, TimeUtils.getSecondsToTheEndOfTheCurrentDay(), TimeUnit.SECONDS);
+        redisTemplate.expire(key, TimeUtils.getSecondsToTheEndOfTheCurrentDay(60), TimeUnit.SECONDS);
     }
 
     private String getLocaleKey(int userId) {

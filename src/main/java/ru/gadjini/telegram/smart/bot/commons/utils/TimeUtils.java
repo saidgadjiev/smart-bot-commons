@@ -10,10 +10,10 @@ public class TimeUtils {
     private TimeUtils() {
     }
 
-    public static int getSecondsToTheEndOfTheCurrentDay() {
+    public static int getSecondsToTheEndOfTheCurrentDay(int min) {
         LocalDateTime now = LocalDateTime.now(ZoneOffset.UTC);
         LocalDateTime endOfCurrentDay = now.toLocalDate().atTime(LocalTime.MAX);
 
-        return SmartMath.toExactInt(ChronoUnit.SECONDS.between(now, endOfCurrentDay));
+        return Math.max(SmartMath.toExactInt(ChronoUnit.SECONDS.between(now, endOfCurrentDay)), min);
     }
 }

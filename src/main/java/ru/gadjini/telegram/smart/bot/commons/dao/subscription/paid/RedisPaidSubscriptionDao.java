@@ -105,7 +105,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         values.put(PaidSubscription.PURCHASE_DATE, subscription.getPurchaseDate());
 
         redisTemplate.opsForHash().putAll(key, values);
-        redisTemplate.expire(key, TimeUtils.getSecondsToTheEndOfTheCurrentDay(), TimeUnit.SECONDS);
+        redisTemplate.expire(key, 1, TimeUnit.DAYS);
     }
 
     private String getKey(String botName, int userId) {
