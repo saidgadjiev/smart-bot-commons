@@ -2,7 +2,6 @@ package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 
@@ -26,14 +25,14 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
 
     @Override
     public String getMessage(PaidSubscription paidSubscription, Locale locale) {
-        PaidSubscriptionPlan activePlan = paidSubscriptionPlanService.getActivePlan();
+        double minPrice = paidSubscriptionPlanService.getMinPrice();
 
         if (paidSubscription == null) {
             return localisationService.getMessage(
                     MessagesProperties.MESSAGE_SUBSCRIPTION_NOT_FOUND,
                     new Object[]{
                             paidSubscriptionProperties.getPaymentBotName(),
-                            String.valueOf(activePlan.getPrice())},
+                            String.valueOf(minPrice)},
                     locale
             );
         } else if (paidSubscription.isTrial()) {
@@ -43,7 +42,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                         new Object[]{
                                 PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
                                 paidSubscriptionProperties.getPaymentBotName(),
-                                String.valueOf(activePlan.getPrice())
+                                String.valueOf(minPrice)
                         },
                         locale);
             } else {
@@ -52,7 +51,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                         new Object[]{
                                 PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
                                 paidSubscriptionProperties.getPaymentBotName(),
-                                String.valueOf(activePlan.getPrice())
+                                String.valueOf(minPrice)
                         },
                         locale);
             }
@@ -63,7 +62,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
                             PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             paidSubscriptionProperties.getPaymentBotName(),
-                            String.valueOf(activePlan.getPrice())},
+                            String.valueOf(minPrice)},
                     locale);
         } else {
             return localisationService.getMessage(
@@ -72,7 +71,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndDate()),
                             PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             paidSubscriptionProperties.getPaymentBotName(),
-                            String.valueOf(activePlan.getPrice())
+                            String.valueOf(minPrice)
                     },
                     locale);
         }

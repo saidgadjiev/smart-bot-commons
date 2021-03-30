@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
@@ -98,7 +97,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private void sendTrialSubscriptionStarted(User user, LocalDate trialSubscriptionEndDate) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
-        PaidSubscriptionPlan activePlan = paidSubscriptionPlanService.getActivePlan();
+        double minPrice = paidSubscriptionPlanService.getMinPrice();
 
         int userId = user.getId();
         messageService.sendMessage(
@@ -107,7 +106,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
                                                 PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscriptionEndDate),
-                                                String.valueOf(activePlan.getPrice())
+                                                String.valueOf(minPrice)
                                         }, locale))
                         .parseMode(ParseMode.HTML)
                         .build()

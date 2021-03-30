@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

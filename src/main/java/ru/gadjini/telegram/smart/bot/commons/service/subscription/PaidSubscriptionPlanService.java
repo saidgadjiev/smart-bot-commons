@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.PaidSubscriptionPlanDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 
+import java.util.List;
+
 @Service
 public class PaidSubscriptionPlanService {
 
@@ -15,8 +17,12 @@ public class PaidSubscriptionPlanService {
         this.paidSubscriptionPlanDao = paidSubscriptionPlanDao;
     }
 
-    public PaidSubscriptionPlan getActivePlan() {
-        return paidSubscriptionPlanDao.getActivePlan();
+    public List<PaidSubscriptionPlan> getActivePlans() {
+        return paidSubscriptionPlanDao.getActivePlans();
+    }
+
+    public double getMinPrice() {
+        return paidSubscriptionPlanDao.getMinPrice();
     }
 
     public PaidSubscriptionPlan getPlanById(int id) {

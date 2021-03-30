@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.List;
 
 @Service
 public class PaidSubscriptionPlanDao {
@@ -20,10 +21,17 @@ public class PaidSubscriptionPlanDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public PaidSubscriptionPlan getActivePlan() {
+    public List<PaidSubscriptionPlan> getActivePlans() {
         return jdbcTemplate.query(
-                "SELECT * FROM paid_subscription_plan WHERE active = true",
-                rs -> rs.next() ? map(rs) : null
+                "SELECT * FROM paid_subscription_plan WHERE active = true ORDER price",
+                (rs, rw) -> map(rs)
+        );
+    }
+
+    public Double getMinPrice() {
+        return jdbcTemplate.query(
+                "SELECT MIN(price) as mm FROM paid_subscription_plan WHERE active = true",
+                rs -> rs.next() ? null : rs.getDouble("mm")
         );
     }
 
