@@ -1,16 +1,22 @@
 package ru.gadjini.telegram.smart.bot.commons.service.command.navigator;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.navigator.keyboard.CommandNavigatorDao;
+import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 
 import java.util.Collection;
@@ -23,11 +29,20 @@ public class CommandNavigator {
 
     private Map<String, NavigableBotCommand> navigableBotCommands = new HashMap<>();
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(CommandNavigator.class);
+
     private CommandNavigatorDao navigatorDao;
 
+    private LocalisationService localisationService;
+
+    private UserService userService;
+
     @Autowired
-    public CommandNavigator(@Qualifier("redis") CommandNavigatorDao navigatorDao) {
+    public CommandNavigator(@Qualifier("redis") CommandNavigatorDao navigatorDao,
+                            LocalisationService localisationService, UserService userService) {
         this.navigatorDao = navigatorDao;
+        this.localisationService = localisationService;
+        this.userService = userService;
     }
 
     @Autowired
@@ -101,15 +116,13 @@ public class CommandNavigator {
         return new SilentPop(parentCommand.getKeyboard(chatId), parentCommand.getMessage(chatId));
     }
 
-    public void zeroRestore(long chatId, NavigableBotCommand botCommand) {
-        setCurrentCommand(chatId, botCommand);
-    }
-
     public NavigableBotCommand getCurrentCommand(long chatId) {
         String currCommand = navigatorDao.get(chatId);
 
         if (currCommand == null) {
-            return null;
+            LOGGER.debug("Bot restarted({})", chatId);
+            zeroRestore(chatId, navigableBotCommands.get(CommandNames.START_COMMAND_NAME));
+            throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, userService.getLocaleOrDefault((int) chatId)));
         }
 
         return navigableBotCommands.get(currCommand);
@@ -119,27 +132,21 @@ public class CommandNavigator {
         navigatorDao.set(chatId, command);
     }
 
-    public boolean isCurrentCommandThat(long chatId, String expectedCommand) {
-        String currCommand = navigatorDao.get(chatId);
-
-        if (currCommand == null) {
-            return false;
-        }
-
-        return currCommand.equals(expectedCommand);
-    }
-
     private void setCurrentCommand(long chatId, NavigableBotCommand navigableBotCommand) {
         navigatorDao.set(chatId, navigableBotCommand.getHistoryName());
     }
 
-    public class SilentPop {
+    private void zeroRestore(long chatId, NavigableBotCommand botCommand) {
+        setCurrentCommand(chatId, botCommand);
+    }
+
+    public static class SilentPop {
 
         private ReplyKeyboard replyKeyboardMarkup;
 
         private String message;
 
-        public SilentPop(ReplyKeyboard replyKeyboard, String message) {
+        private SilentPop(ReplyKeyboard replyKeyboard, String message) {
             this.replyKeyboardMarkup = replyKeyboard;
             this.message = message;
         }

@@ -87,6 +87,10 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
                 String command = commandParser.parseBotCommandName(update.getMessage());
                 BotCommand botCommand = commandsContainer.getBotCommand(command);
 
+                if (botCommand == null) {
+                    return false;
+                }
+
                 return botCommand.isChannelSubscriptionRequired();
             } else if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
                 KeyboardBotCommand keyboardBotCommand = commandsContainer.getKeyboardBotCommand(update.getMessage().getChatId(), text);

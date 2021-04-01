@@ -138,9 +138,13 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private boolean isPaidSubscriptionRequiredForUpdate(Update update) {
         if (update.hasMessage()) {
             String text = MessageUtils.getText(update.getMessage());
-            if (update.getMessage().isCommand()) {
+            if (commandsContainer.isBotCommand(update.getMessage())) {
                 String command = commandParser.parseBotCommandName(update.getMessage());
                 BotCommand botCommand = commandsContainer.getBotCommand(command);
+
+                if (botCommand == null) {
+                    return false;
+                }
 
                 return botCommand.isPaidSubscriptionRequired();
             } else if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
