@@ -6,6 +6,8 @@ public class CommandNames {
 
     public static final String START_COMMAND_NAME = "start";
 
+    public static final String TIME_COMMAND = "time";
+
     public static final String HELP_COMMAND = "help";
 
     public static final String CALLBACK_DELEGATE_COMMAND_NAME = "cdcn";

@@ -110,4 +110,6 @@ public class MessagesProperties {
     public static final String LANGUAGE_COMMAND_DESCRIPTION = "language.command.description";
 
     public static final String SUBSCRIPTION_COMMAND_DESCRIPTION = "subscription.command.description";
+
+    public static final String BOT_TIME_COMMAND_DESCRIPTION = "bot.time.command.description";
 }

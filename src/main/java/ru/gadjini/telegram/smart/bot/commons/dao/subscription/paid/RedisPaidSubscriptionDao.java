@@ -11,7 +11,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,7 +80,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
 
                 subscription.setPlanId(objects.get(0) == null ? null : objectMapper.readValue((String) objects.get(0), Integer.class));
                 subscription.setEndDate(objectMapper.readValue((String) objects.get(1), LocalDate.class));
-                subscription.setPurchaseDate(objectMapper.readValue((String) objects.get(2), LocalDateTime.class));
+                subscription.setPurchaseDate(objectMapper.readValue((String) objects.get(2), ZonedDateTime.class));
                 subscription.setBotName(botName);
                 subscription.setUserId(userId);
 

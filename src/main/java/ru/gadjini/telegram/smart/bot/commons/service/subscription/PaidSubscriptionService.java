@@ -8,15 +8,17 @@ import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscript
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.LocalDate;
-import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 
 @Service
 public class PaidSubscriptionService {
 
-    public static final DateTimeFormatter PAID_SUBSCRIPTION_END_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy");
+    public static final DateTimeFormatter HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy '<i>'z'</i>'");
+
+    public static final DateTimeFormatter PAID_SUBSCRIPTION_END_DATE_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy z");
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
@@ -33,7 +35,7 @@ public class PaidSubscriptionService {
         return paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
     }
 
-    public LocalDate createTrialSubscription(String botName, int userId) {
+    public PaidSubscription createTrialSubscription(String botName, int userId) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botName);
@@ -41,22 +43,22 @@ public class PaidSubscriptionService {
 
         paidSubscriptionDao.create(paidSubscription);
 
-        return paidSubscription.getEndDate();
+        return paidSubscription;
     }
 
-    public LocalDate renewSubscription(String botName, int userId, int planId, Period period) {
+    public PaidSubscription renewSubscription(String botName, int userId, int planId, Period period) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botName);
         paidSubscription.setPlanId(planId);
-        paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(ZoneOffset.UTC), period));
+        paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(TimeUtils.UTC), period));
 
         paidSubscriptionDao.createOrRenew(paidSubscription, period);
 
-        return paidSubscription.getEndDate();
+        return paidSubscription;
     }
 
     private LocalDate getTrialPeriodEndDate() {
-        return LocalDate.now(ZoneOffset.UTC).plusDays(subscriptionProperties.getTrialPeriod());
+        return LocalDate.now(TimeUtils.UTC).plusDays(subscriptionProperties.getTrialPeriod());
     }
 }

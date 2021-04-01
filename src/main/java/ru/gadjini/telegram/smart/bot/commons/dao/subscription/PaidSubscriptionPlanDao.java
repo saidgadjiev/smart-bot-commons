@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.subscription;
 
+import org.joda.time.Period;
 import org.postgresql.util.PGInterval;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -23,7 +24,7 @@ public class PaidSubscriptionPlanDao {
 
     public List<PaidSubscriptionPlan> getActivePlans() {
         return jdbcTemplate.query(
-                "SELECT * FROM paid_subscription_plan WHERE active = true ORDER price",
+                "SELECT * FROM paid_subscription_plan WHERE active = true ORDER BY price",
                 (rs, rw) -> map(rs)
         );
     }
@@ -31,7 +32,7 @@ public class PaidSubscriptionPlanDao {
     public Double getMinPrice() {
         return jdbcTemplate.query(
                 "SELECT MIN(price) as mm FROM paid_subscription_plan WHERE active = true",
-                rs -> rs.next() ? null : rs.getDouble("mm")
+                rs -> rs.next() ? rs.getDouble("mm") : 1
         );
     }
 
@@ -40,6 +41,14 @@ public class PaidSubscriptionPlanDao {
                 "SELECT * FROM paid_subscription_plan WHERE id = ?",
                 ps -> ps.setInt(1, id),
                 rs -> rs.next() ? map(rs) : null
+        );
+    }
+
+    public Period getPlanPeriod(int id) {
+        return jdbcTemplate.query(
+                "SELECT period FROM paid_subscription_plan WHERE id = ?",
+                ps -> ps.setInt(1, id),
+                rs -> rs.next() ? JodaTimeUtils.toPeriod((PGInterval) rs.getObject(PaidSubscriptionPlan.PERIOD)) : null
         );
     }
 

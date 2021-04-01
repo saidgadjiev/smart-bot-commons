@@ -18,6 +18,10 @@ public class DummyCommandMessageBuilder implements CommandMessageBuilder {
     public String getCommandsInfo(Locale locale) {
         return CommandParser.COMMAND_START_CHAR + CommandNames.START_COMMAND_NAME +
                 " - " + localisationService.getMessage(MessagesProperties.START_COMMAND_DESCRIPTION, locale) +
+                "\n" + CommandParser.COMMAND_START_CHAR + CommandNames.TIME_COMMAND +
+                " - " + localisationService.getMessage(MessagesProperties.BOT_TIME_COMMAND_DESCRIPTION, locale) +
+                "\n" + CommandParser.COMMAND_START_CHAR + CommandNames.LANGUAGE_COMMAND_NAME +
+                " - " + localisationService.getMessage(MessagesProperties.LANGUAGE_COMMAND_DESCRIPTION, locale) +
                 "\n" + CommandParser.COMMAND_START_CHAR + CommandNames.HELP_COMMAND +
                 " - " + localisationService.getMessage(MessagesProperties.HELP_COMMAND_DESCRIPTION, locale);
     }

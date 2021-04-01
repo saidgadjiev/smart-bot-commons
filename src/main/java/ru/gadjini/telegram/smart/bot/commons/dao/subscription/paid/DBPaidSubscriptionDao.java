@@ -8,10 +8,10 @@ import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.util.Map;
 
 @Repository
@@ -31,7 +31,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
                 "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id) VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
                 ps -> setPaidSubscriptionCreateValues(ps, paidSubscription)
         );
-        paidSubscription.setPurchaseDate(LocalDateTime.now(ZoneOffset.UTC));
+        paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));
     }
 
     @Override
@@ -67,7 +67,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         Date endDate = (Date) keys.get(PaidSubscription.END_DATE);
 
         paidSubscription.setEndDate(endDate.toLocalDate());
-        paidSubscription.setPurchaseDate(LocalDateTime.now(ZoneOffset.UTC));
+        paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));
     }
 
     private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
@@ -90,7 +90,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         if (!rs.wasNull()) {
             paidSubscription.setPlanId(planId);
         }
-        paidSubscription.setPurchaseDate(rs.getTimestamp(PaidSubscription.PURCHASE_DATE).toLocalDateTime());
+        paidSubscription.setPurchaseDate(ZonedDateTime.of(rs.getTimestamp(PaidSubscription.PURCHASE_DATE).toLocalDateTime(), TimeUtils.UTC));
 
         return paidSubscription;
     }

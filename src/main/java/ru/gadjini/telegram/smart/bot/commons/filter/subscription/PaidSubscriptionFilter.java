@@ -21,8 +21,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboar
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 
-import java.time.LocalDate;
 import java.util.Locale;
 
 @Component
@@ -81,8 +81,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         PaidSubscription subscription = paidSubscriptionService.getSubscription(subscriptionProperties.getPaidBotName(), user.getId());
 
         if (subscription == null) {
-            LocalDate trialSubscriptionEndDate = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
-            sendTrialSubscriptionStarted(user, trialSubscriptionEndDate);
+            PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
+            sendTrialSubscriptionStarted(user, trialSubscription);
 
             return false;
         }
@@ -95,7 +95,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         return true;
     }
 
-    private void sendTrialSubscriptionStarted(User user, LocalDate trialSubscriptionEndDate) {
+    private void sendTrialSubscriptionStarted(User user, PaidSubscription trialSubscription) {
         Locale locale = userService.getLocaleOrDefault(user.getId());
         double minPrice = paidSubscriptionPlanService.getMinPrice();
 
@@ -105,8 +105,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                         .text(
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
-                                                PaidSubscriptionService.PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscriptionEndDate),
-                                                String.valueOf(minPrice)
+                                                PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
+                                                NumberUtils.toString(minPrice)
                                         }, locale))
                         .parseMode(ParseMode.HTML)
                         .build()

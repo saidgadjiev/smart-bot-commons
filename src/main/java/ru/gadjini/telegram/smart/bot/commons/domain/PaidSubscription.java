@@ -1,8 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
+
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 
 public class PaidSubscription {
 
@@ -22,7 +23,7 @@ public class PaidSubscription {
 
     private LocalDate endDate;
 
-    private LocalDateTime purchaseDate;
+    private ZonedDateTime purchaseDate;
 
     private String botName;
 
@@ -38,6 +39,10 @@ public class PaidSubscription {
 
     public LocalDate getEndDate() {
         return endDate;
+    }
+
+    public ZonedDateTime getZonedEndDate() {
+        return TimeUtils.toZonedDateTime(endDate);
     }
 
     public void setEndDate(LocalDate endDate) {
@@ -60,11 +65,11 @@ public class PaidSubscription {
         this.planId = planId;
     }
 
-    public LocalDateTime getPurchaseDate() {
+    public ZonedDateTime getPurchaseDate() {
         return purchaseDate;
     }
 
-    public void setPurchaseDate(LocalDateTime purchaseDate) {
+    public void setPurchaseDate(ZonedDateTime purchaseDate) {
         this.purchaseDate = purchaseDate;
     }
 
@@ -73,7 +78,7 @@ public class PaidSubscription {
     }
 
     public boolean isActive() {
-        LocalDate now = LocalDate.now(ZoneOffset.UTC);
+        LocalDate now = LocalDate.now(TimeUtils.UTC);
         return now.isBefore(endDate) || now.isEqual(endDate);
     }
 }

@@ -18,6 +18,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultHelp
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultStartCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.HelpCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.StartCommandMessageBuilder;
+import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionProvider;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.DummyReplyKeyboardHolderService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartReplyKeyboardService;
@@ -56,9 +57,11 @@ public class DummyConfiguration {
     public DefaultCheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder(
             PaidSubscriptionPlanService paidSubscriptionPlanService,
             LocalisationService localisationService,
-            SubscriptionProperties subscriptionProperties
+            SubscriptionProperties subscriptionProperties,
+            SubscriptionTimeDeclensionProvider subscriptionTimeDeclensionProvider
     ) {
-        return new DefaultCheckPaidSubscriptionMessageBuilder(paidSubscriptionPlanService, localisationService, subscriptionProperties);
+        return new DefaultCheckPaidSubscriptionMessageBuilder(paidSubscriptionPlanService,
+                localisationService, subscriptionProperties, subscriptionTimeDeclensionProvider);
     }
 
     @Bean

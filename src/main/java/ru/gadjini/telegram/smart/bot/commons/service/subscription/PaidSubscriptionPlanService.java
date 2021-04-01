@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
+import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.PaidSubscriptionPlanDao;
@@ -27,5 +28,9 @@ public class PaidSubscriptionPlanService {
 
     public PaidSubscriptionPlan getPlanById(int id) {
         return paidSubscriptionPlanDao.getById(id);
+    }
+
+    public Period getPlanPeriod(int id) {
+        return paidSubscriptionPlanDao.getPlanPeriod(id);
     }
 }

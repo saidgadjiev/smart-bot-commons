@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
 
 public class SmartFileUtils {
@@ -18,7 +17,7 @@ public class SmartFileUtils {
         try {
             FileTime creationTime = (FileTime) Files.getAttribute(file.toPath(), "creationTime");
 
-            LocalDateTime creationDateTime = creationTime.toInstant().atZone(ZoneOffset.UTC).toLocalDateTime();
+            LocalDateTime creationDateTime = creationTime.toInstant().atZone(TimeUtils.UTC).toLocalDateTime();
 
             long between = ChronoUnit.DAYS.between(creationDateTime, LocalDateTime.now());
 
