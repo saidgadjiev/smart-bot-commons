@@ -22,7 +22,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
+import java.time.ZonedDateTime;
 import java.util.Locale;
 
 @Component
@@ -106,6 +108,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
                                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
+                                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                                 NumberUtils.toString(minPrice)
                                         }, locale))
                         .parseMode(ParseMode.HTML)

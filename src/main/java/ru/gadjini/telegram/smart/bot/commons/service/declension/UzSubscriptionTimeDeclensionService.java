@@ -12,20 +12,7 @@ public class UzSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
     }
 
     @Override
-    public String day(int days) {
-        if (days == 1) {
-            return "1 day";
-        }
-
-        return days + " days";
-    }
-
-    @Override
     public String months(int months) {
-        if (months == 1) {
-            return "1 month";
-        }
-
-        return months + " months";
+        return months + " oy";
     }
 }

@@ -11,7 +11,6 @@ public class EnSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         return LocalisationService.EN_LOCALE;
     }
 
-    @Override
     public String day(int days) {
         if (days == 1) {
             return "1 day";

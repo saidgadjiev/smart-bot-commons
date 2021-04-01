@@ -11,7 +11,6 @@ public class RuSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         return LocalisationService.RU_LOCALE;
     }
 
-    @Override
     public String day(int days) {
         if (days == 1) {
             return "1 день";
