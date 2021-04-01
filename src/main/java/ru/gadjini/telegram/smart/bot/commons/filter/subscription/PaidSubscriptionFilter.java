@@ -8,6 +8,8 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
@@ -17,10 +19,12 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
+import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.utils.MessageUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
@@ -36,6 +40,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private CommandsContainer commandsContainer;
 
+    private CommandNavigator commandNavigator;
+
     private UserService userService;
 
     private LocalisationService localisationService;
@@ -50,7 +56,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     @Autowired
     public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
-                                  CommandsContainer commandsContainer, @TgMessageLimitsControl MessageService messageService,
+                                  CommandsContainer commandsContainer, CommandNavigator commandNavigator,
+                                  @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService,
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
@@ -58,6 +65,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         this.subscriptionProperties = subscriptionProperties;
         this.commandParser = commandParser;
         this.commandsContainer = commandsContainer;
+        this.commandNavigator = commandNavigator;
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
@@ -128,11 +136,24 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     }
 
     private boolean isPaidSubscriptionRequiredForUpdate(Update update) {
-        if (update.hasMessage() && update.getMessage().isCommand()) {
-            String command = commandParser.parseBotCommandName(update.getMessage());
-            BotCommand botCommand = commandsContainer.getBotCommand(command);
+        if (update.hasMessage()) {
+            String text = MessageUtils.getText(update.getMessage());
+            if (update.getMessage().isCommand()) {
+                String command = commandParser.parseBotCommandName(update.getMessage());
+                BotCommand botCommand = commandsContainer.getBotCommand(command);
 
-            return botCommand.isPaidSubscriptionRequired();
+                return botCommand.isPaidSubscriptionRequired();
+            } else if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
+                KeyboardBotCommand keyboardBotCommand = commandsContainer.getKeyboardBotCommand(update.getMessage().getChatId(), text);
+
+                return keyboardBotCommand.isPaidSubscriptionRequired();
+            } else {
+                NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(update.getMessage().getChatId());
+
+                if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(update.getMessage())) {
+                    navigableBotCommand.isPaidSubscriptionRequired(update.getMessage());
+                }
+            }
         }
 
         return true;

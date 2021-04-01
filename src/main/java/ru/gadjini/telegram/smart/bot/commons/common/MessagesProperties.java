@@ -31,6 +31,8 @@ public class MessagesProperties {
 
     public static final String MESSAGE_BOT_RESTARTED = "message.bot.restarted";
 
+    public static final String MESSAGE_BOT_RESTARTED_ANSWER = "message.bot.restarted.answer";
+
     public static final String MESSAGE_CHANNEL_SUBSCRIPTION_REQUIRED = "message.channel.subscription.required";
 
     public static final String MESSAGE_PAID_SUBSCRIPTION_REQUIRED = "message.paid.subscription.required";

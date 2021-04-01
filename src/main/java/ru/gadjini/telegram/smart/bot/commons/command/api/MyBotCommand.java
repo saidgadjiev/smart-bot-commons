@@ -4,9 +4,6 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 
 public interface MyBotCommand {
 
-    default void processNonCommandUpdate(Message message, String text) {
-    }
-
     default boolean acceptNonCommandMessage(Message message) {
         return true;
     }
@@ -23,6 +20,14 @@ public interface MyBotCommand {
     }
 
     default boolean isPaidSubscriptionRequired() {
+        return true;
+    }
+
+    default boolean isChannelSubscriptionRequired(Message message) {
+        return true;
+    }
+
+    default boolean isPaidSubscriptionRequired(Message message) {
         return true;
     }
 }

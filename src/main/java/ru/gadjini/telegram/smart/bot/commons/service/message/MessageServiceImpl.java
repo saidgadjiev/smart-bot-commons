@@ -17,7 +17,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
@@ -135,13 +134,6 @@ public class MessageServiceImpl implements MessageService {
         sendMessage(SendMessage.builder().chatId(String.valueOf(chatId))
                 .text(localisationService.getMessage(MessagesProperties.MESSAGE_ERROR, locale))
                 .parseMode(ParseMode.HTML).build());
-    }
-
-    @Override
-    public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        sendMessage(SendMessage.builder().chatId(String.valueOf(chatId)).text(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, locale))
-                .parseMode(ParseMode.HTML)
-                .replyMarkup(replyKeyboard).build());
     }
 
     @Override

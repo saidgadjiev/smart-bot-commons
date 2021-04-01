@@ -1,9 +1,13 @@
 package ru.gadjini.telegram.smart.bot.commons.command.api;
 
+import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 
 public interface NavigableBotCommand extends MyBotCommand {
+
+    default void processNonCommandUpdate(Message message, String text) {
+    }
 
     String getParentCommandName(long chatId);
 

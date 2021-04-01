@@ -8,6 +8,10 @@ public class UserException extends RuntimeException {
 
     private boolean printLog = false;
 
+    private boolean answerPreCheckout = false;
+
+    private String preCheckoutQueryId;
+
     public UserException(String humanMessage) {
         super(humanMessage);
         this.humanMessage = humanMessage;
@@ -35,5 +39,19 @@ public class UserException extends RuntimeException {
         this.replyToMessageId = replyToMessageId;
 
         return this;
+    }
+
+    public UserException answerPreCheckout(String preCheckoutQueryId) {
+        this.preCheckoutQueryId = preCheckoutQueryId;
+        answerPreCheckout = true;
+        return this;
+    }
+
+    public boolean isAnswerPreCheckout() {
+        return answerPreCheckout;
+    }
+
+    public String getPreCheckoutQueryId() {
+        return preCheckoutQueryId;
     }
 }

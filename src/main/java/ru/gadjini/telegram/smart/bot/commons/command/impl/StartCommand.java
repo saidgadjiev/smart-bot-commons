@@ -45,6 +45,16 @@ public class StartCommand implements BotCommand, NavigableBotCommand {
     }
 
     @Override
+    public boolean isChannelSubscriptionRequired(Message message) {
+        return false;
+    }
+
+    @Override
+    public boolean isPaidSubscriptionRequired(Message message) {
+        return false;
+    }
+
+    @Override
     public void processMessage(Message message, String[] params) {
         messageService.sendMessage(
                 SendMessage.builder()

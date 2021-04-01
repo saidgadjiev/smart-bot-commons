@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.job.TgMethodExecutor;
 
 import java.util.Locale;
@@ -92,8 +91,4 @@ public class AsyncMessageService implements MessageService {
         messageService.sendErrorMessage(chatId, locale);
     }
 
-    @Override
-    public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        messageService.sendBotRestartedMessage(chatId, replyKeyboard, locale);
-    }
 }

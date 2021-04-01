@@ -12,7 +12,6 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 
 import java.util.ArrayList;
@@ -107,11 +106,6 @@ public class TgLimitsMessageService implements MessageService {
     @Override
     public void editMessageCaption(EditMessageCaption context) {
         messageService.editMessageCaption(context);
-    }
-
-    @Override
-    public void sendBotRestartedMessage(long chatId, ReplyKeyboard replyKeyboard, Locale locale) {
-        messageService.sendBotRestartedMessage(chatId, replyKeyboard, locale);
     }
 
     @Override

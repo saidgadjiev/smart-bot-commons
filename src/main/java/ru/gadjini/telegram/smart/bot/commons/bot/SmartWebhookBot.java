@@ -7,18 +7,17 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.api.methods.BotApiMethod;
-import org.telegram.telegrambots.meta.api.methods.ParseMode;
-import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
-import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
+import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.filter.BotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.UserExceptionHandler;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
@@ -35,17 +34,21 @@ public class SmartWebhookBot extends SpringWebhookBot {
 
     private MessageService messageService;
 
+    private UserExceptionHandler userExceptionHandler;
+
     private UserService userService;
 
     @Autowired
     public SmartWebhookBot(BotProperties botProperties, BotFilter botFilter,
                            @TgMessageLimitsControl MessageService messageService,
-                           UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook) {
+                           UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook,
+                           UserExceptionHandler userExceptionHandler) {
         super(botOptions, setWebhook);
         this.botProperties = botProperties;
         this.botFilter = botFilter;
         this.messageService = messageService;
         this.userService = userService;
+        this.userExceptionHandler = userExceptionHandler;
 
         LOGGER.debug("Webhook bot({})", setWebhook.getUrl());
     }
@@ -57,12 +60,7 @@ public class SmartWebhookBot extends SpringWebhookBot {
         } catch (InvalidMediaMessageException ignore) {
 
         } catch (UserException ex) {
-            if (ex.isPrintLog()) {
-                LOGGER.error(ex.getMessage(), ex);
-            }
-            messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(TgMessage.getChatId(update)))
-                    .parseMode(ParseMode.HTML)
-                    .text(ex.getHumanMessage()).replyToMessageId(ex.getReplyToMessageId()).build());
+            userExceptionHandler.handle(update, ex);
         } catch (Exception ex) {
             if (!userService.handleBotBlockedByUser(ex)) {
                 LOGGER.error(ex.getMessage(), ex);
