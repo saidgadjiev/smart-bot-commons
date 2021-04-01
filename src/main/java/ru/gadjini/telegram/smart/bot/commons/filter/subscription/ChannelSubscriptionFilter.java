@@ -96,7 +96,7 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
                 NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(update.getMessage().getChatId());
 
                 if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(update.getMessage())) {
-                    navigableBotCommand.isChannelSubscriptionRequired(update.getMessage());
+                    return navigableBotCommand.isChannelSubscriptionRequired(update.getMessage());
                 }
             }
         }
