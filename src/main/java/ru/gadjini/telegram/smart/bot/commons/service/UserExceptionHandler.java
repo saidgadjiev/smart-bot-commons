@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -20,7 +21,7 @@ public class UserExceptionHandler {
     private MessageService messageService;
 
     @Autowired
-    public UserExceptionHandler(MessageService messageService) {
+    public UserExceptionHandler(@TgMessageLimitsControl MessageService messageService) {
         this.messageService = messageService;
     }
 
