@@ -7,7 +7,9 @@ import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.declension.SubscriptionTimeDeclensionProvider;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
+import java.time.ZonedDateTime;
 import java.util.Locale;
 
 public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubscriptionMessageBuilder {
@@ -48,6 +50,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
                         new Object[]{
                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
+                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                 paidSubscriptionProperties.getPaymentBotName(),
                                 NumberUtils.toString(minPrice)
                         },
@@ -57,6 +60,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED,
                         new Object[]{
                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
+                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                 paidSubscriptionProperties.getPaymentBotName(),
                                 NumberUtils.toString(minPrice)
                         },
@@ -70,6 +74,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
                             subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).months(period.getMonths()),
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
+                            TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),
                             NumberUtils.toString(minPrice)},
                     locale);
@@ -81,6 +86,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
                             subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).months(period.getMonths()),
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
+                            TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),
                             NumberUtils.toString(minPrice)
                     },

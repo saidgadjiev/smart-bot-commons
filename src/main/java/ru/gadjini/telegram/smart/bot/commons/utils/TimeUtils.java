@@ -1,9 +1,12 @@
 package ru.gadjini.telegram.smart.bot.commons.utils;
 
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
 public class TimeUtils {
+
+    public static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
 
     public static final ZoneId UTC = ZoneId.of("UTC");
 
