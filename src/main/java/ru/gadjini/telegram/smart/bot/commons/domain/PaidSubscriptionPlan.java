@@ -14,6 +14,7 @@ public class PaidSubscriptionPlan {
 
     private int id;
 
+    //In USD
     private double price;
 
     private Period period;
