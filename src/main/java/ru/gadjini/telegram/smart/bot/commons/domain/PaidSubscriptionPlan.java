@@ -16,8 +16,6 @@ public class PaidSubscriptionPlan {
 
     private double price;
 
-    private String currency;
-
     private Period period;
 
     public int getId() {
@@ -34,14 +32,6 @@ public class PaidSubscriptionPlan {
 
     public void setPrice(double price) {
         this.price = price;
-    }
-
-    public String getCurrency() {
-        return currency;
-    }
-
-    public void setCurrency(String currency) {
-        this.currency = currency;
     }
 
     public Period getPeriod() {

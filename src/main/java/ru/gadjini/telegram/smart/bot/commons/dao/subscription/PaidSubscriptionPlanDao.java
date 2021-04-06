@@ -55,7 +55,6 @@ public class PaidSubscriptionPlanDao {
     private PaidSubscriptionPlan map(ResultSet rs) throws SQLException {
         PaidSubscriptionPlan paidSubscriptionPlan = new PaidSubscriptionPlan();
         paidSubscriptionPlan.setId(rs.getInt(PaidSubscriptionPlan.ID));
-        paidSubscriptionPlan.setCurrency(rs.getString(PaidSubscriptionPlan.CURRENCY));
         paidSubscriptionPlan.setPrice(rs.getDouble(PaidSubscriptionPlan.PRICE));
         paidSubscriptionPlan.setPeriod(JodaTimeUtils.toPeriod((PGInterval) rs.getObject(PaidSubscriptionPlan.PERIOD)));
 
