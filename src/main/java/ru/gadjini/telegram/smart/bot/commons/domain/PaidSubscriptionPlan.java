@@ -8,6 +8,7 @@ public class PaidSubscriptionPlan {
 
     public static final String PRICE = "price";
 
+    //Удалить в ближайшем будущем
     public static final String CURRENCY = "currency";
 
     public static final String PERIOD = "period";
