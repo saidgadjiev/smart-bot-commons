@@ -10,22 +10,14 @@ public class NumberUtils {
 
     }
 
-    public static String toString(double number) {
-        if (number % 1 == 0) {
-            return String.valueOf((int) number);
-        }
-
-        return String.valueOf(number);
-    }
-
     public static String toString(double number, int decimalPoints) {
-        DecimalFormat decimalFormat = new DecimalFormat("0." + StringUtils.repeat("0", decimalPoints));
+        DecimalFormat decimalFormat = new DecimalFormat("0." + StringUtils.repeat("#", decimalPoints));
 
         return decimalFormat.format(number);
     }
 
     public static double round(double number, int decimalPoints) {
-        DecimalFormat decimalFormat = new DecimalFormat("0." + StringUtils.repeat("0", decimalPoints));
+        DecimalFormat decimalFormat = new DecimalFormat("0." + StringUtils.repeat("#", decimalPoints));
         String strNumber = decimalFormat.format(number);
 
         return Double.parseDouble(strNumber);

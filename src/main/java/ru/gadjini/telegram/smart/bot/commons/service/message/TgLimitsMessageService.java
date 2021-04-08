@@ -19,11 +19,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
+import static ru.gadjini.telegram.smart.bot.commons.common.TgConstants.TEXT_LENGTH_LIMIT;
+
 @Service
 @TgMessageLimitsControl
 public class TgLimitsMessageService implements MessageService {
-
-    public static final int TEXT_LENGTH_LIMIT = 4000;
 
     private MessageService messageService;
 

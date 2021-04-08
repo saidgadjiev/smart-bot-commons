@@ -11,6 +11,8 @@ public class TgConstants {
 
     public static final int PAYMENTS_AMOUNT_FACTOR = 100;
 
+    public static final int TEXT_LENGTH_LIMIT = 4000;
+
     public static final String USD_CURRENCY = "usd";
 
     public static final String RUB_CURRENCY = "rub";

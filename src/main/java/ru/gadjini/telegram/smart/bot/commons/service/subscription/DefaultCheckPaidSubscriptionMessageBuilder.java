@@ -41,7 +41,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                     MessagesProperties.MESSAGE_SUBSCRIPTION_NOT_FOUND,
                     new Object[]{
                             paidSubscriptionProperties.getPaymentBotName(),
-                            NumberUtils.toString(minPrice)},
+                            NumberUtils.toString(minPrice, 2)},
                     locale
             );
         } else if (paidSubscription.isTrial()) {
@@ -52,7 +52,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
                                 TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                 paidSubscriptionProperties.getPaymentBotName(),
-                                NumberUtils.toString(minPrice)
+                                NumberUtils.toString(minPrice, 2)
                         },
                         locale);
             } else {
@@ -62,7 +62,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
                                 TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                 paidSubscriptionProperties.getPaymentBotName(),
-                                NumberUtils.toString(minPrice)
+                                NumberUtils.toString(minPrice, 2)
                         },
                         locale);
             }
@@ -76,7 +76,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),
-                            NumberUtils.toString(minPrice)},
+                            NumberUtils.toString(minPrice, 2)},
                     locale);
         } else {
             Period period = paidSubscriptionPlanService.getPlanPeriod(paidSubscription.getPlanId());
@@ -88,7 +88,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),
-                            NumberUtils.toString(minPrice)
+                            NumberUtils.toString(minPrice, 2)
                     },
                     locale);
         }
