@@ -23,12 +23,18 @@ import java.util.concurrent.TimeUnit;
 public class TelegramHttpClientBuilder {
 
     public static CloseableHttpClient build(DefaultBotOptions options) {
+        int connPerRoute = 1000;
+        int maxConnTotal = 2000;
+
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
                 .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .setConnectionManager(createConnectionManager(options))
                 .setConnectionTimeToLive(70, TimeUnit.SECONDS)
-                .setMaxConnTotal(2000)
-                .setMaxConnPerRoute(1000);
+                .setMaxConnTotal(maxConnTotal)
+                .setMaxConnPerRoute(connPerRoute);
+
+        System.out.println("Custom http client(" + maxConnTotal + ", " + connPerRoute + ")");
+
         return httpClientBuilder.build();
     }
 
@@ -38,13 +44,13 @@ public class TelegramHttpClientBuilder {
             case NO_PROXY:
                 return null;
             case HTTP:
-                registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                registry = RegistryBuilder.<ConnectionSocketFactory>create()
                         .register("http", new HttpConnectionSocketFactory())
                         .register("https", new HttpSSLConnectionSocketFactory(SSLContexts.createSystemDefault())).build();
                 return new PoolingHttpClientConnectionManager(registry);
             case SOCKS4:
             case SOCKS5:
-                registry = RegistryBuilder.<ConnectionSocketFactory> create()
+                registry = RegistryBuilder.<ConnectionSocketFactory>create()
                         .register("http", new SocksConnectionSocketFactory())
                         .register("https", new SocksSSLConnectionSocketFactory(SSLContexts.createSystemDefault()))
                         .build();
