@@ -165,7 +165,7 @@ public class MessageMedia {
     }
 
     private String getFixedFileName(String fileName) {
-        return StringUtils.defaultString(fileName, "")
+        return StringUtils.defaultString(fileName, "No name")
                 .replace("\"", "")
                 .replace("\\", "")
                 .replace(";", "");
