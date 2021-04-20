@@ -6,9 +6,12 @@ public class BotHealth {
 
     private String commitId;
 
-    public BotHealth(String message, String commitId) {
+    private String profile;
+
+    public BotHealth(String message, String commitId, String profile) {
         this.message = message;
         this.commitId = commitId;
+        this.profile = profile;
     }
 
     public String getMessage() {
@@ -17,5 +20,9 @@ public class BotHealth {
 
     public String getCommitId() {
         return commitId;
+    }
+
+    public String getProfile() {
+        return profile;
     }
 }
