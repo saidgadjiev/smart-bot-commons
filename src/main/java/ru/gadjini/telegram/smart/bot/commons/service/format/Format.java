@@ -325,6 +325,38 @@ public enum Format {
             return false;
         }
     },
+    VMAKE(FormatCategory.VIDEO) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
+    IMAGEAUDIO(FormatCategory.VIDEO) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     UNKNOWN(FormatCategory.COMMON);
 
     private FormatCategory category;
