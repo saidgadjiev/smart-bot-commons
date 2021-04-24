@@ -74,6 +74,8 @@ public class SmartBotConfiguration {
         }
         defaultBotOptions.setRequestConfig(
                 RequestConfig.copy(RequestConfig.custom().build())
+                        //TODO: infinite
+                        .setSocketTimeout(0)
                         .setConnectTimeout(Constants.SOCKET_TIMEOUT)
                         .setConnectionRequestTimeout(Constants.SOCKET_TIMEOUT).build());
 
