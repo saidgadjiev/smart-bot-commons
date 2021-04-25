@@ -9,6 +9,8 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.apache.http.ssl.SSLContexts;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.facilities.proxysocketfactorys.HttpConnectionSocketFactory;
 import org.telegram.telegrambots.facilities.proxysocketfactorys.HttpSSLConnectionSocketFactory;
@@ -22,6 +24,8 @@ import java.util.concurrent.TimeUnit;
  */
 public class TelegramHttpClientBuilder {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TelegramHttpClientBuilder.class);
+
     public static CloseableHttpClient build(DefaultBotOptions options) {
         int connPerRoute = 1000;
         int maxConnTotal = 2000;
@@ -33,7 +37,7 @@ public class TelegramHttpClientBuilder {
                 .setMaxConnTotal(maxConnTotal)
                 .setMaxConnPerRoute(connPerRoute);
 
-        System.out.println("Custom http client(" + maxConnTotal + ", " + connPerRoute + ")");
+        LOGGER.debug("Custom http client({}, {})", connPerRoute, maxConnTotal);
 
         return httpClientBuilder.build();
     }
