@@ -70,6 +70,14 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));
     }
 
+    @Override
+    public int remove(String botName, int userId) {
+        return jdbcTemplate.update(
+                "DELETE FROM paid_subscription WHERE bot_name = '" + botName + "' AND user_id = ?",
+                ps -> ps.setInt(1, userId)
+        );
+    }
+
     private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
         ps.setInt(1, paidSubscription.getUserId());
         ps.setString(2, paidSubscription.getBotName());

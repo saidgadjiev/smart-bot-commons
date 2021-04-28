@@ -68,6 +68,15 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         storeToRedis(paidSubscription);
     }
 
+    @Override
+    public int remove(String botName, int userId) {
+        int remove = paidSubscriptionDao.remove(botName, userId);
+        String key = getKey(botName, userId);
+        redisTemplate.delete(key);
+
+        return remove;
+    }
+
     private PaidSubscription getFromRedis(String botName, int userId) {
         String key = getKey(botName, userId);
 

@@ -43,4 +43,7 @@ public class CommandNames {
     public static final String BUILD_INFO = "binfo";
 
     public static final String SUBSCRIPTION = "subscription";
+
+    public static final String RM_SUBSCRIPTION = "rmsubscription";
+
 }
