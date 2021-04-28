@@ -117,6 +117,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                         new Object[]{
                                                 PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
                                                 TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
+                                                subscriptionProperties.getPaymentBotName(),
                                                 NumberUtils.toString(minPrice, 2)
                                         }, locale))
                         .parseMode(ParseMode.HTML)
