@@ -21,6 +21,9 @@ public class SubscriptionProperties {
     @Value("#{'${paid.bot.name:${bot.name}}'}")
     private String paidBotName;
 
+    @Value("${payment.currency:USD}")
+    private String paymentCurrency;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -59,5 +62,13 @@ public class SubscriptionProperties {
 
     public void setPaidBotName(String paidBotName) {
         this.paidBotName = paidBotName;
+    }
+
+    public String getPaymentCurrency() {
+        return paymentCurrency;
+    }
+
+    public void setPaymentCurrency(String paymentCurrency) {
+        this.paymentCurrency = paymentCurrency;
     }
 }

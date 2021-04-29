@@ -1,17 +1,20 @@
 package ru.gadjini.telegram.smart.bot.commons.service.currency;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import java.util.Map;
 
 public class TelegramCurrencies {
 
-    @JsonProperty("RUB")
-    private TelegramCurrency rub;
+    private final Map<String, TelegramCurrency> currencies;
 
-    public TelegramCurrency getRub() {
-        return rub;
+    public TelegramCurrencies(Map<String, TelegramCurrency> currencies) {
+        this.currencies = currencies;
     }
 
-    public void setRub(TelegramCurrency rub) {
-        this.rub = rub;
+    public TelegramCurrency get(String current) {
+        return currencies.get(current);
+    }
+
+    public Map<String, TelegramCurrency> getCurrencies() {
+        return currencies;
     }
 }

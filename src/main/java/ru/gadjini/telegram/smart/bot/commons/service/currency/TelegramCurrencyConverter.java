@@ -10,9 +10,12 @@ public class TelegramCurrencyConverter {
         this.telegramCurrencies = telegramCurrencies;
     }
 
-    public double convertToRub(double usd) {
-        double usdRubCurrency = (double) telegramCurrencies.getRub().getMinAmount() / TgConstants.PAYMENTS_AMOUNT_FACTOR;
+    public double convertTo(double usd, String targetCurrency) {
+        if (targetCurrency.equalsIgnoreCase(TgConstants.USD_CURRENCY)) {
+            return usd;
+        }
+        double converted = (double) telegramCurrencies.get(targetCurrency).getMinAmount() / TgConstants.PAYMENTS_AMOUNT_FACTOR;
 
-        return usdRubCurrency * usd;
+        return converted * usd;
     }
 }

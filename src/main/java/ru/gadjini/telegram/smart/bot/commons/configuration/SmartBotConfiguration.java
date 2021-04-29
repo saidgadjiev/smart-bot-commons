@@ -47,6 +47,7 @@ public class SmartBotConfiguration {
         LOGGER.debug("Paid subscription({})", subscriptionProperties.isCheckPaidSubscription());
         LOGGER.debug("Payment bot({})", subscriptionProperties.getPaymentBotName());
         LOGGER.debug("Paid bot({})", subscriptionProperties.getPaidBotName());
+        LOGGER.debug("Payment currency({})", subscriptionProperties.getPaymentCurrency());
         LOGGER.debug("Trial period({})", subscriptionProperties.getTrialPeriod());
     }
 
