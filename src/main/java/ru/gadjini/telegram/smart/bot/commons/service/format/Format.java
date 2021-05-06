@@ -357,6 +357,22 @@ public enum Format {
             return false;
         }
     },
+    VIDEOAUDIO(FormatCategory.VIDEO) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     UNKNOWN(FormatCategory.COMMON);
 
     private FormatCategory category;

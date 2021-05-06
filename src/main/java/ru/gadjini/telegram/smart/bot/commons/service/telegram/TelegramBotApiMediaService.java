@@ -26,6 +26,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class TelegramBotApiMediaService extends DefaultAbsSender implements TelegramMediaService {
 
@@ -109,36 +110,48 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @Override
-    public void downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
-        downloadFileByFileId(fileId, fileSize, null, outputFile);
+    public String downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile) {
+        return downloadFileByFileId(fileId, fileSize, null, outputFile);
     }
 
     @Override
-    public void downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+    public String downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
         try {
             StopWatch stopWatch = new StopWatch();
             stopWatch.start();
             LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
 
-            exceptionHandler.executeWithoutResult(fileId, () -> {
+            AtomicLong resultFileSize = new AtomicLong();
+            String resultFilePath = exceptionHandler.executeWithResult(fileId, () -> {
                 updateProgressBeforeStart(progress);
                 GetFile gf = new GetFile();
                 gf.setFileId(fileId);
                 org.telegram.telegrambots.meta.api.objects.File file = execute(gf);
+                resultFileSize.set(file.getFileSize());
                 String filePath = getLocalFilePath(file.getFilePath());
 
-                try {
-                    FileUtils.copyFile(new File(filePath), outputFile.getFile());
-                } catch (IOException e) {
-                    throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
-                } finally {
-                    FileUtils.deleteQuietly(new File(filePath));
+                if (outputFile != null) {
+                    try {
+                        FileUtils.copyFile(new File(filePath), outputFile.getFile());
+                    } catch (IOException e) {
+                        throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
+                    } finally {
+                        FileUtils.deleteQuietly(new File(filePath));
+                    }
+
+                    filePath = outputFile.getAbsolutePath();
                 }
+
                 updateProgressAfterComplete(progress);
+
+                return filePath;
             });
 
             stopWatch.stop();
-            LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId, MemoryUtils.humanReadableByteCount(outputFile.length()), stopWatch.getTime(TimeUnit.SECONDS));
+            LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId,
+                    MemoryUtils.humanReadableByteCount(resultFileSize.get()), stopWatch.getTime(TimeUnit.SECONDS));
+
+            return resultFilePath;
         } catch (TelegramApiException | FloodWaitException e) {
             LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
             throw e;
@@ -150,7 +163,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
         return botProperties.getToken();
     }
 
-    private String getLocalFilePath(String apiFilePath) {
+    protected final String getLocalFilePath(String apiFilePath) {
         String path = apiFilePath.replace(botApiProperties.getWorkDir(), "");
 
         return botApiProperties.getLocalWorkDir() + path;
