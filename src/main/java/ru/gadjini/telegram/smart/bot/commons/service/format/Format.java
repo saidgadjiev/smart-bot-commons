@@ -341,6 +341,22 @@ public enum Format {
             return false;
         }
     },
+    MERGE(FormatCategory.COMMON) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     IMAGEAUDIO(FormatCategory.VIDEO) {
         @Override
         public boolean isUserSelectable() {

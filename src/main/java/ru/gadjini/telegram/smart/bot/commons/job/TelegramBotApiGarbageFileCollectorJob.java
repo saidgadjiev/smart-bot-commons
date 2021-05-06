@@ -23,6 +23,9 @@ public class TelegramBotApiGarbageFileCollectorJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TelegramBotApiGarbageFileCollectorJob.class);
 
+    private static final Set<String> GARBAGE_DIRS = Set.of("animations", "documents", "music", "photos", "profile_photo",
+            "stickers", "thumbnails", "video_notes", "videos", "voice");
+
     private Set<GarbageAlgorithm> algorithms;
 
     private BotApiProperties botApiProperties;
@@ -44,12 +47,20 @@ public class TelegramBotApiGarbageFileCollectorJob {
         try {
             AtomicInteger counter = new AtomicInteger();
             Files.list(Path.of(botApiProperties.getLocalWorkDir()))
-                    .filter(file -> !Files.isDirectory(file))
-                    .sorted(Comparator.reverseOrder())
-                    .map(Path::toFile)
-                    .forEach(file -> {
-                        if (deleteIfGarbage(file)) {
-                            counter.incrementAndGet();
+                    .filter(file -> Files.isDirectory(file) && GARBAGE_DIRS.contains(file.getFileName().toString()))
+                    .forEach(path -> {
+                        try {
+                            Files.list(path)
+                                    .filter(f -> !Files.isDirectory(f))
+                                    .sorted(Comparator.reverseOrder())
+                                    .map(Path::toFile)
+                                    .forEach(f -> {
+                                        if (deleteIfGarbage(f)) {
+                                            counter.incrementAndGet();
+                                        }
+                                    });
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
                     });
 
