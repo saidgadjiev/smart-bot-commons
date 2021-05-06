@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.job;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.SystemUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,7 +36,11 @@ public class TelegramBotApiGarbageFileCollectorJob {
     public TelegramBotApiGarbageFileCollectorJob(Set<GarbageAlgorithm> algorithms,
                                                  BotApiProperties botApiProperties, BotProperties botProperties) {
         this.algorithms = algorithms;
-        this.dirToClean = botApiProperties.getLocalWorkDir() + File.separator + botProperties.getToken();
+        if (SystemUtils.IS_OS_WINDOWS) {
+            this.dirToClean = botApiProperties.getLocalWorkDir();
+        } else {
+            this.dirToClean = botApiProperties.getLocalWorkDir() + File.separator + botProperties.getToken();
+        }
         LOGGER.debug("Telegram bot api garbage dir({})", dirToClean);
     }
 
