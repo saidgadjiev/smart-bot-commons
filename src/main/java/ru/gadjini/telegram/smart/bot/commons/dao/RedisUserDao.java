@@ -5,7 +5,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
@@ -14,7 +14,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 import java.util.concurrent.TimeUnit;
 
 @Repository
-@Caching
+@Redis
 public class RedisUserDao implements UserDao {
 
     private static final String LOCALE_KEY = "locale";

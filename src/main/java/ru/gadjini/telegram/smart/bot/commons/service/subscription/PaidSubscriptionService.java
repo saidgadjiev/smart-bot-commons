@@ -3,7 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
@@ -25,7 +25,7 @@ public class PaidSubscriptionService {
     private SubscriptionProperties subscriptionProperties;
 
     @Autowired
-    public PaidSubscriptionService(@Caching PaidSubscriptionDao paidSubscriptionDao,
+    public PaidSubscriptionService(@Redis PaidSubscriptionDao paidSubscriptionDao,
                                    SubscriptionProperties subscriptionProperties) {
         this.paidSubscriptionDao = paidSubscriptionDao;
         this.subscriptionProperties = subscriptionProperties;

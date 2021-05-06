@@ -5,10 +5,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 
 @Repository
-@Caching
+@Redis
 public class RedisKeyboardDao implements ReplyKeyboardDao {
 
     private static final String KEY = "keyboard";
