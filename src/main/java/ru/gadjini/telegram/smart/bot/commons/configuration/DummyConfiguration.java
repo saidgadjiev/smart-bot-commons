@@ -3,9 +3,9 @@ package ru.gadjini.telegram.smart.bot.commons.configuration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Caching;
 import ru.gadjini.telegram.smart.bot.commons.annotation.CommandStart;
 import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.impl.StartCommand;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard.ReplyKeyboardDao;
@@ -39,7 +39,7 @@ public class DummyConfiguration {
     @Bean
     @KeyboardHolder
     @ConditionalOnMissingBean(annotation = KeyboardHolder.class)
-    public ReplyKeyboardService replyKeyboardService(@Redis ReplyKeyboardDao replyKeyboardDao,
+    public ReplyKeyboardService replyKeyboardService(@Caching ReplyKeyboardDao replyKeyboardDao,
                                                      SmartReplyKeyboardService smartReplyKeyboardService) {
         return new DummyReplyKeyboardHolderService(replyKeyboardDao, smartReplyKeyboardService);
     }
