@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.cleaner.GarbageAlgorithm;
 
 import java.io.File;
@@ -28,25 +29,27 @@ public class TelegramBotApiGarbageFileCollectorJob {
 
     private Set<GarbageAlgorithm> algorithms;
 
-    private BotApiProperties botApiProperties;
+    private String dirToClean;
 
     @Autowired
-    public TelegramBotApiGarbageFileCollectorJob(Set<GarbageAlgorithm> algorithms, BotApiProperties botApiProperties) {
+    public TelegramBotApiGarbageFileCollectorJob(Set<GarbageAlgorithm> algorithms,
+                                                 BotApiProperties botApiProperties, BotProperties botProperties) {
         this.algorithms = algorithms;
-        this.botApiProperties = botApiProperties;
+        this.dirToClean = botApiProperties.getLocalWorkDir() + File.separator + botProperties.getToken();
+        LOGGER.debug("Telegram bot api garbage dir({})", dirToClean);
     }
 
     @Scheduled(cron = "0 0 * * * *")
     public void run() {
         LOGGER.debug("Start({})", LocalDateTime.now());
-        int clean = clean();
+        int clean = clean(dirToClean);
         LOGGER.debug("Finish({}, {})", clean, LocalDateTime.now());
     }
 
-    private int clean() {
+    private int clean(String dir) {
         try {
             AtomicInteger counter = new AtomicInteger();
-            Files.list(Path.of(botApiProperties.getLocalWorkDir()))
+            Files.list(Path.of(dir))
                     .filter(file -> Files.isDirectory(file) && GARBAGE_DIRS.contains(file.getFileName().toString()))
                     .forEach(path -> {
                         try {
