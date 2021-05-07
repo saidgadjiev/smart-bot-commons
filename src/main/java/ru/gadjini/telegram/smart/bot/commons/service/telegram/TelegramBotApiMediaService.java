@@ -1,7 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.telegram;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -23,10 +22,13 @@ import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
+
+import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 
 public class TelegramBotApiMediaService extends DefaultAbsSender implements TelegramMediaService {
 
@@ -132,11 +134,9 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
                 if (outputFile != null) {
                     try {
-                        FileUtils.copyFile(new File(filePath), outputFile.getFile());
+                        Files.move(Path.of(filePath), outputFile.toPath(), REPLACE_EXISTING);
                     } catch (IOException e) {
                         throw new org.telegram.telegrambots.meta.exceptions.TelegramApiException(e);
-                    } finally {
-                        FileUtils.deleteQuietly(new File(filePath));
                     }
 
                     filePath = outputFile.getAbsolutePath();
