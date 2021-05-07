@@ -38,7 +38,10 @@ public class SmartBotConfiguration {
 
     @Autowired
     public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties,
-                                 SubscriptionProperties subscriptionProperties) {
+                                 SubscriptionProperties subscriptionProperties,
+                                 BotApiProperties botApiProperties) {
+        LOGGER.debug("Local work dir({})", botApiProperties.getLocalWorkDir());
+        LOGGER.debug("Work dir({})", botApiProperties.getWorkDir());
         LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
         LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
