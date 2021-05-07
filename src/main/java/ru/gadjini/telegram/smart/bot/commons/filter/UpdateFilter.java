@@ -2,22 +2,16 @@ package ru.gadjini.telegram.smart.bot.commons.filter;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.CollectionUtils;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
-import ru.gadjini.telegram.smart.bot.commons.property.AdminProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.UpdateFilterProperties;
 
 @Component
 public class UpdateFilter extends BaseBotFilter {
 
-    private AdminProperties adminProperties;
-
     private UpdateFilterProperties updateFilterProperties;
 
     @Autowired
-    public UpdateFilter(AdminProperties adminProperties, UpdateFilterProperties updateFilterProperties) {
-        this.adminProperties = adminProperties;
+    public UpdateFilter(UpdateFilterProperties updateFilterProperties) {
         this.updateFilterProperties = updateFilterProperties;
     }
 
@@ -27,14 +21,6 @@ public class UpdateFilter extends BaseBotFilter {
                 || update.hasCallbackQuery() && update.getCallbackQuery().getMessage().getChat().isUserChat()
                 || doAdditionalFiltering(update)
         ) {
-            if (!CollectionUtils.isEmpty(adminProperties.getWhiteList())) {
-                long chatId = TgMessage.getChatId(update);
-
-                if (!adminProperties.getWhiteList().contains(chatId)) {
-                    return;
-                }
-            }
-
             super.doFilter(update);
         }
     }
