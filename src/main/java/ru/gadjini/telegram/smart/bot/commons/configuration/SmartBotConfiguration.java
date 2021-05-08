@@ -24,12 +24,14 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
-import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMethodExecutor;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMediaService;
+import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMethodExecutor;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMediaService;
 import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
+
+import java.io.File;
 
 @Configuration
 public class SmartBotConfiguration {
@@ -43,6 +45,7 @@ public class SmartBotConfiguration {
         LOGGER.debug("Local work dir({})", botApiProperties.getLocalWorkDir());
         LOGGER.debug("Work dir({})", botApiProperties.getWorkDir());
         LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
+        LOGGER.debug("Disable file cleaners jobs({})", jobsProperties.isDisableFileCleaners());
         LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
         LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
         LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
@@ -101,6 +104,9 @@ public class SmartBotConfiguration {
                     Class<?> clazz = ReflectionUtils.getClass(aClass);
 
                     return jsonDeserializationContext.deserialize(jsonElement, clazz);
+                })
+                .registerTypeAdapter(File.class, (JsonDeserializer<Object>) (json, typeOfT, context) -> {
+                    return new File(json.getAsJsonObject().get("path").getAsString());
                 });
     }
 

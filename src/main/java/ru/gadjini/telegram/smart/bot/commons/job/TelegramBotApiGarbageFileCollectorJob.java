@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.JobsProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.cleaner.GarbageAlgorithm;
 
 import java.io.File;
@@ -35,10 +36,14 @@ public class TelegramBotApiGarbageFileCollectorJob {
 
     private String dirToClean;
 
+    private JobsProperties jobsProperties;
+
     @Autowired
     public TelegramBotApiGarbageFileCollectorJob(Set<GarbageAlgorithm> algorithms,
-                                                 BotApiProperties botApiProperties, BotProperties botProperties) {
+                                                 BotApiProperties botApiProperties,
+                                                 BotProperties botProperties, JobsProperties jobsProperties) {
         this.algorithms = algorithms;
+        this.jobsProperties = jobsProperties;
         if (SystemUtils.IS_OS_WINDOWS) {
             this.dirToClean = botApiProperties.getLocalWorkDir();
         } else {
@@ -49,6 +54,9 @@ public class TelegramBotApiGarbageFileCollectorJob {
 
     @Scheduled(cron = "0 0 * * * *")
     public void run() {
+        if (jobsProperties.isDisableFileCleaners()) {
+            return;
+        }
         LOGGER.debug("Start({})", LocalDateTime.now());
         int clean = clean(dirToClean);
         LOGGER.debug("Finish({}, {})", clean, LocalDateTime.now());

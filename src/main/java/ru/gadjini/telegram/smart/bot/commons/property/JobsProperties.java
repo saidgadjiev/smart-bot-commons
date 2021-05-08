@@ -9,6 +9,8 @@ public class JobsProperties {
 
     private boolean enableLogging;
 
+    private boolean disableFileCleaners;
+
     private boolean enableDownloadUploadSynchronizerLogging;
 
     public boolean isDisable() {
@@ -33,5 +35,13 @@ public class JobsProperties {
 
     public void setEnableDownloadUploadSynchronizerLogging(boolean enableDownloadUploadSynchronizerLogging) {
         this.enableDownloadUploadSynchronizerLogging = enableDownloadUploadSynchronizerLogging;
+    }
+
+    public boolean isDisableFileCleaners() {
+        return disableFileCleaners;
+    }
+
+    public void setDisableFileCleaners(boolean disableFileCleaners) {
+        this.disableFileCleaners = disableFileCleaners;
     }
 }

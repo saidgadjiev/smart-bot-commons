@@ -134,7 +134,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
                 if (outputFile != null) {
                     try {
-                        if (!outputFile.exists() && !outputFile.getParentFile().mkdirs()) {
+                        if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
                             LOGGER.debug("Error mkdirs({}, {})", outputFile.getParentFile().getAbsolutePath(), fileId);
                         }
                         Files.move(Path.of(filePath), outputFile.toPath(), REPLACE_EXISTING);
