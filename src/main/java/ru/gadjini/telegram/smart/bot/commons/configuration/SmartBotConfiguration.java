@@ -51,6 +51,7 @@ public class SmartBotConfiguration {
         LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
         LOGGER.debug("Channel subscription({})", subscriptionProperties.isCheckChannelSubscription());
         LOGGER.debug("Paid subscription({})", subscriptionProperties.isCheckPaidSubscription());
+        LOGGER.debug("Payment description({})", subscriptionProperties.isPaymentDescription());
         LOGGER.debug("Payment bot({})", subscriptionProperties.getPaymentBotName());
         LOGGER.debug("Paid bot({})", subscriptionProperties.getPaidBotName());
         LOGGER.debug("Payment currency({})", subscriptionProperties.getPaymentCurrency());
