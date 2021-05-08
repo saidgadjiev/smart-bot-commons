@@ -84,7 +84,7 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
         if (update.hasMessage()) {
             String text = MessageUtils.getText(update.getMessage());
             if (update.getMessage().isCommand()) {
-                String command = commandParser.parseBotCommandName(update.getMessage());
+                String command = commandParser.parseBotCommand(update.getMessage()).getCommandName();
                 BotCommand botCommand = commandsContainer.getBotCommand(command);
 
                 if (botCommand == null) {

@@ -62,7 +62,7 @@ public class StartCommandFilter extends BaseBotFilter {
 
     private boolean isStartCommand(Update update) {
         if (update.hasMessage() && update.getMessage().isCommand()) {
-            String commandName = commandParser.parseBotCommandName(update.getMessage());
+            String commandName = commandParser.parseBotCommand(update.getMessage()).getCommandName();
 
             return commandName.equals(CommandNames.START_COMMAND_NAME);
         }
