@@ -134,8 +134,8 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
                 if (outputFile != null) {
                     try {
-                        if (!outputFile.getParentFile().mkdirs()) {
-                            LOGGER.debug("Error mkdirs({})", outputFile.getParentFile().getAbsolutePath());
+                        if (!outputFile.exists() && !outputFile.getParentFile().mkdirs()) {
+                            LOGGER.debug("Error mkdirs({}, {})", outputFile.getParentFile().getAbsolutePath(), fileId);
                         }
                         Files.move(Path.of(filePath), outputFile.toPath(), REPLACE_EXISTING);
                     } catch (IOException e) {
@@ -143,6 +143,8 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
                     }
 
                     filePath = outputFile.getAbsolutePath();
+                } else {
+                    LOGGER.debug("Directly downloaded file may be deleted!({}, {})", filePath, fileId);
                 }
 
                 updateProgressAfterComplete(progress);
