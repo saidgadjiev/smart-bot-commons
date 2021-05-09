@@ -4,9 +4,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
@@ -38,7 +38,7 @@ public class CommandNavigator {
     private UserService userService;
 
     @Autowired
-    public CommandNavigator(@Qualifier("redis") CommandNavigatorDao navigatorDao,
+    public CommandNavigator(@Redis CommandNavigatorDao navigatorDao,
                             LocalisationService localisationService, UserService userService) {
         this.navigatorDao = navigatorDao;
         this.localisationService = localisationService;
@@ -56,7 +56,7 @@ public class CommandNavigator {
     }
 
     public void push(long chatId, NavigableBotCommand navigableBotCommand) {
-        NavigableBotCommand currCommand = getCurrentCommand(chatId);
+        NavigableBotCommand currCommand = getCurrentCommand(chatId, false);
 
         if (currCommand != null) {
             if (Objects.equals(currCommand.getHistoryName(), navigableBotCommand.getHistoryName())) {
@@ -76,7 +76,7 @@ public class CommandNavigator {
 
     public void pop(TgMessage message) {
         long chatId = message.getChatId();
-        NavigableBotCommand currentCommand = getCurrentCommand(chatId);
+        NavigableBotCommand currentCommand = getCurrentCommand(chatId, false);
         if (currentCommand == null) {
             NavigableBotCommand parentCommand = navigableBotCommands.get(CommandNames.START_COMMAND_NAME);
 
@@ -102,7 +102,7 @@ public class CommandNavigator {
     }
 
     public SilentPop silentPop(long chatId) {
-        NavigableBotCommand navigableBotCommand = getCurrentCommand(chatId);
+        NavigableBotCommand navigableBotCommand = getCurrentCommand(chatId, false);
         if (navigableBotCommand == null) {
             return null;
         }
@@ -116,13 +116,17 @@ public class CommandNavigator {
         return new SilentPop(parentCommand.getKeyboard(chatId), parentCommand.getMessage(chatId));
     }
 
-    public NavigableBotCommand getCurrentCommand(long chatId) {
+    public NavigableBotCommand getCurrentCommand(long chatId, boolean throwRestartedException) {
         String currCommand = navigatorDao.get(chatId);
 
         if (currCommand == null) {
             LOGGER.debug("Bot restarted({})", chatId);
             zeroRestore(chatId, navigableBotCommands.get(CommandNames.START_COMMAND_NAME));
-            throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED, userService.getLocaleOrDefault((int) chatId)));
+            currCommand = CommandNames.START_COMMAND_NAME;
+            if (throwRestartedException) {
+                throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_BOT_RESTARTED,
+                        userService.getLocaleOrDefault((int) chatId)));
+            }
         }
 
         return navigableBotCommands.get(currCommand);

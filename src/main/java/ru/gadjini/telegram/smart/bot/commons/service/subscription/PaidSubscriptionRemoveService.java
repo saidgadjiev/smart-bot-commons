@@ -22,4 +22,8 @@ public class PaidSubscriptionRemoveService {
     public int removePaidSubscription(int userId) {
         return paidSubscriptionDao.remove(subscriptionProperties.getPaidBotName(), userId);
     }
+
+    public void refreshPaidSubscription(int userId) {
+        paidSubscriptionDao.refresh(subscriptionProperties.getPaidBotName(), userId);
+    }
 }

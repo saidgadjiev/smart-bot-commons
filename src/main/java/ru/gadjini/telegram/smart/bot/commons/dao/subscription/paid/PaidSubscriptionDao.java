@@ -12,4 +12,6 @@ public interface PaidSubscriptionDao {
     void createOrRenew(PaidSubscription paidSubscription, Period period);
 
     int remove(String botName, int userId);
+
+    void refresh(String botName, int userId);
 }

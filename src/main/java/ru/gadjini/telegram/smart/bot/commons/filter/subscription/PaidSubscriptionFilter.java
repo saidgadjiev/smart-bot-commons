@@ -153,7 +153,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
                 return keyboardBotCommand.isPaidSubscriptionRequired();
             } else {
-                NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(update.getMessage().getChatId());
+                NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(update.getMessage().getChatId(), true);
 
                 if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(update.getMessage())) {
                     return navigableBotCommand.isPaidSubscriptionRequired(update.getMessage());

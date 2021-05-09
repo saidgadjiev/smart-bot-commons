@@ -78,6 +78,11 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         );
     }
 
+    @Override
+    public void refresh(String botName, int userId) {
+
+    }
+
     private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
         ps.setInt(1, paidSubscription.getUserId());
         ps.setString(2, paidSubscription.getBotName());

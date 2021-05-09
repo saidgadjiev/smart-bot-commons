@@ -40,7 +40,7 @@ public class CommandExecutor {
     }
 
     public void cancelCommand(long chatId, String queryId) {
-        NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(chatId);
+        NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(chatId, true);
 
         if (navigableBotCommand != null) {
             navigableBotCommand.cancel(chatId, queryId);
@@ -48,7 +48,7 @@ public class CommandExecutor {
     }
 
     public void processNonCommandUpdate(Message message, String text) {
-        NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(message.getChatId());
+        NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(message.getChatId(), true);
 
         if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(message)) {
             navigableBotCommand.processNonCommandUpdate(message, text);
