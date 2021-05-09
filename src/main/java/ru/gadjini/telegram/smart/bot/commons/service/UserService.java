@@ -45,9 +45,9 @@ public class UserService {
                 .filter(locale -> locale.getLanguage().equals(user.getLanguageCode()))
                 .findAny().orElse(Locale.getDefault()).getLanguage();
         tgUser.setLocale(language);
-        String state = userDao.createOrUpdate(tgUser);
+        CreateOrUpdateResult.State state = userDao.createOrUpdate(tgUser);
 
-        CreateOrUpdateResult createOrUpdateResult = new CreateOrUpdateResult(tgUser, CreateOrUpdateResult.State.fromDesc(state));
+        CreateOrUpdateResult createOrUpdateResult = new CreateOrUpdateResult(tgUser, state);
 
         if (createOrUpdateResult.isCreated()) {
             userSettingsService.createDefaultSettings(user.getId());

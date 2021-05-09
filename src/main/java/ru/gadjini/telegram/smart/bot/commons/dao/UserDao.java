@@ -1,12 +1,13 @@
 package ru.gadjini.telegram.smart.bot.commons.dao;
 
+import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
 
 public interface UserDao {
 
     int updateActivity(int userId, String userName);
 
-    String createOrUpdate(TgUser user);
+    CreateOrUpdateResult.State createOrUpdate(TgUser user);
 
     void updateLocale(int userId, String language);
 

@@ -7,6 +7,10 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionRemoveService;
 
@@ -17,11 +21,21 @@ public class RefreshSubscriptionCommand implements BotCommand {
 
     private MessageService messageService;
 
+    private SubscriptionProperties subscriptionProperties;
+
+    private LocalisationService localisationService;
+
+    private UserService userService;
+
     @Autowired
     public RefreshSubscriptionCommand(PaidSubscriptionRemoveService paidSubscriptionRemoveService,
-                                      @TgMessageLimitsControl MessageService messageService) {
+                                      @TgMessageLimitsControl MessageService messageService,
+                                      SubscriptionProperties subscriptionProperties, LocalisationService localisationService, UserService userService) {
         this.paidSubscriptionRemoveService = paidSubscriptionRemoveService;
         this.messageService = messageService;
+        this.subscriptionProperties = subscriptionProperties;
+        this.localisationService = localisationService;
+        this.userService = userService;
     }
 
     @Override
@@ -35,10 +49,16 @@ public class RefreshSubscriptionCommand implements BotCommand {
     }
 
     @Override
+    public boolean accept(Message message) {
+        return subscriptionProperties.isCheckPaidSubscription();
+    }
+
+    @Override
     public void processMessage(Message message, String[] params) {
         paidSubscriptionRemoveService.refreshPaidSubscription(message.getFrom().getId());
         messageService.sendMessage(SendMessage.builder()
-                .text("Subscription refreshed")
+                .text(localisationService.getMessage(MessagesProperties.MESSAGE_SUBSCRIPTION_REFRESHED,
+                        userService.getLocaleOrDefault(message.getFrom().getId())))
                 .chatId(String.valueOf(message.getChatId()))
                 .build());
     }

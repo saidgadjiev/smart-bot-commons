@@ -116,4 +116,8 @@ public class MessagesProperties {
     public static final String BOT_TIME_COMMAND_DESCRIPTION = "bot.time.command.description";
 
     public static final String MESSAGE_TECH_WORK = "message.tech.work";
+
+    public static final String REFRESH_SUBSCRIPTION_COMMAND_DESCRIPTION = "refresh.subscription.command.description";
+
+    public static final String MESSAGE_SUBSCRIPTION_REFRESHED = "message.subscription.refreshed";
 }

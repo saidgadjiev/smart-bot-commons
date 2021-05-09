@@ -5,8 +5,8 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
@@ -47,10 +47,9 @@ public class RedisUserDao implements UserDao {
     }
 
     @Override
-    public String createOrUpdate(TgUser user) {
-        String createOrUpdate = userDao.createOrUpdate(user);
-        CreateOrUpdateResult.State state = CreateOrUpdateResult.State.fromDesc(createOrUpdate);
-        if (CreateOrUpdateResult.State.INSERTED.equals(state)) {
+    public CreateOrUpdateResult.State createOrUpdate(TgUser user) {
+        CreateOrUpdateResult.State createOrUpdate = userDao.createOrUpdate(user);
+        if (CreateOrUpdateResult.State.INSERTED.equals(createOrUpdate)) {
             cacheLocale(user.getUserId(), user.getLanguageCode());
         }
         setLastActivityUpdatedMarker(user.getUserId());

@@ -6,6 +6,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
+import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
 
 import java.sql.Statement;
@@ -38,7 +39,7 @@ public class DBUserDao implements UserDao {
     }
 
     @Override
-    public String createOrUpdate(TgUser user) {
+    public CreateOrUpdateResult.State createOrUpdate(TgUser user) {
         GeneratedKeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
                 connection -> {
@@ -67,7 +68,7 @@ public class DBUserDao implements UserDao {
                 keyHolder
         );
 
-        return (String) keyHolder.getKeys().get("state");
+        return CreateOrUpdateResult.State.fromDesc((String) keyHolder.getKeys().get("state"));
     }
 
     @Override
