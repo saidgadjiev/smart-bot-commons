@@ -8,11 +8,14 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionRemoveService;
+
+import java.util.Objects;
 
 @Component
 public class RefreshSubscriptionCommand implements BotCommand {
@@ -25,16 +28,21 @@ public class RefreshSubscriptionCommand implements BotCommand {
 
     private LocalisationService localisationService;
 
+    private BotProperties botProperties;
+
     private UserService userService;
 
     @Autowired
     public RefreshSubscriptionCommand(PaidSubscriptionRemoveService paidSubscriptionRemoveService,
                                       @TgMessageLimitsControl MessageService messageService,
-                                      SubscriptionProperties subscriptionProperties, LocalisationService localisationService, UserService userService) {
+                                      SubscriptionProperties subscriptionProperties,
+                                      LocalisationService localisationService, BotProperties botProperties,
+                                      UserService userService) {
         this.paidSubscriptionRemoveService = paidSubscriptionRemoveService;
         this.messageService = messageService;
         this.subscriptionProperties = subscriptionProperties;
         this.localisationService = localisationService;
+        this.botProperties = botProperties;
         this.userService = userService;
     }
 
@@ -50,7 +58,8 @@ public class RefreshSubscriptionCommand implements BotCommand {
 
     @Override
     public boolean accept(Message message) {
-        return subscriptionProperties.isCheckPaidSubscription();
+        return subscriptionProperties.isCheckPaidSubscription()
+                || Objects.equals(botProperties.getName(), subscriptionProperties.getPaymentBotName());
     }
 
     @Override
