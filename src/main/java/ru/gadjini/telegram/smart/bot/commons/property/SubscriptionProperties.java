@@ -24,6 +24,9 @@ public class SubscriptionProperties {
     @Value("${payment.currency:USD}")
     private String paymentCurrency;
 
+    @Value("${payment.description:false}")
+    private boolean paymentDescription;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -70,5 +73,13 @@ public class SubscriptionProperties {
 
     public void setPaymentCurrency(String paymentCurrency) {
         this.paymentCurrency = paymentCurrency;
+    }
+
+    public boolean isPaymentDescription() {
+        return paymentDescription;
+    }
+
+    public void setPaymentDescription(boolean paymentDescription) {
+        this.paymentDescription = paymentDescription;
     }
 }

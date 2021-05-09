@@ -39,18 +39,15 @@ public class SmartBotConfiguration {
     private static final Logger LOGGER = LoggerFactory.getLogger(SmartBotConfiguration.class);
 
     @Autowired
-    public SmartBotConfiguration(JobsProperties jobsProperties, AdminProperties adminProperties,
+    public SmartBotConfiguration(AdminProperties adminProperties,
                                  SubscriptionProperties subscriptionProperties,
                                  BotApiProperties botApiProperties) {
         LOGGER.debug("Local work dir({})", botApiProperties.getLocalWorkDir());
         LOGGER.debug("Work dir({})", botApiProperties.getWorkDir());
-        LOGGER.debug("Disable jobs({})", jobsProperties.isDisable());
-        LOGGER.debug("Disable file cleaners jobs({})", jobsProperties.isDisableFileCleaners());
-        LOGGER.debug("Enable jobs logging({})", jobsProperties.isEnableLogging());
-        LOGGER.debug("Download upload synchronizer jobs logging({})", jobsProperties.isEnableDownloadUploadSynchronizerLogging());
         LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
         LOGGER.debug("Channel subscription({})", subscriptionProperties.isCheckChannelSubscription());
         LOGGER.debug("Paid subscription({})", subscriptionProperties.isCheckPaidSubscription());
+        LOGGER.debug("Payment description({})", subscriptionProperties.isPaymentDescription());
         LOGGER.debug("Payment bot({})", subscriptionProperties.getPaymentBotName());
         LOGGER.debug("Paid bot({})", subscriptionProperties.getPaidBotName());
         LOGGER.debug("Payment currency({})", subscriptionProperties.getPaymentCurrency());
