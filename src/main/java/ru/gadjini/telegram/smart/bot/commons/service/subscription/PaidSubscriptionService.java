@@ -51,7 +51,9 @@ public class PaidSubscriptionService {
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botName);
         paidSubscription.setPlanId(planId);
-        paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(TimeUtils.UTC), period));
+        //Если у пользователя еще нет никакой подписки, то добавляем еще пробный период
+        paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(TimeUtils.UTC)
+                .plusDays(subscriptionProperties.getTrialPeriod()), period));
 
         paidSubscriptionDao.createOrRenew(paidSubscription, period);
 
