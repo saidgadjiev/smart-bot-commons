@@ -49,6 +49,48 @@ public class MessageMediaService {
             return sticker.getFileId();
         } else if (message.hasVideoNote()) {
             return message.getVideoNote().getFileId();
+        } else if (message.hasVoice()) {
+            return message.getVoice().getFileId();
+        }
+
+        return null;
+    }
+
+    public boolean hasMedia(Message message) {
+        if (message.hasDocument()) {
+            return true;
+        } else if (message.hasPhoto()) {
+            return true;
+        } else if (message.hasVideo()) {
+            return true;
+        } else if (message.hasAudio()) {
+            return true;
+        } else if (message.hasSticker()) {
+            return true;
+        } else if (message.hasVideoNote()) {
+            return true;
+        } else return message.hasVoice();
+    }
+
+    public Integer getFileSize(Message message) {
+        if (message.hasDocument()) {
+            return message.getDocument().getFileSize();
+        } else if (message.hasPhoto()) {
+            PhotoSize photoSize = message.getPhoto().stream().max(Comparator.comparing(PhotoSize::getWidth)).orElseThrow();
+
+            return photoSize.getFileSize();
+        } else if (message.hasVideo()) {
+            return message.getVideo().getFileSize();
+        } else if (message.hasAudio()) {
+            return message.getAudio().getFileSize();
+        } else if (message.hasSticker()) {
+            Sticker sticker = message.getSticker();
+
+            return sticker.getFileSize();
+        } else if (message.hasVideoNote()) {
+            return message.getVideoNote().getFileSize();
+        } else if (message.hasVoice()) {
+            return message.getVoice().getFileSize();
         }
 
         return null;

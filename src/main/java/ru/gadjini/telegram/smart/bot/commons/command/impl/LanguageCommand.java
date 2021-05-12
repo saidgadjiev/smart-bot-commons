@@ -106,26 +106,6 @@ public class LanguageCommand implements KeyboardBotCommand, NavigableBotCommand,
         }
     }
 
-    @Override
-    public boolean isChannelSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isPaidSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isPaidSubscriptionRequired(Message message) {
-        return false;
-    }
-
-    @Override
-    public boolean isChannelSubscriptionRequired(Message message) {
-        return false;
-    }
-
     private void changeLocale(Message message, Locale locale) {
         userService.changeLocale(message.getFrom().getId(), locale);
         messageService.sendMessage(

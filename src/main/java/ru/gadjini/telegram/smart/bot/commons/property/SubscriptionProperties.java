@@ -27,6 +27,9 @@ public class SubscriptionProperties {
     @Value("${payment.description:false}")
     private boolean paymentDescription;
 
+    @Value("${free.file.weight.limit:0}")
+    private long freeFileWeighLimit;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -81,5 +84,17 @@ public class SubscriptionProperties {
 
     public void setPaymentDescription(boolean paymentDescription) {
         this.paymentDescription = paymentDescription;
+    }
+
+    public long getFreeFileWeighLimit() {
+        return freeFileWeighLimit;
+    }
+
+    public void setFreeFileWeighLimit(long freeFileWeighLimit) {
+        this.freeFileWeighLimit = freeFileWeighLimit;
+    }
+
+    public boolean isFreeWeightLimitEnabled() {
+        return freeFileWeighLimit > 0;
     }
 }

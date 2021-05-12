@@ -47,16 +47,6 @@ public class RefreshSubscriptionCommand implements BotCommand {
     }
 
     @Override
-    public boolean isPaidSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isPaidSubscriptionRequired(Message message) {
-        return false;
-    }
-
-    @Override
     public boolean accept(Message message) {
         return subscriptionProperties.isCheckPaidSubscription()
                 || Objects.equals(botProperties.getName(), subscriptionProperties.getPaymentBotName());

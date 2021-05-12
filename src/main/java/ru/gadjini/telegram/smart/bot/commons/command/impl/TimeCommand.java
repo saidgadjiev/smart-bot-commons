@@ -27,16 +27,6 @@ public class TimeCommand implements BotCommand {
     }
 
     @Override
-    public boolean isChannelSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isPaidSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
     public void processMessage(Message message, String[] params) {
         messageService.sendMessage(
                 SendMessage.builder()

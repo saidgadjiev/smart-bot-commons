@@ -50,16 +50,6 @@ public class CheckPaidSubscriptionCommand implements BotCommand {
     }
 
     @Override
-    public boolean isChannelSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
-    public boolean isPaidSubscriptionRequired() {
-        return false;
-    }
-
-    @Override
     public boolean accept(Message message) {
         return paidSubscriptionProperties.isCheckPaidSubscription()
                 || Objects.equals(botProperties.getName(), paidSubscriptionProperties.getPaymentBotName());
