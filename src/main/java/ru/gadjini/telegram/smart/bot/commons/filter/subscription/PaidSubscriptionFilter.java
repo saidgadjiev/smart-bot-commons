@@ -133,11 +133,16 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     }
 
     private boolean isFileNeedSubscription(Message message) {
-        if (!subscriptionProperties.isFreeWeightLimitEnabled()) {
-            return false;
-        }
         Integer fileSize = messageMediaService.getFileSize(message);
 
-        return fileSize == null || fileSize > subscriptionProperties.getFreeFileWeighLimit();
+        if (fileSize == null) {
+            return false;
+        }
+
+        if (!subscriptionProperties.isFreeWeightLimitEnabled()) {
+            return true;
+        }
+
+        return fileSize > subscriptionProperties.getFreeFileWeighLimit();
     }
 }
