@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -20,7 +21,7 @@ import java.util.Locale;
 import java.util.Objects;
 
 @Component
-public class CheckPaidSubscriptionCommand implements BotCommand {
+public class CheckPaidSubscriptionCommand implements BotCommand, PaidSubscriptionOptional {
 
     private MessageService messageService;
 

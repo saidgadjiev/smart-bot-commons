@@ -1,6 +1,5 @@
 package ru.gadjini.telegram.smart.bot.commons.service.telegram;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.StopWatch;
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
@@ -38,77 +36,50 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
     private final BotApiProperties botApiProperties;
 
-    private ObjectMapper objectMapper;
-
     private TelegramBotApiMethodExecutor exceptionHandler;
 
-    public TelegramBotApiMediaService(BotProperties botProperties, ObjectMapper objectMapper,
+    public TelegramBotApiMediaService(BotProperties botProperties,
                                       DefaultBotOptions botOptions, BotApiProperties botApiProperties,
                                       TelegramBotApiMethodExecutor exceptionHandler) {
         super(botOptions);
         this.botProperties = botProperties;
-        this.objectMapper = objectMapper;
         this.botApiProperties = botApiProperties;
         this.exceptionHandler = exceptionHandler;
     }
 
     @Override
     public Message editMessageMedia(EditMessageMedia editMessageMedia) {
-        return exceptionHandler.executeWithResult(editMessageMedia.getChatId(), () -> {
-            Message execute = (Message) execute(editMessageMedia);
-
-            return objectMapper.convertValue(execute, Message.class);
-        });
+        return exceptionHandler.executeWithResult(editMessageMedia.getChatId(), () -> (Message) execute(editMessageMedia));
     }
 
     @Override
     public Message sendSticker(SendSticker sendSticker, Progress progress) {
-        return uploadFile(sendSticker.getChatId(), () -> {
-            Message execute = execute(sendSticker);
-
-            return objectMapper.convertValue(execute, Message.class);
-        }, progress);
+        return uploadFile(sendSticker.getChatId(), () -> execute(sendSticker), progress);
     }
 
     @Override
     public Message sendDocument(SendDocument sendDocument, Progress progress) {
-        return uploadFile(sendDocument.getChatId(), () -> {
-            Message execute = execute(sendDocument);
-            return objectMapper.convertValue(execute, Message.class);
-        }, progress);
+        return uploadFile(sendDocument.getChatId(), () -> execute(sendDocument), progress);
     }
 
     @Override
     public Message sendVideo(SendVideo sendVideo, Progress progress) {
-        return uploadFile(sendVideo.getChatId(), () -> {
-            Message execute = execute(sendVideo);
-            return objectMapper.convertValue(execute, Message.class);
-        }, progress);
+        return uploadFile(sendVideo.getChatId(), () -> execute(sendVideo), progress);
     }
 
     @Override
     public Message sendAudio(SendAudio sendAudio, Progress progress) {
-        return uploadFile(sendAudio.getChatId(), () -> {
-            Message execute = execute(sendAudio);
-            return objectMapper.convertValue(execute, Message.class);
-        }, progress);
+        return uploadFile(sendAudio.getChatId(), () -> execute(sendAudio), progress);
     }
 
     @Override
     public Message sendVoice(SendVoice sendVoice, Progress progress) {
-        return uploadFile(sendVoice.getChatId(), () -> {
-            Message execute = execute(sendVoice);
-            return objectMapper.convertValue(execute, Message.class);
-        }, progress);
+        return uploadFile(sendVoice.getChatId(), () -> execute(sendVoice), progress);
     }
 
     @Override
     public Message sendPhoto(SendPhoto sendPhoto) {
-        return exceptionHandler.executeWithResult(sendPhoto.getChatId(), () -> {
-            Message execute = execute(sendPhoto);
-
-            return objectMapper.convertValue(execute, Message.class);
-        });
+        return exceptionHandler.executeWithResult(sendPhoto.getChatId(), () -> execute(sendPhoto));
     }
 
     @Override
@@ -189,7 +160,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
             EditMessageText editMessageText = new EditMessageText();
             editMessageText.setChatId(progress.getChatId());
             editMessageText.setText(progress.getAfterProgressCompletionMessage());
-            editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getAfterProgressCompletionReplyMarkup(), InlineKeyboardMarkup.class));
+            editMessageText.setReplyMarkup(progress.getAfterProgressCompletionReplyMarkup());
             editMessageText.setMessageId(progress.getProgressMessageId());
             editMessageText.setParseMode(ParseMode.HTML);
 
@@ -208,7 +179,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
             EditMessageText editMessageText = new EditMessageText();
             editMessageText.setChatId(progress.getChatId());
             editMessageText.setText(progress.getProgressMessage());
-            editMessageText.setReplyMarkup(objectMapper.convertValue(progress.getProgressReplyMarkup(), InlineKeyboardMarkup.class));
+            editMessageText.setReplyMarkup(progress.getProgressReplyMarkup());
             editMessageText.setMessageId(progress.getProgressMessageId());
             editMessageText.setParseMode(ParseMode.HTML);
 

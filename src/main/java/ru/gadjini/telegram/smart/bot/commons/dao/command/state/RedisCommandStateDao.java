@@ -1,12 +1,12 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.command.state;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
+import ru.gadjini.telegram.smart.bot.commons.service.Jackson;
 
 import java.util.concurrent.TimeUnit;
 
@@ -20,12 +20,12 @@ public class RedisCommandStateDao implements CommandStateDao {
 
     private RedisTemplate<String, Object> redisTemplate;
 
-    private ObjectMapper objectMapper;
+    private Jackson json;
 
     @Autowired
-    public RedisCommandStateDao(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
+    public RedisCommandStateDao(RedisTemplate<String, Object> redisTemplate, Jackson json) {
         this.redisTemplate = redisTemplate;
-        this.objectMapper = objectMapper;
+        this.json = json;
     }
 
     @Override
@@ -50,7 +50,7 @@ public class RedisCommandStateDao implements CommandStateDao {
                 return tClass.cast(o);
             }
 
-            return objectMapper.convertValue(o, tClass);
+            return json.convertValue(o, tClass);
         } catch (Exception e) {
             LOGGER.error(e.getMessage(), e);
             return null;

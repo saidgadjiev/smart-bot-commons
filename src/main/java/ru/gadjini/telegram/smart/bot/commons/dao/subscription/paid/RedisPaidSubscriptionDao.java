@@ -1,14 +1,14 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Repository;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
+import ru.gadjini.telegram.smart.bot.commons.service.Jackson;
 
 import java.time.LocalDate;
 import java.time.ZonedDateTime;
@@ -29,15 +29,15 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
 
     private RedisTemplate<String, Object> redisTemplate;
 
-    private ObjectMapper objectMapper;
+    private Jackson json;
 
     @Autowired
     public RedisPaidSubscriptionDao(@DB PaidSubscriptionDao paidSubscriptionDao, StringRedisTemplate stringRedisTemplate,
-                                    RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
+                                    RedisTemplate<String, Object> redisTemplate, Jackson json) {
         this.paidSubscriptionDao = paidSubscriptionDao;
         this.stringRedisTemplate = stringRedisTemplate;
         this.redisTemplate = redisTemplate;
-        this.objectMapper = objectMapper;
+        this.json = json;
     }
 
     @Override
@@ -90,19 +90,15 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
             List<Object> objects = stringRedisTemplate.opsForHash()
                     .multiGet(key, List.of(PaidSubscription.PLAN_ID, PaidSubscription.END_DATE, PaidSubscription.PURCHASE_DATE));
 
-            try {
-                PaidSubscription subscription = new PaidSubscription();
+            PaidSubscription subscription = new PaidSubscription();
 
-                subscription.setPlanId(objects.get(0) == null ? null : objectMapper.readValue((String) objects.get(0), Integer.class));
-                subscription.setEndDate(objectMapper.readValue((String) objects.get(1), LocalDate.class));
-                subscription.setPurchaseDate(objectMapper.readValue((String) objects.get(2), ZonedDateTime.class));
-                subscription.setBotName(botName);
-                subscription.setUserId(userId);
+            subscription.setPlanId(objects.get(0) == null ? null : json.readValue((String) objects.get(0), Integer.class));
+            subscription.setEndDate(json.readValue((String) objects.get(1), LocalDate.class));
+            subscription.setPurchaseDate(json.readValue((String) objects.get(2), ZonedDateTime.class));
+            subscription.setBotName(botName);
+            subscription.setUserId(userId);
 
-                return subscription;
-            } catch (Exception ex) {
-                throw new RuntimeException(ex);
-            }
+            return subscription;
         }
 
         return null;

@@ -4,22 +4,27 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
+import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.filter.BaseBotFilter;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
-import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
+import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
+import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.utils.MessageUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
@@ -30,6 +35,12 @@ import java.util.Locale;
 public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private SubscriptionProperties subscriptionProperties;
+
+    private CommandParser commandParser;
+
+    private CommandsContainer commandsContainer;
+
+    private CommandNavigator commandNavigator;
 
     private UserService userService;
 
@@ -43,23 +54,24 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private SmartInlineKeyboardService inlineKeyboardService;
 
-    private MessageMediaService messageMediaService;
-
     @Autowired
-    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties,
+    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
+                                  CommandsContainer commandsContainer, CommandNavigator commandNavigator,
                                   @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
                                   PaidSubscriptionService paidSubscriptionService,
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
-                                  SmartInlineKeyboardService inlineKeyboardService, MessageMediaService messageMediaService) {
+                                  SmartInlineKeyboardService inlineKeyboardService) {
         this.subscriptionProperties = subscriptionProperties;
+        this.commandParser = commandParser;
+        this.commandsContainer = commandsContainer;
+        this.commandNavigator = commandNavigator;
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
         this.paidSubscriptionService = paidSubscriptionService;
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.inlineKeyboardService = inlineKeyboardService;
-        this.messageMediaService = messageMediaService;
     }
 
     @Override
@@ -126,23 +138,29 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private boolean isPaidSubscriptionRequiredForUpdate(Update update) {
         if (update.hasMessage()) {
-            return isFileNeedSubscription(update.getMessage());
+            String text = MessageUtils.getText(update.getMessage());
+            if (commandsContainer.isBotCommand(update.getMessage())) {
+                String command = commandParser.parseBotCommand(update.getMessage()).getCommandName();
+                BotCommand botCommand = commandsContainer.getBotCommand(command);
+
+                if (botCommand == null) {
+                    return false;
+                }
+
+                return botCommand.isPaidSubscriptionRequired();
+            } else if (commandsContainer.isKeyboardCommand(update.getMessage().getChatId(), text)) {
+                KeyboardBotCommand keyboardBotCommand = commandsContainer.getKeyboardBotCommand(update.getMessage().getChatId(), text);
+
+                return keyboardBotCommand.isPaidSubscriptionRequired();
+            } else {
+                NavigableBotCommand navigableBotCommand = commandNavigator.getCurrentCommand(update.getMessage().getChatId(), true);
+
+                if (navigableBotCommand != null && navigableBotCommand.acceptNonCommandMessage(update.getMessage())) {
+                    return navigableBotCommand.isPaidSubscriptionRequired(update.getMessage());
+                }
+            }
         }
 
         return false;
-    }
-
-    private boolean isFileNeedSubscription(Message message) {
-        Integer fileSize = messageMediaService.getFileSize(message);
-
-        if (fileSize == null) {
-            return false;
-        }
-
-        if (!subscriptionProperties.isFreeWeightLimitEnabled()) {
-            return true;
-        }
-
-        return fileSize > subscriptionProperties.getFreeFileWeighLimit();
     }
 }

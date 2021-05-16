@@ -158,6 +158,11 @@ public enum Format {
         public boolean isDummy() {
             return true;
         }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
     },
     PDF_IMPORT(FormatCategory.DOCUMENTS) {
         @Override

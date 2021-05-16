@@ -6,6 +6,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
@@ -18,7 +19,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscripti
 import java.util.Objects;
 
 @Component
-public class RefreshSubscriptionCommand implements BotCommand {
+public class RefreshSubscriptionCommand implements BotCommand, PaidSubscriptionOptional {
 
     private PaidSubscriptionRemoveService paidSubscriptionRemoveService;
 

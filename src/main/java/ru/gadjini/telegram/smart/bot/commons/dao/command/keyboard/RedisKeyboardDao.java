@@ -1,11 +1,11 @@
 package ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Repository;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
+import ru.gadjini.telegram.smart.bot.commons.service.Jackson;
 
 @Repository
 @Redis
@@ -15,12 +15,12 @@ public class RedisKeyboardDao implements ReplyKeyboardDao {
 
     private RedisTemplate<String, Object> redisTemplate;
 
-    private ObjectMapper objectMapper;
+    private Jackson json;
 
     @Autowired
-    public RedisKeyboardDao(RedisTemplate<String, Object> redisTemplate, ObjectMapper objectMapper) {
+    public RedisKeyboardDao(RedisTemplate<String, Object> redisTemplate, Jackson json) {
         this.redisTemplate = redisTemplate;
-        this.objectMapper = objectMapper;
+        this.json = json;
     }
 
     @Override
@@ -36,7 +36,7 @@ public class RedisKeyboardDao implements ReplyKeyboardDao {
             return null;
         }
 
-        return objectMapper.convertValue(o, ReplyKeyboardMarkup.class);
+        return json.convertValue(o, ReplyKeyboardMarkup.class);
     }
 
     private String getKey(long chatId) {

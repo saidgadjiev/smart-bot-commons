@@ -9,6 +9,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionFullyOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -22,7 +23,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @Component
-public class LanguageCommand implements KeyboardBotCommand, NavigableBotCommand, BotCommand {
+public class LanguageCommand implements KeyboardBotCommand, BotCommand, NavigableBotCommand, PaidChannelSubscriptionFullyOptional {
 
     private Set<String> names = new HashSet<>();
 

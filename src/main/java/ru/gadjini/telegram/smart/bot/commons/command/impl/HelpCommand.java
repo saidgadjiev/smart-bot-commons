@@ -8,6 +8,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
@@ -20,7 +21,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @Component
-public class HelpCommand implements KeyboardBotCommand, BotCommand {
+public class HelpCommand implements KeyboardBotCommand, BotCommand, PaidChannelSubscriptionOptional {
 
     private final MessageService messageService;
 

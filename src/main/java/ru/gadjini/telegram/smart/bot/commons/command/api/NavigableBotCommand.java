@@ -4,7 +4,19 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 
-public interface NavigableBotCommand extends MyBotCommand {
+public interface NavigableBotCommand {
+
+    default boolean isChannelSubscriptionRequired(Message message) {
+        return true;
+    }
+
+    default boolean isPaidSubscriptionRequired(Message message) {
+        return true;
+    }
+
+    default boolean acceptNonCommandMessage(Message message) {
+        return true;
+    }
 
     default void processNonCommandUpdate(Message message, String text) {
     }
@@ -27,6 +39,9 @@ public interface NavigableBotCommand extends MyBotCommand {
 
     default void leave(long chatId) {
 
+    }
+
+    default void cancel(long chatId, String queryId) {
     }
 
     default boolean setPrevCommand(long chatId, String prevCommand) {
