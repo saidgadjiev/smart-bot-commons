@@ -15,6 +15,7 @@ import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 @Repository
@@ -81,6 +82,14 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     public void refresh(String botName, int userId) {
         String key = getKey(botName, userId);
         redisTemplate.delete(key);
+    }
+
+    @Override
+    public void refreshAll(String botName) {
+        Set<String> keys = redisTemplate.keys(KEY + "*");
+        if (keys != null) {
+            redisTemplate.delete(keys);
+        }
     }
 
     private PaidSubscription getFromRedis(String botName, int userId) {

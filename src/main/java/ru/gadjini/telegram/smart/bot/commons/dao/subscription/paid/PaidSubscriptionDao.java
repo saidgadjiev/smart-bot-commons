@@ -13,5 +13,11 @@ public interface PaidSubscriptionDao {
 
     int remove(String botName, int userId);
 
-    void refresh(String botName, int userId);
+    default void refresh(String botName, int userId) {
+
+    }
+
+    default void refreshAll(String botName) {
+
+    }
 }

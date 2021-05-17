@@ -48,5 +48,7 @@ public class CommandNames {
 
     public static final String REFRESH_SUBSCRIPTION = "refreshsub";
 
+    public static final String REFRESH_SUBSCRIPTIONS = "refreshsubs";
+
     public static final String ME = "me";
 }
