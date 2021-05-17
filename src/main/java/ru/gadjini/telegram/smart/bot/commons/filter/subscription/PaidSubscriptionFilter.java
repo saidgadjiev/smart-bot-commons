@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.filter.subscription;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -33,6 +35,8 @@ import java.util.Locale;
 
 @Component
 public class PaidSubscriptionFilter extends BaseBotFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaidSubscriptionFilter.class);
 
     private SubscriptionProperties subscriptionProperties;
 
@@ -93,11 +97,13 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         if (subscription == null) {
             PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
             sendTrialSubscriptionStarted(user, trialSubscription);
+            LOGGER.debug("Trial subscription started({})", user.getId());
 
             return false;
         }
         if (!subscription.isActive()) {
             sendSubscriptionExpired(user.getId());
+            LOGGER.debug("Paid subscription required({})", user.getId());
 
             return false;
         }
