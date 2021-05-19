@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.utils;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.attribute.FileTime;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -24,6 +25,8 @@ public class SmartFileUtils {
             if (between > days) {
                 return true;
             }
+        } catch (NoSuchFileException ignore) {
+            return true;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
