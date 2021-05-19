@@ -5,6 +5,7 @@ import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -34,7 +35,8 @@ public class SmartBotConfiguration {
     @Autowired
     public SmartBotConfiguration(AdminProperties adminProperties,
                                  SubscriptionProperties subscriptionProperties,
-                                 BotApiProperties botApiProperties) {
+                                 BotApiProperties botApiProperties,
+                                 HttpClientProperties httpClientProperties) {
         LOGGER.debug("Local work dir({})", botApiProperties.getLocalWorkDir());
         LOGGER.debug("Work dir({})", botApiProperties.getWorkDir());
         LOGGER.debug("Admin white list({})", adminProperties.getWhiteList());
@@ -45,6 +47,7 @@ public class SmartBotConfiguration {
         LOGGER.debug("Paid bot({})", subscriptionProperties.getPaidBotName());
         LOGGER.debug("Payment currency({})", subscriptionProperties.getPaymentCurrency());
         LOGGER.debug("Trial period({})", subscriptionProperties.getTrialPeriod());
+        LOGGER.debug("Http download request timeout({})", httpClientProperties.getDownloadRequestTimeout());
     }
 
     @Bean
@@ -70,13 +73,23 @@ public class SmartBotConfiguration {
             defaultBotOptions.setBaseUrl(localBotApiProperties.getEndpoint());
         }
         defaultBotOptions.setRequestConfig(
-                RequestConfig.copy(RequestConfig.custom().build())
+                RequestConfig.custom()
                         //TODO: infinite
                         .setSocketTimeout(0)
                         .setConnectTimeout(Constants.SOCKET_TIMEOUT)
                         .setConnectionRequestTimeout(Constants.SOCKET_TIMEOUT).build());
 
         return defaultBotOptions;
+    }
+
+    @Bean
+    @Scope
+    @Qualifier("downloadRequestConfig")
+    public RequestConfig downloadRequestConfig(HttpClientProperties httpClientProperties) {
+        return RequestConfig.custom()
+                .setSocketTimeout(httpClientProperties.getDownloadRequestTimeout())
+                .setConnectTimeout(Constants.SOCKET_TIMEOUT)
+                .setConnectionRequestTimeout(Constants.SOCKET_TIMEOUT).build();
     }
 
     @Bean
