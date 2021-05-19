@@ -127,7 +127,8 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
             stopWatch.stop();
             long time = stopWatch.getTime(TimeUnit.SECONDS);
             LOGGER.debug("Finish downloadFileByFileId({}, {}, {}, {})", fileId,
-                    MemoryUtils.humanReadableByteCount(resultFileSize.get()), time, NetSpeedUtils.toSpeed(resultFileSize.get() / time));
+                    MemoryUtils.humanReadableByteCount(resultFileSize.get()), time,
+                    NetSpeedUtils.toSpeed(resultFileSize.get() / Math.max(1, time)));
 
             return resultFilePath;
         } catch (TelegramApiException | FloodWaitException e) {
