@@ -90,13 +90,13 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
     @Override
     public String downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
+        AtomicLong resultFileSize = new AtomicLong(fileSize);
         try {
-            StopWatch stopWatch = new StopWatch();
-            stopWatch.start();
             LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
 
-            AtomicLong resultFileSize = new AtomicLong();
-            String resultFilePath = exceptionHandler.executeWithResult(fileId, () -> {
+            return exceptionHandler.executeWithResult(fileId, () -> {
                 updateProgressBeforeStart(progress);
                 GetFile gf = new GetFile();
                 gf.setFileId(fileId);
@@ -121,19 +121,20 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
 
                 updateProgressAfterComplete(progress);
 
+                LOGGER.debug("Finished successfully downloadFileByFileId({}, {})", fileId,
+                        MemoryUtils.humanReadableByteCount(resultFileSize.get()));
+
                 return filePath;
             });
-
+        } catch (TelegramApiException | FloodWaitException e) {
+            LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+            throw e;
+        } finally {
             stopWatch.stop();
             long time = stopWatch.getTime(TimeUnit.SECONDS);
             LOGGER.debug("Finish downloadFileByFileId({}, {}, {}, {})", fileId,
                     MemoryUtils.humanReadableByteCount(resultFileSize.get()), time,
                     NetSpeedUtils.toSpeed(resultFileSize.get() / Math.max(1, time)));
-
-            return resultFilePath;
-        } catch (TelegramApiException | FloodWaitException e) {
-            LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
-            throw e;
         }
     }
 
