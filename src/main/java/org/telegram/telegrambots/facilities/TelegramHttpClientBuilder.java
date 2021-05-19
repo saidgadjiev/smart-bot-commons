@@ -33,6 +33,17 @@ public class TelegramHttpClientBuilder {
         HttpClientBuilder httpClientBuilder = HttpClientBuilder.create()
                 .setSSLHostnameVerifier(new NoopHostnameVerifier())
                 .setConnectionManager(createConnectionManager(options))
+                .setRetryHandler((exception, executionCount, context) -> {
+                    if (executionCount > 3) {
+                        LOGGER.warn("Maximum tries reached for client http pool ");
+                        return false;
+                    }
+                    if (exception instanceof org.apache.http.NoHttpResponseException) {
+                        LOGGER.warn("No response from server on " + executionCount + " call");
+                        return true;
+                    }
+                    return false;
+                })
                 .setConnectionTimeToLive(70, TimeUnit.SECONDS)
                 .setMaxConnTotal(maxConnTotal)
                 .setMaxConnPerRoute(connPerRoute);
