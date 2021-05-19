@@ -19,6 +19,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.property.BotApiProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.NetSpeedUtils;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -124,8 +125,9 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
             });
 
             stopWatch.stop();
-            LOGGER.debug("Finish downloadFileByFileId({}, {}, {})", fileId,
-                    MemoryUtils.humanReadableByteCount(resultFileSize.get()), stopWatch.getTime(TimeUnit.SECONDS));
+            long time = stopWatch.getTime(TimeUnit.SECONDS);
+            LOGGER.debug("Finish downloadFileByFileId({}, {}, {}, {})", fileId,
+                    MemoryUtils.humanReadableByteCount(resultFileSize.get()), time, NetSpeedUtils.toSpeed(resultFileSize.get() / time));
 
             return resultFilePath;
         } catch (TelegramApiException | FloodWaitException e) {
