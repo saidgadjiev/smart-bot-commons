@@ -39,7 +39,7 @@ public class TelegramHttpClientBuilder {
                         return false;
                     }
                     if (exception instanceof org.apache.http.NoHttpResponseException) {
-                        LOGGER.warn("No response from server on " + executionCount + " call");
+                        LOGGER.warn("No response from server " + exception.getMessage() + " on " + executionCount + " call");
                         return true;
                     }
                     return false;
