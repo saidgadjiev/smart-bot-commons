@@ -95,15 +95,15 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         PaidSubscription subscription = paidSubscriptionService.getSubscription(subscriptionProperties.getPaidBotName(), user.getId());
 
         if (subscription == null) {
+            LOGGER.debug("Trial subscription started({})", user.getId());
             PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
             sendTrialSubscriptionStarted(user, trialSubscription);
-            LOGGER.debug("Trial subscription started({})", user.getId());
 
             return false;
         }
         if (!subscription.isActive()) {
-            sendSubscriptionExpired(user.getId());
             LOGGER.debug("Paid subscription required({})", user.getId());
+            sendSubscriptionExpired(user.getId());
 
             return false;
         }
