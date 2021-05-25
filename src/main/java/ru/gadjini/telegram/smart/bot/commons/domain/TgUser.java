@@ -22,6 +22,8 @@ public class TgUser {
 
     private String originalLocale;
 
+    private String startParameter;
+
     public int getUserId() {
         return userId;
     }
@@ -56,5 +58,13 @@ public class TgUser {
 
     public void setOriginalLocale(String originalLocale) {
         this.originalLocale = originalLocale;
+    }
+
+    public String getStartParameter() {
+        return startParameter;
+    }
+
+    public void setStartParameter(String startParameter) {
+        this.startParameter = startParameter;
     }
 }

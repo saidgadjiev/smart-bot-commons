@@ -49,29 +49,22 @@ public class StartCommandFilter extends BaseBotFilter {
 
     @Override
     public void doFilter(Update update) {
-        if (isStartCommand(update)) {
-            CreateOrUpdateResult createOrUpdateResult = doStart(update.getMessage());
+        if (update.hasMessage() && update.getMessage().isCommand()) {
+            CommandParser.CommandParseResult commandParseResult = commandParser.parseBotCommand(update.getMessage());
+            if (commandParseResult.getCommandName().equals(CommandNames.START_COMMAND_NAME)) {
+                CreateOrUpdateResult createOrUpdateResult = doStart(update.getMessage(), commandParseResult.getStartParameter());
 
-            if (createOrUpdateResult.isCreated()) {
-                return;
+                if (createOrUpdateResult.isCreated()) {
+                    return;
+                }
             }
         }
 
         super.doFilter(update);
     }
 
-    private boolean isStartCommand(Update update) {
-        if (update.hasMessage() && update.getMessage().isCommand()) {
-            String commandName = commandParser.parseBotCommand(update.getMessage()).getCommandName();
-
-            return commandName.equals(CommandNames.START_COMMAND_NAME);
-        }
-
-        return false;
-    }
-
-    private CreateOrUpdateResult doStart(Message message) {
-        CreateOrUpdateResult createOrUpdateResult = userService.createOrUpdate(message.getFrom());
+    private CreateOrUpdateResult doStart(Message message, String startParameter) {
+        CreateOrUpdateResult createOrUpdateResult = userService.createOrUpdate(message.getFrom(), startParameter);
 
         if (createOrUpdateResult.isCreated()) {
             String text = startCommandMessageBuilder.getWelcomeMessage(createOrUpdateResult.getUser().getLocale());

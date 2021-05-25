@@ -44,7 +44,7 @@ public class DBUserDao implements UserDao {
         jdbcTemplate.update(
                 connection -> {
                     var ps = connection.prepareStatement(
-                            "INSERT INTO tg_user(user_id, username, locale, original_locale) VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET " +
+                            "INSERT INTO tg_user(user_id, username, locale, original_locale, start_parameter) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE SET " +
                                     "last_activity_at = now(), username = excluded.username, original_locale = excluded.original_locale, blocked = false " +
                                     "RETURNING CASE WHEN XMAX::text::int > 0 THEN 'updated' ELSE 'inserted' END AS state",
                             Statement.RETURN_GENERATED_KEYS
@@ -61,6 +61,11 @@ public class DBUserDao implements UserDao {
                         ps.setNull(4, Types.NULL);
                     } else {
                         ps.setString(4, user.getOriginalLocale());
+                    }
+                    if (StringUtils.isNotBlank(user.getStartParameter())) {
+                        ps.setString(5, user.getStartParameter());
+                    } else {
+                        ps.setNull(5, Types.VARCHAR);
                     }
 
                     return ps;

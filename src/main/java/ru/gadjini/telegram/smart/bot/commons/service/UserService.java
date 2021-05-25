@@ -35,11 +35,12 @@ public class UserService {
         this.userSettingsService = userSettingsService;
     }
 
-    public CreateOrUpdateResult createOrUpdate(User user) {
+    public CreateOrUpdateResult createOrUpdate(User user, String startParameter) {
         TgUser tgUser = new TgUser();
         tgUser.setUserId(user.getId());
         tgUser.setUsername(user.getUserName());
         tgUser.setOriginalLocale(user.getLanguageCode());
+        tgUser.setStartParameter(startParameter);
 
         String language = localisationService.getSupportedLocales().stream()
                 .filter(locale -> locale.getLanguage().equals(user.getLanguageCode()))
@@ -78,7 +79,7 @@ public class UserService {
         int updated = userDao.updateActivity(user.getId(), user.getUserName());
 
         if (updated == 0) {
-            createOrUpdate(user);
+            createOrUpdate(user, null);
             LOGGER.debug("User created({})", user.getId());
         }
     }
