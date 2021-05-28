@@ -7,6 +7,7 @@ import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Configuration;
@@ -22,7 +23,7 @@ public class JacksonConfiguration implements Jackson2ObjectMapperBuilderCustomiz
     @Override
     public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
         jacksonObjectMapperBuilder
-                .modules(new JavaTimeModule())
+                .modules(new JavaTimeModule(), new JodaModule())
                 .annotationIntrospector(new JacksonAnnotationIntrospector() {
                     @Override
                     protected <A extends Annotation> A _findAnnotation(final Annotated annotated,
