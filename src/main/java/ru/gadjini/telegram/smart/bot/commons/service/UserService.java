@@ -35,7 +35,7 @@ public class UserService {
         this.userSettingsService = userSettingsService;
     }
 
-    public CreateOrUpdateResult createOrUpdate(User user, String startParameter) {
+    public void createOrUpdate(User user, String startParameter) {
         TgUser tgUser = new TgUser();
         tgUser.setUserId(user.getId());
         tgUser.setUsername(user.getUserName());
@@ -53,8 +53,6 @@ public class UserService {
         if (createOrUpdateResult.isCreated()) {
             userSettingsService.createDefaultSettings(user.getId());
         }
-
-        return createOrUpdateResult;
     }
 
     public Locale getLocaleOrDefault(int userId) {
