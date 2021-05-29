@@ -1,5 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+
+import java.util.Locale;
+
 public class BulkDistribution {
 
     public static final String ID = "id";
@@ -60,5 +64,17 @@ public class BulkDistribution {
 
     public void setMessageUz(String messageUz) {
         this.messageUz = messageUz;
+    }
+
+    public String getMessage(Locale locale) {
+        switch (locale.getLanguage()) {
+            case LocalisationService
+                    .RU_LOCALE:
+                return getMessageRu();
+            case LocalisationService.UZ_LOCALE:
+                return getMessageUz();
+            default:
+                return getMessageEn();
+        }
     }
 }

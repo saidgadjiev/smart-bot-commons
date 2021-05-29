@@ -9,13 +9,10 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.domain.BulkDistribution;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.distribution.BulkDistributionService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.user.UserBotService;
-
-import java.util.Locale;
 
 @Component
 public class BulkDistributionJob {
@@ -51,13 +48,14 @@ public class BulkDistributionJob {
         this.disable = disable;
     }
 
-    @Scheduled(fixedDelay = 1000)
+    @Scheduled(fixedDelay = 1000 * 1000)
     public void distribute() {
         if (disable) {
             return;
         }
         BulkDistribution bulkDistribution = bulkDistributionService.getDistribution(botProperties.getName());
         if (bulkDistribution == null) {
+            disable = true;
             return;
         }
 
@@ -65,7 +63,7 @@ public class BulkDistributionJob {
             messageService.sendMessage(
                     SendMessage.builder()
                             .chatId(String.valueOf(bulkDistribution.getUserId()))
-                            .text(getMessage(bulkDistribution, userService.getLocaleOrDefault(bulkDistribution.getUserId())))
+                            .text(bulkDistribution.getMessage(userService.getLocaleOrDefault(bulkDistribution.getUserId())))
                             .parseMode(ParseMode.HTML)
                             .build()
             );
@@ -76,18 +74,6 @@ public class BulkDistributionJob {
         } catch (Throwable e) {
             userService.handleBotBlockedByUser(e);
             bulkDistributionService.delete(bulkDistribution.getId());
-        }
-    }
-
-    private String getMessage(BulkDistribution bulkDistribution, Locale locale) {
-        switch (locale.getLanguage()) {
-            case LocalisationService
-                    .RU_LOCALE:
-                return bulkDistribution.getMessageRu();
-            case LocalisationService.UZ_LOCALE:
-                return bulkDistribution.getMessageUz();
-            default:
-                return bulkDistribution.getMessageEn();
         }
     }
 }

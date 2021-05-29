@@ -15,11 +15,15 @@ public class BulkDistributionService {
         this.bulkDistributionDao = bulkDistributionDao;
     }
 
-    public BulkDistribution getDistribution(String botName) {
+    public synchronized BulkDistribution getDistribution(String botName) {
         return bulkDistributionDao.getFirstDistribution(botName);
     }
 
-    public void delete(int id) {
+    public synchronized BulkDistribution deleteAndGetDistribution(int userId, String botName) {
+        return bulkDistributionDao.deleteAndGet(userId, botName);
+    }
+
+    public synchronized void delete(int id) {
         bulkDistributionDao.delete(id);
     }
 }

@@ -39,7 +39,7 @@ public class EnableBulkDistributionCommand implements BotCommand {
         bulkDistributionJob.setDisable(!Boolean.parseBoolean(params[0]));
         messageService.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(message.getChatId()))
-                .text(String.valueOf(bulkDistributionJob.isDisable()))
+                .text(String.valueOf(!bulkDistributionJob.isDisable()))
                 .build());
     }
 
