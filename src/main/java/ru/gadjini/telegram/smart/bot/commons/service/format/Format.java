@@ -270,6 +270,28 @@ public enum Format {
             return true;
         }
     },
+    VIDEO_NOTE(FormatCategory.VIDEO) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+    },
+    SQUARE(FormatCategory.VIDEO) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+    },
     PROBE(FormatCategory.COMMON) {
 
         @Override

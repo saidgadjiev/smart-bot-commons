@@ -31,6 +31,8 @@ public interface MediaMessageService {
 
     SendFileResult sendVideo(SendVideo sendVideo, Progress progress);
 
+    SendFileResult sendVideoNote(SendVideoNote sendVideoNote, Progress progress);
+
     default SendFileResult sendAudio(SendAudio sendAudio) {
         return sendAudio(sendAudio, null);
     }

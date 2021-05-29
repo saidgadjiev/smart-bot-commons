@@ -69,6 +69,11 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @Override
+    public Message sendVideoNote(SendVideoNote sendVideoNote, Progress progress) {
+        return uploadFile(sendVideoNote.getChatId(), () -> execute(sendVideoNote), progress);
+    }
+
+    @Override
     public Message sendAudio(SendAudio sendAudio, Progress progress) {
         return uploadFile(sendAudio.getChatId(), () -> execute(sendAudio), progress);
     }

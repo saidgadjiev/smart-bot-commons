@@ -100,6 +100,14 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
+    public SendFileResult sendVideoNote(SendVideoNote sendVideoNote, Progress progress) {
+        sendVideoNote.setAllowSendingWithoutReply(true);
+        Message message = telegramMediaService.sendVideoNote(sendVideoNote, progress);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
+    }
+
+    @Override
     public SendFileResult sendAudio(SendAudio sendAudio, Progress progress) {
         if (StringUtils.isNotBlank(sendAudio.getCaption())) {
             sendAudio.setParseMode(ParseMode.HTML);

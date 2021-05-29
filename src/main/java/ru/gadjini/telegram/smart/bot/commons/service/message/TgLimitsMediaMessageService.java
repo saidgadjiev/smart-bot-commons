@@ -93,6 +93,15 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
+    public SendFileResult sendVideoNote(SendVideoNote sendVideoNote, Progress progress) {
+        if (validate(sendVideoNote.getChatId(), sendVideoNote.getVideoNote(), sendVideoNote.getReplyMarkup(), sendVideoNote.getReplyToMessageId())) {
+            return mediaMessageService.sendVideoNote(sendVideoNote, progress);
+        }
+
+        throw new InvalidMediaMessageException();
+    }
+
+    @Override
     public SendFileResult sendAudio(SendAudio sendAudio, Progress progress) {
         if (validate(sendAudio.getChatId(), sendAudio.getAudio(), sendAudio.getReplyMarkup(), sendAudio.getReplyToMessageId())) {
             return mediaMessageService.sendAudio(sendAudio, progress);
