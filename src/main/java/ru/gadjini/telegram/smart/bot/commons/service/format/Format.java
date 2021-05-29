@@ -271,6 +271,12 @@ public enum Format {
         }
     },
     PROBE(FormatCategory.COMMON) {
+
+        @Override
+        public boolean isUploadable() {
+            return false;
+        }
+
         @Override
         public boolean isDownloadable() {
             return false;
@@ -457,6 +463,10 @@ public enum Format {
     }
 
     public boolean isDownloadable() {
+        return true;
+    }
+
+    public boolean isUploadable() {
         return true;
     }
 
