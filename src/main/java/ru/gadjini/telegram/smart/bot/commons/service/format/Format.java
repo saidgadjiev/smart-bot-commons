@@ -292,6 +292,20 @@ public enum Format {
             return true;
         }
     },
+    ASS(FormatCategory.SUBTITLES),
+    WEBVTT(FormatCategory.SUBTITLES) {
+        @Override
+        public String getExt() {
+            return "vtt";
+        }
+    },
+    SRT(FormatCategory.SUBTITLES),
+    SUBRIP(FormatCategory.SUBTITLES) {
+        @Override
+        public String getExt() {
+            return SRT.getExt();
+        }
+    },
     PROBE(FormatCategory.COMMON) {
 
         @Override

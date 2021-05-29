@@ -7,6 +7,7 @@ public enum FormatCategory {
     WEB,
     ARCHIVE,
     VIDEO,
+    SUBTITLES,
     AUDIO,
     COMMON
 }
