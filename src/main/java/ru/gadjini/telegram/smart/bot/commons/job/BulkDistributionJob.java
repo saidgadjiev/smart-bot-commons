@@ -61,7 +61,6 @@ public class BulkDistributionJob {
         }
         BulkDistribution bulkDistribution = bulkDistributionService.getDistribution(botProperties.getName());
         if (bulkDistribution == null) {
-            disable = true;
             return;
         }
 
