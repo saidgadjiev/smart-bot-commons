@@ -1,5 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.job;
 
+import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.http.NoHttpResponseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -13,6 +16,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.distribution.BulkDistributionService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.user.UserBotService;
+
+import java.net.SocketException;
+import java.net.SocketTimeoutException;
 
 @Component
 public class BulkDistributionJob {
@@ -48,7 +54,7 @@ public class BulkDistributionJob {
         this.disable = disable;
     }
 
-    @Scheduled(fixedDelay = 1000 * 1000)
+    @Scheduled(fixedDelay = 1000)
     public void distribute() {
         if (disable) {
             return;
@@ -72,8 +78,23 @@ public class BulkDistributionJob {
         } catch (FloodWaitException ignore) {
             userBotService.create(bulkDistribution.getUserId(), botProperties.getName());
         } catch (Throwable e) {
-            userService.handleBotBlockedByUser(e);
-            bulkDistributionService.delete(bulkDistribution.getId());
+            if (!isNoneCriticalDownloadingException(e)) {
+                userService.handleBotBlockedByUser(e);
+                bulkDistributionService.delete(bulkDistribution.getId());
+            }
         }
+    }
+
+    private static boolean isNoneCriticalDownloadingException(Throwable ex) {
+        int indexOfNoResponseException = ExceptionUtils.indexOfThrowable(ex, NoHttpResponseException.class);
+        int socketException = ExceptionUtils.indexOfThrowable(ex, SocketException.class);
+        int socketTimeOutException = ExceptionUtils.indexOfThrowable(ex, SocketTimeoutException.class);
+        boolean restart500 = false;
+        if (StringUtils.isNotBlank(ex.getMessage())) {
+            restart500 = ex.getMessage().contains("Internal Server Error: restart");
+        }
+
+        return indexOfNoResponseException != -1 || socketException != -1
+                || socketTimeOutException != -1 || restart500;
     }
 }
