@@ -6,7 +6,7 @@ public class TelegramLinkUtils {
     }
 
     public static String botLink(String botName, String startParameter) {
-        return "<a href=\"https://t.me/" + botName + "?start=" + startParameter + "\">" + botName + "</a>";
+        return "<a href=\"https://t.me/" + botName + "?start=" + startParameter + "\">@" + botName + "</a>";
     }
 
     public static String userLink(int id) {
