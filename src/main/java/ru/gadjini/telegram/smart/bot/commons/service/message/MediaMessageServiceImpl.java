@@ -25,7 +25,8 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     private TelegramMediaService telegramMediaService;
 
     @Autowired
-    public MediaMessageServiceImpl(MessageMediaService fileService, TelegramMediaService telegramMediaService) {
+    public MediaMessageServiceImpl(MessageMediaService fileService,
+                                   TelegramMediaService telegramMediaService) {
         this.fileService = fileService;
         this.telegramMediaService = telegramMediaService;
     }

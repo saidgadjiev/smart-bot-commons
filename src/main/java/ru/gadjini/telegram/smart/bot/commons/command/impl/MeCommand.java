@@ -10,7 +10,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.utils.UserUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TelegramLinkUtils;
 
 @Component
 public class MeCommand implements BotCommand {
@@ -25,8 +25,9 @@ public class MeCommand implements BotCommand {
     @Override
     public void processMessage(Message message, String[] params) {
         StringBuilder text = new StringBuilder();
-        text.append("ID - ").append(UserUtils.userLink(message.getFrom().getId())).append("\n");
-        text.append("Username - ").append(StringUtils.defaultIfBlank("@" + message.getFrom().getUserName(), ""));
+        text.append("ID - ").append(TelegramLinkUtils.userLink(message.getFrom().getId())).append("\n");
+        text.append("Username - ").append(StringUtils.isNotBlank(message.getFrom().getUserName())
+                ? TelegramLinkUtils.mention(message.getFrom().getUserName()) : "");
 
         messageService.sendMessage(SendMessage.builder()
                 .chatId(String.valueOf(message.getChatId()))

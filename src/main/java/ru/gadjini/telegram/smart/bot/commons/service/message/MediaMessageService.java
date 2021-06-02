@@ -7,7 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 
 public interface MediaMessageService {
-    EditMediaResult editMessageMedia(EditMessageMedia editMediaContext);
+    EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia);
 
     default SendFileResult sendSticker(SendSticker sendSticker) {
         return sendSticker(sendSticker, null);
@@ -19,11 +19,11 @@ public interface MediaMessageService {
 
     SendFileResult sendPhoto(SendPhoto sendPhoto);
 
-    default SendFileResult sendDocument(SendDocument sendDocumentContext) {
-        return sendDocument(sendDocumentContext, null);
+    default SendFileResult sendDocument(SendDocument sendDocument) {
+        return sendDocument(sendDocument, null);
     }
 
-    SendFileResult sendDocument(SendDocument sendDocumentContext, Progress progress);
+    SendFileResult sendDocument(SendDocument sendDocument, Progress progress);
 
     default SendFileResult sendVideo(SendVideo sendVideo) {
         return sendVideo(sendVideo, null);

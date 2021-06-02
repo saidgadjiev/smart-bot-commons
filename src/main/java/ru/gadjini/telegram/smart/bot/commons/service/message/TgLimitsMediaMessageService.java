@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMe
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
+import ru.gadjini.telegram.smart.bot.commons.annotation.WatermarkMessages;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
@@ -45,7 +46,7 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Autowired
-    public void setMediaMessageService(@Qualifier("media") MediaMessageService mediaMessageService) {
+    public void setMediaMessageService(@WatermarkMessages MediaMessageService mediaMessageService) {
         this.mediaMessageService = mediaMessageService;
     }
 
@@ -55,8 +56,8 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
-    public EditMediaResult editMessageMedia(EditMessageMedia editMediaContext) {
-        return mediaMessageService.editMessageMedia(editMediaContext);
+    public EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia) {
+        return mediaMessageService.editMessageMedia(editMessageMedia);
     }
 
     @Override
