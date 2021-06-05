@@ -15,7 +15,14 @@ public class TelegramCurrencyConverterFactory {
 
     public TelegramCurrencyConverter createConverter() {
         TelegramCurrencies currencies = telegramPaymentsApi.getCurrencies();
+        addCustomCurrencies(currencies);
 
         return new TelegramCurrencyConverter(currencies);
+    }
+
+    private void addCustomCurrencies(TelegramCurrencies telegramCurrencies) {
+        TelegramCurrency telegramCurrency = new TelegramCurrency();
+        telegramCurrency.setMinAmount(100);
+        telegramCurrencies.getCurrencies().put("USDT", telegramCurrency);
     }
 }
