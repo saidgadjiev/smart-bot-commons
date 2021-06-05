@@ -93,6 +93,9 @@ public class MessageServiceImpl implements MessageService {
     @Override
     public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
         editMessageText.setParseMode(ParseMode.HTML);
+        if (editMessageText.getDisableWebPagePreview() == null) {
+            editMessageText.setDisableWebPagePreview(true);
+        }
 
         try {
             telegramService.editMessageText(editMessageText);
@@ -148,7 +151,9 @@ public class MessageServiceImpl implements MessageService {
     private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {
         try {
             sendMessage.disableWebPagePreview();
-            sendMessage.setAllowSendingWithoutReply(true);
+            if (sendMessage.getDisableWebPagePreview() == null) {
+                sendMessage.setAllowSendingWithoutReply(true);
+            }
             Message message = telegramService.sendMessage(sendMessage);
 
             if (callback != null) {
