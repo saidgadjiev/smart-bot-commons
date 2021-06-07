@@ -10,6 +10,10 @@ public class TelegramCurrencyConverter {
         this.telegramCurrencies = telegramCurrencies;
     }
 
+    public TelegramCurrencies getTelegramCurrencies() {
+        return telegramCurrencies;
+    }
+
     public double convertTo(double usd, String targetCurrency) {
         if (targetCurrency.equalsIgnoreCase(TgConstants.USD_CURRENCY)) {
             return usd;
