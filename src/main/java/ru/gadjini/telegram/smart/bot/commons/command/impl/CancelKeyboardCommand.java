@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
@@ -14,7 +15,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @Component
-public class CancelKeyboardCommand implements KeyboardBotCommand {
+public class CancelKeyboardCommand implements KeyboardBotCommand, PaidChannelSubscriptionOptional {
 
     private CommandNavigator commandNavigator;
 

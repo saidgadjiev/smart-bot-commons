@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
@@ -16,7 +17,7 @@ import java.util.Locale;
 import java.util.Set;
 
 @Component
-public class GoBackCommand implements KeyboardBotCommand, BotCommand {
+public class GoBackCommand implements KeyboardBotCommand, BotCommand, PaidChannelSubscriptionOptional {
 
     private CommandNavigator commandNavigator;
 

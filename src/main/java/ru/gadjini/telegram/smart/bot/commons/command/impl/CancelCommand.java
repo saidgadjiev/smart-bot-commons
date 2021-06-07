@@ -4,12 +4,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import ru.gadjini.telegram.smart.bot.commons.command.api.CallbackBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandExecutor;
 import ru.gadjini.telegram.smart.bot.commons.service.request.RequestParams;
 
 @Component
-public class CancelCommand implements CallbackBotCommand {
+public class CancelCommand implements CallbackBotCommand, PaidChannelSubscriptionOptional {
 
     private CommandExecutor commandExecutor;
 
