@@ -368,6 +368,11 @@ public enum Format {
         public boolean canBeSentAsAudio() {
             return true;
         }
+
+        @Override
+        public boolean canBeSentAsVoice() {
+            return true;
+        }
     },
     WAV(FormatCategory.AUDIO) {
         @Override
@@ -458,7 +463,7 @@ public enum Format {
             return false;
         }
     },
-    VIDEOAUDIO(FormatCategory.VIDEO) {
+    VIDEOAUDIO(FormatCategory.COMMON) {
         @Override
         public boolean isUserSelectable() {
             return false;
@@ -495,6 +500,10 @@ public enum Format {
     }
 
     public boolean canBeSentAsAudio() {
+        return false;
+    }
+
+    public boolean canBeSentAsVoice() {
         return false;
     }
 

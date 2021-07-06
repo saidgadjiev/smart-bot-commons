@@ -1,7 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,23 +35,29 @@ public class ProcessExecutor {
     }
 
     public String executeWithResult(String[] command) throws InterruptedException {
-        return execute(command, null, ProcessBuilder.Redirect.PIPE, null, Collections.emptySet());
+        File out = createTempFile();
+
+        try {
+            return execute(command, null, out.getAbsolutePath(), Collections.emptySet(), true);
+        } finally {
+            FileUtils.deleteQuietly(out);
+        }
     }
 
     public void executeWithFile(String[] command, String outputFile) throws InterruptedException {
-        execute(command, null, null, outputFile, Collections.emptySet());
+        execute(command, null, outputFile, Collections.emptySet(), false);
     }
 
     public void execute(String[] command, Collection<Integer> successCodes) throws InterruptedException {
-        execute(command, null, ProcessBuilder.Redirect.DISCARD, null, successCodes);
+        execute(command, null, null, successCodes, false);
     }
 
     public void execute(String[] command) throws InterruptedException {
-        execute(command, null, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
+        execute(command, null, null, Collections.emptySet(), false);
     }
 
     public void execute(String[] command, int waitForSeconds) throws InterruptedException {
-        execute(command, waitForSeconds, ProcessBuilder.Redirect.DISCARD, null, Collections.emptySet());
+        execute(command, waitForSeconds, null, Collections.emptySet(), false);
     }
 
     public String tryExecute(String[] command, int waitForInSeconds) throws InterruptedException {
@@ -82,16 +87,16 @@ public class ProcessExecutor {
         }
     }
 
-    private String execute(String[] command, Integer waitForSeconds, ProcessBuilder.Redirect redirectOutput,
-                           String outputRedirectFile, Collection<Integer> successCodes) throws InterruptedException {
+    private String execute(String[] command, Integer waitForSeconds,
+                           String outputRedirectFile, Collection<Integer> successCodes, boolean returnResult) throws InterruptedException {
         File errorFile = getErrorLogFile();
         try {
             FileUtils.writeStringToFile(errorFile, String.join(" ", command) + "\n", StandardCharsets.UTF_8);
             ProcessBuilder processBuilder = new ProcessBuilder(command);
-            if (redirectOutput != null) {
-                processBuilder.redirectOutput(redirectOutput);
-            } else if (StringUtils.isNotBlank(outputRedirectFile)) {
+            if (StringUtils.isNotBlank(outputRedirectFile)) {
                 processBuilder.redirectOutput(new File(outputRedirectFile));
+            } else {
+                processBuilder.redirectOutput(ProcessBuilder.Redirect.DISCARD);
             }
             processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
             Process process = processBuilder.start();
@@ -108,15 +113,15 @@ public class ProcessExecutor {
                     }
                 }
                 if (!codes.contains(exitValue)) {
-                    LOGGER.error("Error({}, {}, {})", process.exitValue(), Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
-                    throw new ProcessException(exitValue, "Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\nLogs: " + (errorFile != null ? errorFile.getName() : "404"));
+                    LOGGER.error("Error({}, {}, {})", process.exitValue(), Arrays.toString(command), errorFile.getName());
+                    throw new ProcessException(exitValue, "Error " + process.exitValue() + "\nCommand " + Arrays.toString(command) + "\nLogs: " + errorFile.getName());
                 } else if (exitValue != 0) {
-                    LOGGER.error("Completed with strange exit code({}, {}, {})", exitValue, Arrays.toString(command), errorFile != null ? errorFile.getName() : "404");
+                    LOGGER.error("Completed with strange exit code({}, {}, {})", exitValue, Arrays.toString(command), errorFile.getName());
                 }
 
                 String result = null;
-                if (redirectOutput == ProcessBuilder.Redirect.PIPE) {
-                    result = IOUtils.toString(process.getInputStream(), StandardCharsets.UTF_8);
+                if (returnResult && StringUtils.isNotBlank(outputRedirectFile)) {
+                    result = FileUtils.readFileToString(new File(outputRedirectFile), StandardCharsets.UTF_8);
                 }
 
                 FileUtils.deleteQuietly(errorFile);
@@ -138,6 +143,16 @@ public class ProcessExecutor {
     public File getErrorLogFile() {
         try {
             return File.createTempFile("log", ".txt", new File(processLoggingDir));
+        } catch (IOException e) {
+            LOGGER.error(e.getMessage(), e);
+
+            throw new RuntimeException(e);
+        }
+    }
+
+    private File createTempFile() {
+        try {
+            return File.createTempFile("tmp", ".txt");
         } catch (IOException e) {
             LOGGER.error(e.getMessage(), e);
 
