@@ -388,6 +388,11 @@ public enum Format {
         public boolean canBeSentAsAudio() {
             return true;
         }
+
+        @Override
+        public boolean canBeSentAsVoice() {
+            return true;
+        }
     },
     SPX(FormatCategory.AUDIO),
     MID(FormatCategory.AUDIO),
