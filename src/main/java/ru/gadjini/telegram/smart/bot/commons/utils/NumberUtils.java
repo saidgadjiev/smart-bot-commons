@@ -10,6 +10,10 @@ public class NumberUtils {
 
     }
 
+    public static boolean isEvent(Integer val) {
+        return val != null && val % 2 == 0;
+    }
+
     public static String toString(double number, int decimalPoints) {
         DecimalFormat decimalFormat = new DecimalFormat("0." + StringUtils.repeat("#", decimalPoints));
 
