@@ -60,7 +60,7 @@ public class MessageMediaService {
         MessageMedia messageMedia = new MessageMedia();
 
         if (message.hasDocument()) {
-            messageMedia.setFileName(message.getDocument().getFileName());
+            messageMedia.setFileName(MessageMedia.getFixedFileName(message.getDocument().getFileName()));
             messageMedia.setFileId(message.getDocument().getFileId());
             messageMedia.setMimeType(message.getDocument().getMimeType());
             messageMedia.setFileSize(message.getDocument().getFileSize());
@@ -84,11 +84,11 @@ public class MessageMediaService {
 
             return messageMedia;
         } else if (message.hasVideo()) {
-            Format format = formatService.getFormat(message.getVideo().getFileName(), message.getVideo().getMimeType());
+            Format format = formatService.getFormat(MessageMedia.getFixedFileName(message.getVideo().getFileName()), message.getVideo().getMimeType());
             if (format == null) {
                 format = Format.MP4;
             }
-            String fileName = message.getVideo().getFileName();
+            String fileName = MessageMedia.getFixedFileName(message.getVideo().getFileName());
             if (StringUtils.isBlank(fileName)) {
                 fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
             }
@@ -130,12 +130,12 @@ public class MessageMediaService {
 
             return messageMedia;
         } else if (message.hasAudio()) {
-            Format format = formatService.getFormat(message.getAudio().getFileName(), message.getAudio().getMimeType());
+            Format format = formatService.getFormat(MessageMedia.getFixedFileName(message.getAudio().getFileName()), message.getAudio().getMimeType());
 
             if (format == null) {
                 format = Format.MP3;
             }
-            String fileName = message.getAudio().getFileName();
+            String fileName = MessageMedia.getFixedFileName(message.getAudio().getFileName());
             if (StringUtils.isBlank(fileName)) {
                 fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + format.getExt();
             }

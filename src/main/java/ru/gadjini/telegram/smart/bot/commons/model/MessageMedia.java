@@ -57,7 +57,7 @@ public class MessageMedia {
     }
 
     public void setFileName(String fileName) {
-        this.fileName = getFixedFileName(fileName);
+        this.fileName = StringUtils.defaultIfBlank(getFixedFileName(fileName), "No name");
     }
 
     public String getMimeType() {
@@ -164,11 +164,15 @@ public class MessageMedia {
         return tgFile;
     }
 
-    private String getFixedFileName(String fileName) {
-        return StringUtils.defaultString(fileName, "No name")
+    public static String getFixedFileName(String fileName) {
+        if (StringUtils.isBlank(fileName)) {
+            return fileName;
+        }
+        return fileName
                 .replace("\"", "")
                 .replace("\\", "")
-                .replace(";", "");
+                .replace(";", "")
+                .replace(":", "");
     }
 
     @Override
