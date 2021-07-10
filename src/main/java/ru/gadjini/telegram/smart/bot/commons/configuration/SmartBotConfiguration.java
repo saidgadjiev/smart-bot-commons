@@ -52,7 +52,7 @@ public class SmartBotConfiguration {
     @Profile({Profiles.PROFILE_PROD_PRIMARY})
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
     public SetWebhook setWebhook(WebhookProperties webhookProperties) {
-        return SetWebhook.builder().url(webhookProperties.getUrl() + "/callback").maxConnections(webhookProperties.getMaxConnections()).build();
+        return SetWebhook.builder().url(webhookProperties.getUrl()).maxConnections(webhookProperties.getMaxConnections()).build();
     }
 
     @Bean
