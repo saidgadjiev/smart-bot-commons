@@ -67,7 +67,7 @@ public class HelpCommand implements KeyboardBotCommand, BotCommand, PaidChannelS
         return false;
     }
 
-    private void sendHelpMessage(int userId, Locale locale) {
+    private void sendHelpMessage(long userId, Locale locale) {
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
                         .text(helpCommandMessageBuilder.getWelcomeMessage(locale))

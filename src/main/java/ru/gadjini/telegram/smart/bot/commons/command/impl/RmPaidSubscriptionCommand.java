@@ -42,7 +42,7 @@ public class RmPaidSubscriptionCommand implements BotCommand {
                     .build());
         } else {
             try {
-                int userId = Integer.parseInt(params[0]);
+                long userId = Integer.parseInt(params[0]);
                 int remove = paidSubscriptionRemoveService.removePaidSubscription(userId);
                 if (remove == 1) {
                     messageService.sendMessage(SendMessage.builder()

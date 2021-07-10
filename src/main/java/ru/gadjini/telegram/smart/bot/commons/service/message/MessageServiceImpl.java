@@ -56,7 +56,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public boolean isChatMember(String chatId, int userId) {
+    public boolean isChatMember(String chatId, long userId) {
         GetChatMember isChatMember = new GetChatMember();
         isChatMember.setChatId(chatId);
         isChatMember.setUserId(userId);

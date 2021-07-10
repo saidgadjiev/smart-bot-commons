@@ -19,11 +19,11 @@ public class PaidSubscriptionRemoveService {
         this.subscriptionProperties = subscriptionProperties;
     }
 
-    public int removePaidSubscription(int userId) {
+    public int removePaidSubscription(long userId) {
         return paidSubscriptionDao.remove(subscriptionProperties.getPaidBotName(), userId);
     }
 
-    public void refreshPaidSubscription(int userId) {
+    public void refreshPaidSubscription(long userId) {
         paidSubscriptionDao.refresh(subscriptionProperties.getPaidBotName(), userId);
     }
 

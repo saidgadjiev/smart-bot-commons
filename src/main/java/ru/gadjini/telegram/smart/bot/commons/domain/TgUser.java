@@ -14,7 +14,7 @@ public class TgUser {
 
     public static final String ORIGINAL_LOCALE = "original_locale";
 
-    private int userId;
+    private long userId;
 
     private String username;
 
@@ -24,11 +24,11 @@ public class TgUser {
 
     private String startParameter;
 
-    public int getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

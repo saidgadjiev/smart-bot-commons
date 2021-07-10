@@ -115,7 +115,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         Locale locale = userService.getLocaleOrDefault(user.getId());
         double minPrice = paidSubscriptionPlanService.getMinPrice();
 
-        int userId = user.getId();
+        long userId = user.getId();
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
                         .text(
@@ -131,7 +131,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         );
     }
 
-    private void sendSubscriptionExpired(int userId) {
+    private void sendSubscriptionExpired(long userId) {
         Locale locale = userService.getLocaleOrDefault(userId);
         double minPrice = paidSubscriptionPlanService.getMinPrice();
         messageService.sendMessage(

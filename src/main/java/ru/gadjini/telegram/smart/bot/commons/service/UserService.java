@@ -55,7 +55,7 @@ public class UserService {
         }
     }
 
-    public Locale getLocaleOrDefault(int userId) {
+    public Locale getLocaleOrDefault(long userId) {
         String locale = userDao.getLocale(userId);
 
         if (StringUtils.isNotBlank(locale)) {
@@ -82,7 +82,7 @@ public class UserService {
         }
     }
 
-    public void blockUser(int userId) {
+    public void blockUser(long userId) {
         userDao.blockUser(userId);
     }
 
@@ -101,11 +101,11 @@ public class UserService {
         return false;
     }
 
-    public boolean isAdmin(int userId) {
+    public boolean isAdmin(long userId) {
         return userId == 171271164;
     }
 
-    public void changeLocale(int userId, Locale locale) {
+    public void changeLocale(long userId, Locale locale) {
         userDao.updateLocale(userId, locale.getLanguage());
     }
 }

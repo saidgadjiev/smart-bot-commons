@@ -19,7 +19,7 @@ public class BulkDistributionService {
         return bulkDistributionDao.getFirstDistribution(botName);
     }
 
-    public synchronized BulkDistribution deleteAndGetDistribution(int userId, String botName) {
+    public synchronized BulkDistribution deleteAndGetDistribution(long userId, String botName) {
         return bulkDistributionDao.deleteAndGet(userId, botName);
     }
 

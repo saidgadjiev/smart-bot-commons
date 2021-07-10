@@ -9,7 +9,7 @@ public class TelegramLinkUtils {
         return "<a href=\"https://t.me/" + botName + "?start=" + startParameter + "\">@" + botName + "</a>";
     }
 
-    public static String userLink(int id) {
+    public static String userLink(long id) {
         return "<a href=\"tg://user?id=" + id + "\">" + id + "</a>";
     }
 

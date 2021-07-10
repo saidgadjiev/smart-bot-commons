@@ -19,7 +19,7 @@ public class PaidSubscription {
 
     public static final String PLAN_ID = "plan_id";
 
-    private int userId;
+    private long userId;
 
     private LocalDate endDate;
 
@@ -29,11 +29,11 @@ public class PaidSubscription {
 
     private Integer planId;
 
-    public int getUserId() {
+    public long getUserId() {
         return userId;
     }
 
-    public void setUserId(int userId) {
+    public void setUserId(long userId) {
         this.userId = userId;
     }
 

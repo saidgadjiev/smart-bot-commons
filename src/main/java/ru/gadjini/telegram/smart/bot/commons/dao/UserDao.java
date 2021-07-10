@@ -5,15 +5,15 @@ import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
 
 public interface UserDao {
 
-    int updateActivity(int userId, String userName);
+    int updateActivity(long userId, String userName);
 
     CreateOrUpdateResult.State createOrUpdate(TgUser user);
 
-    void updateLocale(int userId, String language);
+    void updateLocale(long userId, String language);
 
-    void blockUser(int userId);
+    void blockUser(long userId);
 
-    String getLocale(int userId);
+    String getLocale(long userId);
 
     Long countActiveUsers(int intervalInDays);
 }

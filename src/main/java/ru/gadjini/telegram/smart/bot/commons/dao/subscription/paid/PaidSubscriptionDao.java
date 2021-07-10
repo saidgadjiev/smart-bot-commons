@@ -7,13 +7,13 @@ public interface PaidSubscriptionDao {
 
     void create(PaidSubscription paidSubscription);
 
-    PaidSubscription getByBotNameAndUserId(String botName, int userId);
+    PaidSubscription getByBotNameAndUserId(String botName, long userId);
 
     void createOrRenew(PaidSubscription paidSubscription, Period period);
 
-    int remove(String botName, int userId);
+    int remove(String botName, long userId);
 
-    default void refresh(String botName, int userId) {
+    default void refresh(String botName, long userId) {
 
     }
 

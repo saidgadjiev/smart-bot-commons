@@ -32,7 +32,7 @@ public class RedisUserDao implements UserDao {
     }
 
     @Override
-    public int updateActivity(int userId, String userName) {
+    public int updateActivity(long userId, String userName) {
         String key = getLastActivityUpdatedKey(userId);
         if (BooleanUtils.isTrue(redisTemplate.hasKey(key))) {
             return 1;
@@ -58,14 +58,14 @@ public class RedisUserDao implements UserDao {
     }
 
     @Override
-    public void updateLocale(int userId, String language) {
+    public void updateLocale(long userId, String language) {
         userDao.updateLocale(userId, language);
 
         cacheLocale(userId, language);
     }
 
     @Override
-    public void blockUser(int userId) {
+    public void blockUser(long userId) {
         userDao.blockUser(userId);
 
         String localeKey = getLocaleKey(userId);
@@ -75,7 +75,7 @@ public class RedisUserDao implements UserDao {
     }
 
     @Override
-    public String getLocale(int userId) {
+    public String getLocale(long userId) {
         String localeKey = getLocaleKey(userId);
         String locale = (String) redisTemplate.opsForValue().get(localeKey);
         if (StringUtils.isNotBlank(locale)) {
@@ -93,23 +93,23 @@ public class RedisUserDao implements UserDao {
         return userDao.countActiveUsers(intervalInDays);
     }
 
-    private void cacheLocale(int userId, String locale) {
+    private void cacheLocale(long userId, String locale) {
         String localeKey = getLocaleKey(userId);
         redisTemplate.opsForValue().set(localeKey, locale);
         redisTemplate.expire(localeKey, 2, TimeUnit.DAYS);
     }
 
-    private void setLastActivityUpdatedMarker(int userId) {
+    private void setLastActivityUpdatedMarker(long userId) {
         String key = getLastActivityUpdatedKey(userId);
         redisTemplate.opsForValue().set(key, true);
         redisTemplate.expire(key, TimeUtils.getSecondsToTheEndOfTheCurrentDay(60), TimeUnit.SECONDS);
     }
 
-    private String getLocaleKey(int userId) {
+    private String getLocaleKey(long userId) {
         return LOCALE_KEY + ":" + userId;
     }
 
-    private String getLastActivityUpdatedKey(int userId) {
+    private String getLastActivityUpdatedKey(long userId) {
         return LAST_ACTIVITY_UPDATED_KEY + ":" + userId;
     }
 }

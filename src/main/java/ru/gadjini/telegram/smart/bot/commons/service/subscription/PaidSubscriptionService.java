@@ -31,11 +31,11 @@ public class PaidSubscriptionService {
         this.subscriptionProperties = subscriptionProperties;
     }
 
-    public PaidSubscription getSubscription(String botName, int userId) {
+    public PaidSubscription getSubscription(String botName, long userId) {
         return paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
     }
 
-    public PaidSubscription createTrialSubscription(String botName, int userId) {
+    public PaidSubscription createTrialSubscription(String botName, long userId) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botName);
@@ -46,7 +46,7 @@ public class PaidSubscriptionService {
         return paidSubscription;
     }
 
-    public PaidSubscription renewSubscription(String botName, int userId, int planId, Period period) {
+    public PaidSubscription renewSubscription(String botName, long userId, int planId, Period period) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
         paidSubscription.setBotName(botName);

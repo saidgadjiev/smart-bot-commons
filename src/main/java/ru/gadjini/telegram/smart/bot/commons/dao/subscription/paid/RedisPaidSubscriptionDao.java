@@ -48,7 +48,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getByBotNameAndUserId(String botName, int userId) {
+    public PaidSubscription getByBotNameAndUserId(String botName, long userId) {
         PaidSubscription fromRedis = getFromRedis(botName, userId);
 
         if (fromRedis != null) {
@@ -70,7 +70,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public int remove(String botName, int userId) {
+    public int remove(String botName, long userId) {
         int remove = paidSubscriptionDao.remove(botName, userId);
         String key = getKey(botName, userId);
         redisTemplate.delete(key);
@@ -79,7 +79,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public void refresh(String botName, int userId) {
+    public void refresh(String botName, long userId) {
         String key = getKey(botName, userId);
         redisTemplate.delete(key);
     }
@@ -92,7 +92,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         }
     }
 
-    private PaidSubscription getFromRedis(String botName, int userId) {
+    private PaidSubscription getFromRedis(String botName, long userId) {
         String key = getKey(botName, userId);
 
         if (redisTemplate.hasKey(key)) {
@@ -127,7 +127,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         redisTemplate.expire(key, 1, TimeUnit.DAYS);
     }
 
-    private String getKey(String botName, int userId) {
+    private String getKey(String botName, long userId) {
         return KEY + ":" + botName + userId;
     }
 }

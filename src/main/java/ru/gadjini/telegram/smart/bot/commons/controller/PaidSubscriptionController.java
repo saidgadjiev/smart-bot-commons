@@ -24,7 +24,7 @@ public class PaidSubscriptionController {
     }
 
     @PostMapping("/{userId}/refresh")
-    public ResponseEntity<?> refresh(@PathVariable("userId") int userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    public ResponseEntity<?> refresh(@PathVariable("userId") long userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         if (tokenValidator.isInvalid(token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }

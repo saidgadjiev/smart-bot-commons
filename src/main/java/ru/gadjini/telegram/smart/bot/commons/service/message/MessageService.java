@@ -18,7 +18,7 @@ public interface MessageService {
 
     void sendAnswerCallbackQuery(AnswerCallbackQuery answerCallbackQuery);
 
-    boolean isChatMember(String chatId, int userId);
+    boolean isChatMember(String chatId, long userId);
 
     void sendMessage(SendMessage sendMessage);
 

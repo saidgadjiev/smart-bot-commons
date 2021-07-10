@@ -24,7 +24,7 @@ public class DBUserDao implements UserDao {
     }
 
     @Override
-    public int updateActivity(int userId, String userName) {
+    public int updateActivity(long userId, String userName) {
         return jdbcTemplate.update(
                 "UPDATE tg_user SET last_activity_at = now(), username = ? WHERE user_id = ?",
                 ps -> {
@@ -33,7 +33,7 @@ public class DBUserDao implements UserDao {
                     } else {
                         ps.setString(1, userName);
                     }
-                    ps.setInt(2, userId);
+                    ps.setLong(2, userId);
                 }
         );
     }
@@ -50,7 +50,7 @@ public class DBUserDao implements UserDao {
                             Statement.RETURN_GENERATED_KEYS
                     );
 
-                    ps.setInt(1, user.getUserId());
+                    ps.setLong(1, user.getUserId());
                     if (StringUtils.isBlank(user.getUsername())) {
                         ps.setNull(2, Types.NULL);
                     } else {
@@ -77,28 +77,28 @@ public class DBUserDao implements UserDao {
     }
 
     @Override
-    public void updateLocale(int userId, String language) {
+    public void updateLocale(long userId, String language) {
         jdbcTemplate.update(
                 "UPDATE tg_user SET locale = ? WHERE user_id = ?",
                 ps -> {
                     ps.setString(1, language);
-                    ps.setInt(2, userId);
+                    ps.setLong(2, userId);
                 }
         );
     }
 
     @Override
-    public void blockUser(int userId) {
+    public void blockUser(long userId) {
         jdbcTemplate.update(
                 "UPDATE tg_user SET blocked = true WHERE user_id = " + userId
         );
     }
 
     @Override
-    public String getLocale(int userId) {
+    public String getLocale(long userId) {
         return jdbcTemplate.query(
                 "SELECT locale FROM tg_user WHERE user_id = ?",
-                ps -> ps.setInt(1, userId),
+                ps -> ps.setLong(1, userId),
                 rs -> {
                     if (rs.next()) {
                         return rs.getString(TgUser.LOCALE);

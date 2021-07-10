@@ -69,7 +69,7 @@ public class TechWorkFilter extends BaseBotFilter {
     }
 
     private void techWork(Update update) {
-        int userId = TgMessage.getUserId(update);
+        long userId = TgMessage.getUserId(update);
         Locale locale = userService.getLocaleOrDefault(userId);
         messageService.sendMessage(
                 SendMessage.builder()

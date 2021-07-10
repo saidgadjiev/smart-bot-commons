@@ -14,33 +14,33 @@ public class UserSettingsDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void createDefaultSettings(String botName, int userId) {
+    public void createDefaultSettings(String botName, long userId) {
         jdbcTemplate.update(
                 "INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, true)",
                 ps -> {
                     ps.setString(1, botName);
-                    ps.setInt(2, userId);
+                    ps.setLong(2, userId);
                 }
         );
     }
 
-    public void smartFileFeature(String botName, int userId, boolean enable) {
+    public void smartFileFeature(String botName, long userId, boolean enable) {
         jdbcTemplate.update(
                 "UPDATE user_settings SET smart_file = ? where bot_name = ? and user_id = ?",
                 ps -> {
                     ps.setBoolean(1, enable);
                     ps.setString(2, botName);
-                    ps.setInt(3, userId);
+                    ps.setLong(3, userId);
                 }
         );
     }
 
-    public Boolean getSmartFileFeatureEnabledOrDefault(String botName, int userId) {
+    public Boolean getSmartFileFeatureEnabledOrDefault(String botName, long userId) {
         return jdbcTemplate.query(
                 "SELECT smart_file FROM user_settings WHERE bot_name = ? AND user_id = ?",
                 ps -> {
                     ps.setString(1, botName);
-                    ps.setInt(2, userId);
+                    ps.setLong(2, userId);
                 },
                 rs -> {
                     if (rs.next()) {

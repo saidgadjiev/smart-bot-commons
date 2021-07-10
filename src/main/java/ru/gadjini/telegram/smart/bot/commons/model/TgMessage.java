@@ -74,7 +74,7 @@ public class TgMessage {
         return update.getMessage().getChatId();
     }
 
-    public static int getUserId(Update update) {
+    public static long getUserId(Update update) {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getFrom().getId();
         } else if (update.hasPreCheckoutQuery()) {

@@ -24,7 +24,7 @@ public class ChannelSubscriptionDao {
         this.messageService = messageService;
     }
 
-    public boolean isChatMember(String chatId, int userId, long ttl, TimeUnit timeUnit) {
+    public boolean isChatMember(String chatId, long userId, long ttl, TimeUnit timeUnit) {
         String key = key(userId);
         boolean aBoolean = BooleanUtils.toBoolean(stringRedisTemplate.hasKey(key));
 
@@ -44,7 +44,7 @@ public class ChannelSubscriptionDao {
         }
     }
 
-    private String key(int userId) {
+    private String key(long userId) {
         return KEY + ":" + userId;
     }
 }

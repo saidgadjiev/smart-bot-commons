@@ -14,11 +14,11 @@ public class UserBotDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public boolean createIfNotExist(int userId, String botName) {
+    public boolean createIfNotExist(long userId, String botName) {
         return jdbcTemplate.update(
                 "INSERT INTO user_bot(user_id, bot_name) VALUES(?, ?) ON CONFLICT(user_id, bot_name) DO NOTHING",
                 ps -> {
-                    ps.setInt(1, userId);
+                    ps.setLong(1, userId);
                     ps.setString(2, botName);
                 }
         ) > 0;

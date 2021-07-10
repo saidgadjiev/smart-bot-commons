@@ -40,11 +40,11 @@ public class BulkDistributionDao {
         );
     }
 
-    public BulkDistribution deleteAndGet(int userId, String botName) {
+    public BulkDistribution deleteAndGet(long userId, String botName) {
         return jdbcTemplate.query(
                 "DELETE FROM bulk_distribution WHERE user_id = ? AND bot_name = ? RETURNING *",
                 ps -> {
-                    ps.setInt(1, userId);
+                    ps.setLong(1, userId);
                     ps.setString(2, botName);
                 },
                 rs -> {

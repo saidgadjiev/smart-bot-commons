@@ -42,7 +42,7 @@ public class AsyncMessageService implements MessageService {
     }
 
     @Override
-    public boolean isChatMember(String chatId, int userId) {
+    public boolean isChatMember(String chatId, long userId) {
         return messageService.isChatMember(chatId, userId);
     }
 

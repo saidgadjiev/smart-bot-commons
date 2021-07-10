@@ -17,7 +17,7 @@ public class ChannelSubscriptionService {
         this.subscriptionDao = subscriptionDao;
     }
 
-    public boolean isSubscriptionExists(int userId) {
+    public boolean isSubscriptionExists(long userId) {
         return subscriptionDao.isChatMember(CommonConstants.SMART_FILE_UTILS_CHANNEL, userId, 1, TimeUnit.DAYS);
     }
 }

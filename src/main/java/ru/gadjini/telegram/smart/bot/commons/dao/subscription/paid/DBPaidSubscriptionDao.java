@@ -35,10 +35,10 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getByBotNameAndUserId(String botName, int userId) {
+    public PaidSubscription getByBotNameAndUserId(String botName, long userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM paid_subscription WHERE bot_name = '" + botName + "' AND user_id = ?",
-                ps -> ps.setInt(1, userId),
+                ps -> ps.setLong(1, userId),
                 rs -> rs.next() ? map(rs) : null
         );
     }
@@ -71,20 +71,20 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public int remove(String botName, int userId) {
+    public int remove(String botName, long userId) {
         return jdbcTemplate.update(
                 "DELETE FROM paid_subscription WHERE bot_name = '" + botName + "' AND user_id = ?",
-                ps -> ps.setInt(1, userId)
+                ps -> ps.setLong(1, userId)
         );
     }
 
     @Override
-    public void refresh(String botName, int userId) {
+    public void refresh(String botName, long userId) {
 
     }
 
     private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
-        ps.setInt(1, paidSubscription.getUserId());
+        ps.setLong(1, paidSubscription.getUserId());
         ps.setString(2, paidSubscription.getBotName());
         ps.setDate(3, Date.valueOf(paidSubscription.getEndDate()));
         if (paidSubscription.getPlanId() == null) {

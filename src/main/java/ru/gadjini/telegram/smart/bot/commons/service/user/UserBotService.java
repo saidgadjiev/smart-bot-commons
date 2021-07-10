@@ -14,7 +14,7 @@ public class UserBotService {
         this.userBotDao = userBotDao;
     }
 
-    public boolean create(int userId, String botName) {
+    public boolean create(long userId, String botName) {
         return userBotDao.createIfNotExist(userId, botName);
     }
 }

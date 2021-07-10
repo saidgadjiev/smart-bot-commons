@@ -19,15 +19,15 @@ public class UserSettingsService {
         this.botProperties = botProperties;
     }
 
-    public void createDefaultSettings(int userId) {
+    public void createDefaultSettings(long userId) {
         //userSettingsDao.createDefaultSettings(botProperties.getName(), userId);
     }
 
-    public void smartFileFeature(int userId, boolean enable) {
+    public void smartFileFeature(long userId, boolean enable) {
         //userSettingsDao.smartFileFeature(botProperties.getName(), userId, enable);
     }
 
-    public boolean isSmartFileFeatureEnabled(int userId) {
+    public boolean isSmartFileFeatureEnabled(long userId) {
         return false;
         //return userSettingsDao.getSmartFileFeatureEnabledOrDefault(botProperties.getName(), userId);
     }
