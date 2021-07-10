@@ -49,6 +49,8 @@ public class MessageMediaService {
             return sticker.getFileId();
         } else if (message.hasVideoNote()) {
             return message.getVideoNote().getFileId();
+        } else if (message.hasVoice()) {
+            return message.getVoice().getFileId();
         }
 
         return null;
