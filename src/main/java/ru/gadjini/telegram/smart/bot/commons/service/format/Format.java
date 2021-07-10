@@ -219,6 +219,18 @@ public enum Format {
         }
     },
     AVI(FormatCategory.VIDEO),
+    AVI_H263_PLUS(FormatCategory.VIDEO) {
+        @Override
+        public String getName() {
+            return "AVI_H263+";
+        }
+
+        @Override
+        public String getExt() {
+            return AVI.getExt();
+        }
+
+    },
     FLV(FormatCategory.VIDEO),
     M4V(FormatCategory.VIDEO) {
         @Override
@@ -400,6 +412,21 @@ public enum Format {
         @Override
         public String getExt() {
             return OGG.getExt();
+        }
+
+        @Override
+        public Format getAssociatedFormat() {
+            return OGG;
+        }
+
+        @Override
+        public boolean canBeSentAsVoice() {
+            return getAssociatedFormat().canBeSentAsVoice();
+        }
+
+        @Override
+        public boolean canBeSentAsAudio() {
+            return getAssociatedFormat().canBeSentAsAudio();
         }
     },
     RA(FormatCategory.AUDIO),
