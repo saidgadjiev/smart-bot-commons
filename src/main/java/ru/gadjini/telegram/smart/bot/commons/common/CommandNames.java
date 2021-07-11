@@ -55,4 +55,6 @@ public class CommandNames {
     public static final String BULK_DISTRIBUTION = "bdistr";
 
     public static final String BOTLIST = "botlist";
+
+    public static final String POST = "post";
 }
