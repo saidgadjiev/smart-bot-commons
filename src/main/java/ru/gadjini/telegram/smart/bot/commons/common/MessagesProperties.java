@@ -120,4 +120,8 @@ public class MessagesProperties {
     public static final String REFRESH_SUBSCRIPTION_COMMAND_DESCRIPTION = "refresh.subscription.command.description";
 
     public static final String MESSAGE_SUBSCRIPTION_REFRESHED = "message.subscription.refreshed";
+
+    public static final String MESSAGE_BOTLIST = "message.botlist";
+
+    public static final String BOTLIST_COMMAND_DESCRIPTION = "botlist.command.description";
 }
