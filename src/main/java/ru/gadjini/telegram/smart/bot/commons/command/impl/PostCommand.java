@@ -48,8 +48,9 @@ public class PostCommand implements BotCommand {
                         .chatId(String.valueOf(message.getChatId()))
                         .photo(new InputFile(new File("C:/logo.jpg")))
                         .caption(localisationService.getMessage("message.post",
+                                new Object[] {params[0]},
                                 userService.getLocaleOrDefault(message.getFrom().getId())))
-                        .replyMarkup(postMarkup())
+                        .replyMarkup(postMarkup(params[0]))
                         .parseMode(ParseMode.HTML)
                         .build()
         );
@@ -60,12 +61,12 @@ public class PostCommand implements BotCommand {
         return CommandNames.POST;
     }
 
-    private InlineKeyboardMarkup postMarkup() {
+    private InlineKeyboardMarkup postMarkup(String reffreal) {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
 
         inlineKeyboardMarkup.setKeyboard(new ArrayList<>());
         InlineKeyboardButton joinButton = new InlineKeyboardButton("Start");
-        joinButton.setUrl("https://t.me/SmartVideoConverterBot?start=drip");
+        joinButton.setUrl("https://t.me/SmartVideoConverterBot?start=" + reffreal);
 
         inlineKeyboardMarkup.getKeyboard().add(List.of(joinButton));
 

@@ -19,7 +19,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMar
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import ru.gadjini.telegram.smart.bot.commons.jackson.mixin.ReplyKeyboardMixin;
+import ru.gadjini.telegram.smart.bot.commons.jackson.mixin.replykeyboard.ReplyKeyboardMixin;
 
 import java.io.File;
 import java.lang.annotation.Annotation;

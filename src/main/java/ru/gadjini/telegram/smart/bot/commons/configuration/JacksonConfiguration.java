@@ -4,16 +4,21 @@ import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.PropertyAccessor;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.introspect.JacksonAnnotationIntrospector;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.common.collect.EvictingQueue;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.json.Jackson2ObjectMapperBuilder;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
-import ru.gadjini.telegram.smart.bot.commons.jackson.mixin.ReplyKeyboardMixin;
+import ru.gadjini.telegram.smart.bot.commons.jackson.mixin.replykeyboard.ReplyKeyboardMixin;
+import ru.gadjini.telegram.smart.bot.commons.jackson.sd.EvictingQueueDeserializer;
+import ru.gadjini.telegram.smart.bot.commons.jackson.sd.EvictingQueueSerializer;
 
 import java.lang.annotation.Annotation;
 
@@ -22,6 +27,9 @@ public class JacksonConfiguration implements Jackson2ObjectMapperBuilderCustomiz
 
     @Override
     public void customize(Jackson2ObjectMapperBuilder jacksonObjectMapperBuilder) {
+        SimpleModule simpleModule = new SimpleModule();
+        simpleModule.addSerializer(EvictingQueue.class, new EvictingQueueSerializer());
+        simpleModule.addDeserializer(EvictingQueue.class, new EvictingQueueDeserializer(new ObjectMapper()));
         jacksonObjectMapperBuilder
                 .modules(new JavaTimeModule(), new JodaModule())
                 .annotationIntrospector(new JacksonAnnotationIntrospector() {
