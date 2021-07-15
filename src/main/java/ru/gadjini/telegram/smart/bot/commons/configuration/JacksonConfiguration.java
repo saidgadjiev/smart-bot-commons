@@ -31,7 +31,7 @@ public class JacksonConfiguration implements Jackson2ObjectMapperBuilderCustomiz
         simpleModule.addSerializer(EvictingQueue.class, new EvictingQueueSerializer());
         simpleModule.addDeserializer(EvictingQueue.class, new EvictingQueueDeserializer(new ObjectMapper()));
         jacksonObjectMapperBuilder
-                .modules(new JavaTimeModule(), new JodaModule())
+                .modules(simpleModule, new JavaTimeModule(), new JodaModule())
                 .annotationIntrospector(new JacksonAnnotationIntrospector() {
                     @Override
                     protected <A extends Annotation> A _findAnnotation(final Annotated annotated,

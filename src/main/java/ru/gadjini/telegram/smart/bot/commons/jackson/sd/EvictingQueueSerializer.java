@@ -21,7 +21,7 @@ public class EvictingQueueSerializer extends StdSerializer<EvictingQueue> {
     @Override
     public void serialize(EvictingQueue value, JsonGenerator gen, SerializerProvider provider) throws IOException {
         gen.writeStartObject();
-        gen.writeNumberField("size", value.size());
+        gen.writeNumberField("size", value.size() + value.remainingCapacity());
         if (!value.isEmpty()) {
             gen.writeStringField("itemClass", value.iterator().next().getClass().getName());
         }
