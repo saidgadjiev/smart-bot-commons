@@ -5,9 +5,23 @@ import org.apache.tika.mime.MimeType;
 import org.apache.tika.mime.MimeTypeException;
 import org.apache.tika.mime.MimeTypes;
 
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 public class MimeTypeUtils {
 
+    public static final Pattern CS_PATTERN = Pattern.compile(";charset=.*");
+
     private MimeTypeUtils() {
+    }
+
+    public static String removeCharset(String mime) {
+        Matcher matcher = CS_PATTERN.matcher(mime);
+        if (matcher.find()) {
+            return matcher.replaceFirst("");
+        }
+
+        return mime;
     }
 
     public static String getExtension(String fileNameExtension, String mimeType) {
