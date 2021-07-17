@@ -4,12 +4,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.PhotoSize;
 import org.telegram.telegrambots.meta.api.objects.stickers.Sticker;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
+import ru.gadjini.telegram.smart.bot.commons.common.TgConstants;
 import ru.gadjini.telegram.smart.bot.commons.domain.FileSource;
+import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
@@ -26,10 +30,13 @@ public class MessageMediaService {
 
     private FormatService formatService;
 
+    private RestTemplate restTemplate;
+
     @Autowired
-    public MessageMediaService(LocalisationService localisationService, FormatService formatService) {
+    public MessageMediaService(LocalisationService localisationService, FormatService formatService, RestTemplate restTemplate) {
         this.localisationService = localisationService;
         this.formatService = formatService;
+        this.restTemplate = restTemplate;
     }
 
     public String getFileId(Message message) {
@@ -185,6 +192,42 @@ public class MessageMediaService {
             messageMedia.setFormat(format);
 
             return messageMedia;
+        } else if (message.hasText()) {
+            Format format = formatService.getFormat(message.getText());
+
+            if (Format.URL.equals(format)) {
+                try {
+                    HttpHeaders httpHeaders = restTemplate.headForHeaders(message.getText());
+                    if (httpHeaders.getContentType() == null || StringUtils.isBlank(httpHeaders.getContentType().getType())) {
+                        throw new IllegalArgumentException("Empty content type");
+                    }
+                    String fileName = message.getText().substring(message.getText().lastIndexOf('/') + 1);
+                    Format mediaFormat = formatService.getFormat(fileName, httpHeaders.getContentType().toString());
+                    if (mediaFormat == null) {
+                        throw new IllegalArgumentException("Unknown media type " + httpHeaders.getContentType().getType());
+                    }
+                    if (httpHeaders.getContentLength() <= 0
+                            || httpHeaders.getContentLength() > TgConstants.LARGE_FILE_SIZE) {
+                        throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_BIG_IN_REMOTE_FILE, locale));
+                    }
+                    if (StringUtils.isBlank(fileName)) {
+                        fileName = localisationService.getMessage(MessagesProperties.MESSAGE_EMPTY_FILE_NAME, locale) + "." + mediaFormat.getExt();
+                    }
+
+                    messageMedia.setFileName(fileName);
+                    messageMedia.setFileId(message.getText());
+                    messageMedia.setMimeType(httpHeaders.getContentType().getType());
+                    messageMedia.setFileSize(httpHeaders.getContentLength());
+                    messageMedia.setFormat(mediaFormat);
+
+                    return messageMedia;
+                } catch (UserException e) {
+                    throw e;
+                } catch (Throwable e) {
+                    LOGGER.error("Incorrect url({}, {})", message.getText(), e.getMessage());
+                    throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_INCORRECT_MEDIA_URL, locale));
+                }
+            }
         }
 
         return null;

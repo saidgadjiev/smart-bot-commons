@@ -124,4 +124,8 @@ public class MessagesProperties {
     public static final String MESSAGE_BOTLIST = "message.botlist";
 
     public static final String BOTLIST_COMMAND_DESCRIPTION = "botlist.command.description";
+
+    public static final String MESSAGE_INCORRECT_MEDIA_URL = "message.incorrect.media.url";
+
+    public static final String MESSAGE_BIG_IN_REMOTE_FILE = "message.big.in.remote.file";
 }

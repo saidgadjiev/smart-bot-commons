@@ -511,6 +511,17 @@ public enum Format {
             return false;
         }
     },
+    UPLOAD(FormatCategory.COMMON) {
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     VIDEOAUDIO(FormatCategory.COMMON) {
         @Override
         public boolean isUserSelectable() {
