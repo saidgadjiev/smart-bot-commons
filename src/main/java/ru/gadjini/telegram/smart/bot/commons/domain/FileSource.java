@@ -14,5 +14,7 @@ public enum FileSource {
 
     STICKER,
 
-    VOICE
+    VOICE,
+
+    URL
 }

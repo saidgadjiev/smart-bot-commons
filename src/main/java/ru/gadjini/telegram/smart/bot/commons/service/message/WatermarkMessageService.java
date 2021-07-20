@@ -13,7 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
-import ru.gadjini.telegram.smart.bot.commons.property.MessageProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.utils.TelegramLinkUtils;
 
 @Service
@@ -22,18 +22,16 @@ public class WatermarkMessageService implements MediaMessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(WatermarkMessageService.class);
 
-    private MessageProperties messageProperties;
-
     private MediaMessageService mediaMessageService;
 
     private BotProperties botProperties;
 
-    @Autowired
-    public WatermarkMessageService(MessageProperties messageProperties, BotProperties botProperties) {
-        this.messageProperties = messageProperties;
-        this.botProperties = botProperties;
+    private PaidSubscriptionService paidSubscriptionService;
 
-        LOGGER.debug("Watermark referral({})", messageProperties.getReferral());
+    @Autowired
+    public WatermarkMessageService(BotProperties botProperties, PaidSubscriptionService paidSubscriptionService) {
+        this.botProperties = botProperties;
+        this.paidSubscriptionService = paidSubscriptionService;
     }
 
     @Autowired
@@ -93,14 +91,15 @@ public class WatermarkMessageService implements MediaMessageService {
     }
 
     private String appendWatermark(String chatId, String text) {
-        String watermarkReferral = messageProperties.getWatermarkReferral(chatId);
-
-        if (StringUtils.isNotBlank(watermarkReferral)) {
-            String botLink = TelegramLinkUtils.botLink(botProperties.getName(), watermarkReferral);
-
-            return StringUtils.isBlank(text) ? botLink : text + "\n\n" + botLink;
+        try {
+            if (paidSubscriptionService.isExistsPaidSubscription(botProperties.getName(), Long.parseLong(chatId))) {
+                return text;
+            }
+            return StringUtils.isBlank(text) ? TelegramLinkUtils.mention(botProperties.getName()) : text + "\n\n"
+                    + TelegramLinkUtils.mention(botProperties.getName());
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
+            return text;
         }
-
-        return text;
     }
 }

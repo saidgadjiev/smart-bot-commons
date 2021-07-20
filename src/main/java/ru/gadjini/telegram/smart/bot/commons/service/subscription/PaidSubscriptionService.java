@@ -31,6 +31,12 @@ public class PaidSubscriptionService {
         this.subscriptionProperties = subscriptionProperties;
     }
 
+    public boolean isExistsPaidSubscription(String botName, long userId) {
+        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+
+        return subscription != null && subscription.getPlanId() != null && subscription.isActive();
+    }
+
     public PaidSubscription getSubscription(String botName, long userId) {
         return paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
     }

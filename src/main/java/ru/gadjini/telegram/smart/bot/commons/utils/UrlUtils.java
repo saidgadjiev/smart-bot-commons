@@ -23,7 +23,10 @@ public class UrlUtils {
     }
 
     public static boolean isUrl(String url) {
-        Matcher matcher = URL_CHECK.matcher(url);
+        if (StringUtils.isBlank(url)) {
+            return false;
+        }
+        Matcher matcher = URL_CHECK.matcher(url.toLowerCase());
 
         return matcher.matches();
     }
