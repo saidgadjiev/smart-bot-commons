@@ -72,7 +72,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                     MessagesProperties.MESSAGE_ACTIVE_SUBSCRIPTION,
                     new Object[]{
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
-                            subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).months(period.getMonths()),
+                            subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).localize(period),
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),
@@ -84,7 +84,7 @@ public class DefaultCheckPaidSubscriptionMessageBuilder implements CheckPaidSubs
                     MessagesProperties.MESSAGE_SUBSCRIPTION_EXPIRED,
                     new Object[]{
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
-                            subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).months(period.getMonths()),
+                            subscriptionTimeDeclensionProvider.getService(locale.getLanguage()).localize(period),
                             PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getPurchaseDate()),
                             TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                             paidSubscriptionProperties.getPaymentBotName(),

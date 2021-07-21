@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.service.declension;
 
+import org.joda.time.Period;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 
@@ -23,14 +24,24 @@ public class RuSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
     }
 
     @Override
-    public String months(int months) {
-        if (months == 1) {
-            return "1 месяц";
+    public String localize(Period period) {
+        StringBuilder result = new StringBuilder();
+
+        if (period.getYears() == 1) {
+            result.append("1 год");
+        } else if (period.getYears() >= 2 && period.getYears() <= 4) {
+            result.append(period.getYears()).append(" года");
+        } else if (period.getYears() != 0) {
+            result.append(period.getYears()).append(" лет");
         }
-        if (months >= 2 && months <= 4) {
-            return months + " месяца";
+        if (period.getMonths() == 1) {
+            result.append("1 месяц");
+        } else if (period.getMonths() >= 2 && period.getMonths() <= 4) {
+            result.append(period.getMonths()).append(" месяца");
+        } else if (period.getMonths() != 0) {
+            result.append(period.getMonths()).append(" месяцев");
         }
 
-        return months + " месяцев";
+        return result.toString();
     }
 }

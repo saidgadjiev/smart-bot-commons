@@ -3,17 +3,14 @@ package ru.gadjini.telegram.smart.bot.commons.configuration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.CommandStart;
 import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.impl.StartCommand;
 import ru.gadjini.telegram.smart.bot.commons.dao.command.keyboard.ReplyKeyboardDao;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.CommandMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.DummyCommandMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
-import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.*;
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultHelpCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.DefaultStartCommandMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.command.message.HelpCommandMessageBuilder;
@@ -29,6 +26,12 @@ import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscripti
 
 @Configuration
 public class DummyConfiguration {
+
+    @Bean
+    @ConditionalOnMissingBean(UrlMediaExtractor.class)
+    public UrlMediaExtractor urlMediaExtractor() {
+        return new DefaultMediaExtractor();
+    }
 
     @Bean
     @ConditionalOnMissingBean(CommandMessageBuilder.class)
