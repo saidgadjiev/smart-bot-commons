@@ -41,8 +41,6 @@ public class MessagesProperties {
 
     public static final String MESSAGE_TOO_LARGE_OUT_FILE = "message.too.large.out.file";
 
-    public static final String MESSAGE_TOO_LARGE_IN_FILE = "message.too.large.in.file";
-
     public static final String MESSAGE_ZERO_LENGTH_FILE = "message.zero.length.file";
 
     public static final String MESSAGE_QUERY_CANCELED = "message.query.canceled";
@@ -124,6 +122,4 @@ public class MessagesProperties {
     public static final String MESSAGE_BOTLIST = "message.botlist";
 
     public static final String BOTLIST_COMMAND_DESCRIPTION = "botlist.command.description";
-
-    public static final String MESSAGE_BIG_IN_REMOTE_FILE = "message.big.in.remote.file";
 }
