@@ -108,6 +108,19 @@ public class CommandNavigator {
         return new SilentPop(parentCommand.getKeyboard(chatId), parentCommand.getMessage(chatId));
     }
 
+    public void silentPopFromCallback(long chatId) {
+        NavigableBotCommand navigableBotCommand = getCurrentCommand(chatId, false);
+        if (navigableBotCommand == null) {
+            return;
+        }
+        String parentHistoryName = navigableBotCommand.getParentCommandName(chatId);
+
+        navigableBotCommand.leave(chatId);
+        NavigableBotCommand parentCommand = navigableBotCommands.get(parentHistoryName);
+
+        setCurrentCommand(chatId, parentCommand);
+    }
+
     public NavigableBotCommand getCurrentCommand(long chatId, boolean throwRestartedException) {
         String currCommand = navigatorDao.get(chatId);
 
@@ -126,6 +139,10 @@ public class CommandNavigator {
 
     public void setCurrentCommand(long chatId, String command) {
         navigatorDao.set(chatId, command);
+    }
+
+    public String getCurrentCommandName(long chatId) {
+        return navigatorDao.get(chatId);
     }
 
     private void setCurrentCommand(long chatId, NavigableBotCommand navigableBotCommand) {
