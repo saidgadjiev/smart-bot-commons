@@ -7,8 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
-import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
-import ru.gadjini.telegram.smart.bot.commons.command.api.KeyboardBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
@@ -17,7 +15,6 @@ import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
 import ru.gadjini.telegram.smart.bot.commons.model.TgMessage;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
-import ru.gadjini.telegram.smart.bot.commons.utils.ReflectionUtils;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -46,13 +43,8 @@ public class CommandNavigator {
     }
 
     @Autowired
-    public void setBotCommands(Collection<BotCommand> botCommands) {
-        ReflectionUtils.findImplements(botCommands, NavigableBotCommand.class).forEach(command -> navigableBotCommands.put(command.getHistoryName(), command));
-    }
-
-    @Autowired
-    public void setKeyboardCommands(Collection<KeyboardBotCommand> keyboardCommands) {
-        ReflectionUtils.findImplements(keyboardCommands, NavigableBotCommand.class).forEach(command -> navigableBotCommands.put(command.getHistoryName(), command));
+    public void setNavigableCommands(Collection<NavigableBotCommand> navigableBotCommands) {
+        navigableBotCommands.forEach(n -> this.navigableBotCommands.put(n.getHistoryName(), n));
     }
 
     public void push(long chatId, NavigableBotCommand navigableBotCommand) {

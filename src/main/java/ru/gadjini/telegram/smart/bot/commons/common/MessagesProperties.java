@@ -122,4 +122,16 @@ public class MessagesProperties {
     public static final String MESSAGE_BOTLIST = "message.botlist";
 
     public static final String BOTLIST_COMMAND_DESCRIPTION = "botlist.command.description";
+
+    public static final String CAPTION_COMMAND_DESCRIPTION = "caption.command.description";
+
+    public static final String THUMB_COMMAND_DESCRIPTION = "thumb.command.description";
+
+    public static final String MESSAGE_CURRENT_CAPTION = "message.current.caption";
+
+    public static final String MESSAGE_CURRENT_FILENAME = "message.current.filename";
+
+    public static final String MESSAGE_CURRENT_THUMB = "message.current.thumb";
+
+    public static final String FILENAME_COMMAND_DESCRIPTION = "filename.command.description";
 }

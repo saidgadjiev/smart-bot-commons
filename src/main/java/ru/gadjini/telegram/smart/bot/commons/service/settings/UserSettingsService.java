@@ -20,15 +20,14 @@ public class UserSettingsService {
     }
 
     public void createDefaultSettings(long userId) {
-        //userSettingsDao.createDefaultSettings(botProperties.getName(), userId);
+        userSettingsDao.createDefaultSettings(botProperties.getName(), userId);
     }
 
     public void smartFileFeature(long userId, boolean enable) {
-        //userSettingsDao.smartFileFeature(botProperties.getName(), userId, enable);
+        userSettingsDao.smartFileFeature(botProperties.getName(), userId, enable);
     }
 
     public boolean isSmartFileFeatureEnabled(long userId) {
-        return false;
-        //return userSettingsDao.getSmartFileFeatureEnabledOrDefault(botProperties.getName(), userId);
+        return userSettingsDao.getSmartFileFeatureEnabledOrDefault(botProperties.getName(), userId);
     }
 }

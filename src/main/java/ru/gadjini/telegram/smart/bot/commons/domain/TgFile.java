@@ -26,6 +26,8 @@ public class TgFile {
 
     public static final String FORMAT = "format";
 
+    public static final String SOURCE = "source";
+
     public static final String AUDIO_PERFORMER = "audio_performer";
 
     public static final String AUDIO_TITLE = "audio_title";

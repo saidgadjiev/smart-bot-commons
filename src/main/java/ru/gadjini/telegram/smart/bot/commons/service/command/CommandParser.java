@@ -15,6 +15,8 @@ public class CommandParser {
 
     public static final String COMMAND_ARG_SEPARATOR = "=";
 
+    public static final String BOT_COMMAND_ARG_SEPARATOR = "_";
+
     public static final String START_PARAMETER_SEPARATOR = " ";
 
     public static final String COMMAND_NAME_SEPARATOR = ":";
@@ -51,7 +53,7 @@ public class CommandParser {
     }
 
     private CommandParseResult parseBotCommand(String text) {
-        String[] commandSplit = text.split(COMMAND_ARG_SEPARATOR);
+        String[] commandSplit = text.split(BOT_COMMAND_ARG_SEPARATOR);
         String[] parameters = Arrays.copyOfRange(commandSplit, 1, commandSplit.length);
 
         return new CommandParseResult(commandSplit[0].substring(1), parameters);

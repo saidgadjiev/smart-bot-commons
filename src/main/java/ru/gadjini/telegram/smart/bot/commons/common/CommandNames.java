@@ -2,7 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.common;
 
 public class CommandNames {
 
-    private CommandNames() {}
+    private CommandNames() {
+    }
 
     public static final String START_COMMAND_NAME = "start";
 
@@ -26,8 +27,6 @@ public class CommandNames {
 
     public static final String CANCEL_QUERY_COMMAND_NAME = "c";
 
-    public static final String UPLOAD_TYPE_COMMAND = "sfs";
-
     public static final String UPDATE_QUERY_STATUS = "updq";
 
     public static final String QUEUE_STATS = "qstats";
@@ -35,10 +34,6 @@ public class CommandNames {
     public static final String TSTATS = "tstats";
 
     public static final String GLOBAL_STATS = "gstats";
-
-    public static final String GET_SMART_FILE = "gsmart";
-
-    public static final String SMART_FILE_FEATURE = "smartfile";
 
     public static final String BUILD_INFO = "binfo";
 
