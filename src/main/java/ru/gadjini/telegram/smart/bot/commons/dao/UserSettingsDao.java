@@ -26,28 +26,32 @@ public class UserSettingsDao {
 
     public void smartFileFeature(String botName, long userId, boolean enable) {
         jdbcTemplate.update(
-                "UPDATE user_settings SET smart_file = ? where bot_name = ? and user_id = ?",
+                "INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, ?) " +
+                        " ON CONFLICT(user_id, bot_name) DO UPDATE SET smart_file = excluded.smart_file",
                 ps -> {
-                    ps.setBoolean(1, enable);
-                    ps.setString(2, botName);
-                    ps.setLong(3, userId);
+                    ps.setString(1, botName);
+                    ps.setLong(2, userId);
+                    ps.setBoolean(3, enable);
                 }
         );
     }
 
     public Boolean getSmartFileFeatureEnabledOrDefault(String botName, long userId) {
         return jdbcTemplate.query(
-                "SELECT smart_file FROM user_settings WHERE bot_name = ? AND user_id = ?",
+                "WITH ins AS(INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, true) " +
+                        " ON CONFLICT(user_id, bot_name) DO NOTHING) SELECT smart_file FROM user_settings WHERE bot_name = ? AND user_id = ?",
                 ps -> {
                     ps.setString(1, botName);
                     ps.setLong(2, userId);
+                    ps.setString(3, botName);
+                    ps.setLong(4, userId);
                 },
                 rs -> {
                     if (rs.next()) {
                         return rs.getBoolean("smart_file");
                     }
 
-                    throw new RuntimeException("User settings not found for user " + userId);
+                    return true;
                 }
         );
     }
