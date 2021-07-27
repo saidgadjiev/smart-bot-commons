@@ -11,7 +11,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMa
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
-import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
@@ -29,16 +28,12 @@ public class PostCommand implements BotCommand {
 
     private UserService userService;
 
-    private BotProperties botProperties;
-
     @Autowired
-    public PostCommand(@Qualifier("mediaLimits") MediaMessageService messageService,
-                       LocalisationService localisationService,
-                       UserService userService, BotProperties botProperties) {
+    public PostCommand(@Qualifier("mediaLimits") MediaMessageService messageService, LocalisationService localisationService,
+                       UserService userService) {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
-        this.botProperties = botProperties;
     }
 
     @Override
@@ -53,7 +48,7 @@ public class PostCommand implements BotCommand {
                         .chatId(String.valueOf(message.getChatId()))
                         .photo(new InputFile(new File("C:/logo.jpg")))
                         .caption(localisationService.getMessage("message.post",
-                                new Object[]{botProperties.getName(), params[0]},
+                                new Object[] {params[0]},
                                 userService.getLocaleOrDefault(message.getFrom().getId())))
                         .replyMarkup(postMarkup(params[0]))
                         .parseMode(ParseMode.HTML)
@@ -71,7 +66,7 @@ public class PostCommand implements BotCommand {
 
         inlineKeyboardMarkup.setKeyboard(new ArrayList<>());
         InlineKeyboardButton joinButton = new InlineKeyboardButton("Start");
-        joinButton.setUrl("https://t.me/" + botProperties.getName() + "?start=" + reffreal);
+        joinButton.setUrl("https://t.me/SmartVideoConverterBot?start=" + reffreal);
 
         inlineKeyboardMarkup.getKeyboard().add(List.of(joinButton));
 
