@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 
 import java.sql.ResultSet;
@@ -22,9 +23,12 @@ public class PaidSubscriptionPlanDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<PaidSubscriptionPlan> getActivePlans() {
+    public List<PaidSubscriptionPlan> getActivePlans(PaidSubscriptionTariffType tariffType) {
         return jdbcTemplate.query(
-                "SELECT * FROM paid_subscription_plan WHERE active = true ORDER BY price",
+                "SELECT * FROM paid_subscription_plan WHERE active = true and tariff = ? ORDER BY price",
+                ps -> {
+                    ps.setString(1, tariffType.name().toLowerCase());
+                },
                 (rs, rw) -> map(rs)
         );
     }
