@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import org.joda.time.Period;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 
 public class PaidSubscriptionPlan {
 
@@ -13,12 +14,16 @@ public class PaidSubscriptionPlan {
 
     public static final String PERIOD = "period";
 
+    public static final String TARIFF = "tariff";
+
     private int id;
 
     //In USD
     private double price;
 
     private Period period;
+
+    private PaidSubscriptionTariffType tariff;
 
     public int getId() {
         return id;
@@ -42,5 +47,13 @@ public class PaidSubscriptionPlan {
 
     public void setPeriod(Period period) {
         this.period = period;
+    }
+
+    public void setTariff(PaidSubscriptionTariffType tariff) {
+        this.tariff = tariff;
+    }
+
+    public PaidSubscriptionTariffType getTariff() {
+        return tariff;
     }
 }

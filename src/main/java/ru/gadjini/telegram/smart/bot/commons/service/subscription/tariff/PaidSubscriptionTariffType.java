@@ -4,7 +4,5 @@ public enum PaidSubscriptionTariffType {
 
     FIXED,
 
-    FLEXIBLE,
-
-    UNDEFINED
+    FLEXIBLE
 }

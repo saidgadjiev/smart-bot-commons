@@ -1,5 +1,6 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
+import org.joda.time.Period;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.LocalDate;
@@ -19,9 +20,13 @@ public class PaidSubscription {
 
     public static final String PLAN_ID = "plan_id";
 
+    public static final String SUBSCRIPTION_INTERVAL = "subscription_interval";
+
     private long userId;
 
     private LocalDate endDate;
+
+    private Period subscriptionInterval;
 
     private ZonedDateTime purchaseDate;
 
@@ -71,6 +76,14 @@ public class PaidSubscription {
 
     public void setPurchaseDate(ZonedDateTime purchaseDate) {
         this.purchaseDate = purchaseDate;
+    }
+
+    public Period getSubscriptionInterval() {
+        return subscriptionInterval;
+    }
+
+    public void setSubscriptionInterval(Period subscriptionInterval) {
+        this.subscriptionInterval = subscriptionInterval;
     }
 
     public boolean isTrial() {

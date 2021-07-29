@@ -18,6 +18,10 @@ public class JodaTimeUtils {
                 .plusDays(period.getDays());
     }
 
+    public static int toDays(Period period) {
+        return period.getYears() * 365 + period.getMonths() * 30 + period.getWeeks() * 7 + period.getDays();
+    }
+
     public static PGInterval toPgInterval(Period period) {
         if (period == null) {
             return null;

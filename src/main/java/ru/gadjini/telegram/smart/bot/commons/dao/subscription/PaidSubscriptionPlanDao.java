@@ -48,6 +48,20 @@ public class PaidSubscriptionPlanDao {
         );
     }
 
+    public PaidSubscriptionTariffType getTariff(int id) {
+        return jdbcTemplate.query(
+                "SELECT tariff FROM paid_subscription_plan WHERE id = ?",
+                ps -> ps.setInt(1, id),
+                rs -> {
+                    if (rs.next()) {
+                        return PaidSubscriptionTariffType.valueOf(rs.getString(PaidSubscriptionPlan.TARIFF).toUpperCase());
+                    }
+
+                    return null;
+                }
+        );
+    }
+
     public Period getPlanPeriod(int id) {
         return jdbcTemplate.query(
                 "SELECT period FROM paid_subscription_plan WHERE id = ?",
@@ -61,6 +75,7 @@ public class PaidSubscriptionPlanDao {
         paidSubscriptionPlan.setId(rs.getInt(PaidSubscriptionPlan.ID));
         paidSubscriptionPlan.setPrice(rs.getDouble(PaidSubscriptionPlan.PRICE));
         paidSubscriptionPlan.setPeriod(JodaTimeUtils.toPeriod((PGInterval) rs.getObject(PaidSubscriptionPlan.PERIOD)));
+        paidSubscriptionPlan.setTariff(PaidSubscriptionTariffType.valueOf(rs.getString(PaidSubscriptionPlan.TARIFF).toUpperCase()));
 
         return paidSubscriptionPlan;
     }

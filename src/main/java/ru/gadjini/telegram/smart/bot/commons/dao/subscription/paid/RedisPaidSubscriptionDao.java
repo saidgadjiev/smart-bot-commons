@@ -104,6 +104,8 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
             subscription.setPlanId(objects.get(0) == null ? null : json.readValue((String) objects.get(0), Integer.class));
             subscription.setEndDate(json.readValue((String) objects.get(1), LocalDate.class));
             subscription.setPurchaseDate(json.readValue((String) objects.get(2), ZonedDateTime.class));
+            subscription.setSubscriptionInterval((String) objects.get(3) == null ? null : json.readValue((String) objects.get(3), Period.class));
+
             subscription.setBotName(botName);
             subscription.setUserId(userId);
 
@@ -122,6 +124,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         }
         values.put(PaidSubscription.END_DATE, subscription.getEndDate());
         values.put(PaidSubscription.PURCHASE_DATE, subscription.getPurchaseDate());
+        values.put(PaidSubscription.SUBSCRIPTION_INTERVAL, subscription.getSubscriptionInterval());
 
         redisTemplate.opsForHash().putAll(key, values);
         redisTemplate.expire(key, 1, TimeUnit.DAYS);

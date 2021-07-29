@@ -19,6 +19,10 @@ public class PaidSubscriptionPlanService {
         this.paidSubscriptionPlanDao = paidSubscriptionPlanDao;
     }
 
+    public PaidSubscriptionTariffType getTariff(int planId) {
+        return paidSubscriptionPlanDao.getTariff(planId);
+    }
+
     public List<PaidSubscriptionPlan> getActivePlans(PaidSubscriptionTariffType tariffType) {
         return paidSubscriptionPlanDao.getActivePlans(tariffType);
     }

@@ -13,7 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.utils.TelegramLinkUtils;
 
 @Service
@@ -26,10 +26,10 @@ public class WatermarkMessageService implements MediaMessageService {
 
     private BotProperties botProperties;
 
-    private PaidSubscriptionService paidSubscriptionService;
+    private FixedTariffPaidSubscriptionService paidSubscriptionService;
 
     @Autowired
-    public WatermarkMessageService(BotProperties botProperties, PaidSubscriptionService paidSubscriptionService) {
+    public WatermarkMessageService(BotProperties botProperties, FixedTariffPaidSubscriptionService paidSubscriptionService) {
         this.botProperties = botProperties;
         this.paidSubscriptionService = paidSubscriptionService;
     }

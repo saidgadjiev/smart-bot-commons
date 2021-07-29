@@ -21,11 +21,17 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiMethodExecutor;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMediaService;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyBotSession;
 import ru.gadjini.telegram.smart.bot.commons.webhook.DummyWebhook;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 @Configuration
 public class SmartBotConfiguration {
@@ -106,5 +112,17 @@ public class SmartBotConfiguration {
                                                      DefaultBotOptions options, BotApiProperties botApiProperties,
                                                      TelegramBotApiMethodExecutor exceptionHandler) {
         return new TelegramBotApiMediaService(botProperties, options, botApiProperties, exceptionHandler);
+    }
+
+    @Bean
+    public Map<PaidSubscriptionTariffType, PaidSubscriptionService> tariffServiceMap(
+            Set<PaidSubscriptionService> paidSubscriptionServices
+    ) {
+        Map<PaidSubscriptionTariffType, PaidSubscriptionService> tariffServiceMap = new HashMap<>();
+        for (PaidSubscriptionService paidSubscriptionService : paidSubscriptionServices) {
+            tariffServiceMap.put(paidSubscriptionService.tariffType(), paidSubscriptionService);
+        }
+
+        return tariffServiceMap;
     }
 }

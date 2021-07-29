@@ -25,7 +25,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNa
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.utils.MessageUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
@@ -52,7 +52,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private MessageService messageService;
 
-    private PaidSubscriptionService paidSubscriptionService;
+    private FixedTariffPaidSubscriptionService paidSubscriptionService;
 
     private PaidSubscriptionPlanService paidSubscriptionPlanService;
 
@@ -63,7 +63,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                   CommandsContainer commandsContainer, CommandNavigator commandNavigator,
                                   @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
-                                  PaidSubscriptionService paidSubscriptionService,
+                                  FixedTariffPaidSubscriptionService paidSubscriptionService,
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
                                   SmartInlineKeyboardService inlineKeyboardService) {
         this.subscriptionProperties = subscriptionProperties;
@@ -121,7 +121,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                         .text(
                                 localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                                         new Object[]{
-                                                PaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
+                                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
                                                 TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
                                                 subscriptionProperties.getPaymentBotName(),
                                                 NumberUtils.toString(minPrice, 2)
