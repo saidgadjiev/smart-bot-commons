@@ -27,6 +27,37 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
+    public PaidSubscription activateSubscriptionDay(String botName, long userId) {
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(
+                conn -> {
+                    PreparedStatement ps = conn.prepareStatement("UPDATE paid_subscription " +
+                            "SET end_date = current_date, " +
+                            "subscription_interval = subscription_interval - interval '1 days' " +
+                            "WHERE user_id = ? AND bot_name = ? RETURNING end_date, subscription_interval", PreparedStatement.RETURN_GENERATED_KEYS);
+                    ps.setLong(1, userId);
+                    ps.setString(2, botName);
+
+                    return ps;
+                },
+                generatedKeyHolder
+        );
+
+        Date endDate = (Date) generatedKeyHolder.getKeys().get("end_date");
+
+        PaidSubscription paidSubscription = new PaidSubscription();
+        paidSubscription.setUserId(userId);
+        paidSubscription.setBotName(botName);
+        paidSubscription.setEndDate(endDate.toLocalDate());
+
+        PGInterval interval = (PGInterval) generatedKeyHolder.getKeys().get(PaidSubscription.SUBSCRIPTION_INTERVAL);
+        paidSubscription.setSubscriptionInterval(JodaTimeUtils.toPeriod(interval));
+
+        return paidSubscription;
+    }
+
+    @Override
     public void create(PaidSubscription paidSubscription) {
         jdbcTemplate.update(
                 "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id, subscription_interval) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
@@ -63,7 +94,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
                     }
                     ps.setInt(7, paidSubscription.getPlanId());
                     if (paidSubscription.getSubscriptionInterval() != null) {
-                        ps.setObject(8, JodaTimeUtils.toPgInterval(period));
+                        ps.setObject(8, JodaTimeUtils.toPgIntervalDays(period));
                     } else {
                         ps.setNull(8, Types.OTHER);
                     }
@@ -112,14 +143,19 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         if (paidSubscription.getSubscriptionInterval() == null) {
             ps.setNull(5, Types.OTHER);
         } else {
-            ps.setObject(5, JodaTimeUtils.toPgInterval(paidSubscription.getSubscriptionInterval()));
+            ps.setObject(5, JodaTimeUtils.toPgIntervalDays(paidSubscription.getSubscriptionInterval()));
         }
     }
 
     private PaidSubscription map(ResultSet rs) throws SQLException {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
-        paidSubscription.setEndDate(rs.getDate(PaidSubscription.END_DATE).toLocalDate());
+
+        Date endDate = rs.getDate(PaidSubscription.END_DATE);
+        if (endDate != null) {
+            paidSubscription.setEndDate(endDate.toLocalDate());
+        }
+
         paidSubscription.setBotName(rs.getString(PaidSubscription.BOT_NAME));
         paidSubscription.setSubscriptionInterval(JodaTimeUtils.toPeriod((PGInterval) rs.getObject(PaidSubscription.SUBSCRIPTION_INTERVAL)));
         int planId = rs.getInt(PaidSubscription.PLAN_ID);

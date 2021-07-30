@@ -5,6 +5,8 @@ import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 
 public interface PaidSubscriptionDao {
 
+    PaidSubscription activateSubscriptionDay(String botName, long userId);
+
     void create(PaidSubscription paidSubscription);
 
     PaidSubscription getByBotNameAndUserId(String botName, long userId);

@@ -36,6 +36,21 @@ public class JodaTimeUtils {
         );
     }
 
+    public static PGInterval toPgIntervalDays(Period period) {
+        if (period == null) {
+            return null;
+        }
+
+        return new PGInterval(
+                0,
+                0,
+                toDays(period),
+                0,
+                0,
+                0
+        );
+    }
+
     public static Period toPeriod(PGInterval interval) {
         if (interval == null) {
             return null;

@@ -134,4 +134,10 @@ public class MessagesProperties {
     public static final String MESSAGE_CURRENT_THUMB = "message.current.thumb";
 
     public static final String FILENAME_COMMAND_DESCRIPTION = "filename.command.description";
+
+    public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_REQUIRED = "message.flexible.subscription.required";
+
+    public static final String FLEXIBLE_SUBSCRIPTION_REQUIRED_COMMAND_DESCRIPTION = "flexible.subscription.required.command.description";
+
+    public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_DAY_ACTIVATED = "message.flexible.subscription.day.activated";
 }

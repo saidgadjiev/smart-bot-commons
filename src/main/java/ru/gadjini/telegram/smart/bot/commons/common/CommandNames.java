@@ -52,4 +52,6 @@ public class CommandNames {
     public static final String BOTLIST = "botlist";
 
     public static final String POST = "post";
+
+    public static final String ACTIVATE_FLEXIBLE_SUBSCRIPTION = "afs";
 }

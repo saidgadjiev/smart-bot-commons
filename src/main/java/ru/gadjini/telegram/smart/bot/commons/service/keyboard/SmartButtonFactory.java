@@ -33,6 +33,14 @@ public class SmartButtonFactory {
         return inlineKeyboardButton;
     }
 
+    public InlineKeyboardButton flexibleTariffSubscriptionRequiredKeyboard(Locale locale) {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(
+                MessagesProperties.FLEXIBLE_SUBSCRIPTION_REQUIRED_COMMAND_DESCRIPTION, locale));
+        inlineKeyboardButton.setCallbackData(CommandNames.ACTIVATE_FLEXIBLE_SUBSCRIPTION + CommandParser.COMMAND_NAME_SEPARATOR);
+
+        return inlineKeyboardButton;
+    }
+
     public InlineKeyboardButton cancelQueryItem(int queryItemId, Locale locale) {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton(localisationService.getMessage(MessagesProperties.CANCEL_QUERY_COMMAND_DESCRIPTION, locale));
         inlineKeyboardButton.setCallbackData(CommandNames.CANCEL_QUERY_COMMAND_NAME + CommandParser.COMMAND_NAME_SEPARATOR +

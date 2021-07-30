@@ -18,6 +18,12 @@ public class SmartInlineKeyboardService {
         this.buttonFactory = buttonFactory;
     }
 
+    public InlineKeyboardMarkup getFlexibleTariffSubscriptionRequiredKeyboard(Locale locale) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboardMarkup();
+        inlineKeyboardMarkup.getKeyboard().add(List.of(buttonFactory.flexibleTariffSubscriptionRequiredKeyboard(locale)));
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup getProcessingKeyboard(int queueItemId, Locale locale) {
         InlineKeyboardMarkup inlineKeyboardMarkup = inlineKeyboardMarkup();
         inlineKeyboardMarkup.getKeyboard().add(List.of(buttonFactory.cancelQueryItem(queueItemId, locale)));

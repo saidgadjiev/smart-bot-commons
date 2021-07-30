@@ -91,6 +91,9 @@ public class PaidSubscription {
     }
 
     public boolean isActive() {
+        if (endDate == null) {
+            return false;
+        }
         LocalDate now = LocalDate.now(TimeUtils.UTC);
         return now.isBefore(endDate) || now.isEqual(endDate);
     }

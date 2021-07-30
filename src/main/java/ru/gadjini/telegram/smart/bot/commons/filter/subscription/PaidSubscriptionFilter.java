@@ -22,16 +22,17 @@ import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
-import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartInlineKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 import ru.gadjini.telegram.smart.bot.commons.utils.MessageUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.ZonedDateTime;
 import java.util.Locale;
+import java.util.Map;
 
 @Component
 public class PaidSubscriptionFilter extends BaseBotFilter {
@@ -56,7 +57,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private PaidSubscriptionPlanService paidSubscriptionPlanService;
 
-    private SmartInlineKeyboardService inlineKeyboardService;
+    private Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap;
 
     @Autowired
     public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
@@ -65,7 +66,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                   LocalisationService localisationService, UserService userService,
                                   FixedTariffPaidSubscriptionService paidSubscriptionService,
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
-                                  SmartInlineKeyboardService inlineKeyboardService) {
+                                  Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap) {
         this.subscriptionProperties = subscriptionProperties;
         this.commandParser = commandParser;
         this.commandsContainer = commandsContainer;
@@ -75,7 +76,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         this.userService = userService;
         this.paidSubscriptionService = paidSubscriptionService;
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
-        this.inlineKeyboardService = inlineKeyboardService;
+        this.expiredPaidSubscriptionHandlerMap = expiredPaidSubscriptionHandlerMap;
     }
 
     @Override
@@ -103,7 +104,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         }
         if (!subscription.isActive()) {
             LOGGER.debug("Paid subscription required({})", user.getId());
-            sendSubscriptionExpired(user.getId());
+            PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(subscription.getPlanId());
+            expiredPaidSubscriptionHandlerMap.get(tariff).handle(user.getId(), subscription);
 
             return false;
         }
@@ -126,19 +128,6 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                                 subscriptionProperties.getPaymentBotName(),
                                                 NumberUtils.toString(minPrice, 2)
                                         }, locale))
-                        .parseMode(ParseMode.HTML)
-                        .build()
-        );
-    }
-
-    private void sendSubscriptionExpired(long userId) {
-        Locale locale = userService.getLocaleOrDefault(userId);
-        double minPrice = paidSubscriptionPlanService.getMinPrice();
-        messageService.sendMessage(
-                SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED,
-                                new Object[] {NumberUtils.toString(minPrice, 2)}, locale))
-                        .replyMarkup(inlineKeyboardService.getPaymentKeyboard(subscriptionProperties.getPaymentBotName(), locale))
                         .parseMode(ParseMode.HTML)
                         .build()
         );

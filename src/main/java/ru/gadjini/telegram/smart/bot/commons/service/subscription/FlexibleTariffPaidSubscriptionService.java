@@ -34,6 +34,10 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
         return paidSubscription;
     }
 
+    public PaidSubscription activateSubscriptionDay(String botName, long userId) {
+        return paidSubscriptionDao.activateSubscriptionDay(botName, userId);
+    }
+
     @Override
     public PaidSubscriptionTariffType tariffType() {
         return PaidSubscriptionTariffType.FLEXIBLE;

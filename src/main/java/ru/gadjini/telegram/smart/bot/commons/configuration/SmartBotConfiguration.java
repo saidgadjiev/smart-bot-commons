@@ -20,6 +20,7 @@ import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
+import ru.gadjini.telegram.smart.bot.commons.filter.subscription.ExpiredPaidSubscriptionHandler;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
@@ -124,5 +125,17 @@ public class SmartBotConfiguration {
         }
 
         return tariffServiceMap;
+    }
+
+    @Bean
+    public Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap(
+            Set<ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlers
+    ) {
+        Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap = new HashMap<>();
+        for (ExpiredPaidSubscriptionHandler expiredPaidSubscriptionHandler : expiredPaidSubscriptionHandlers) {
+            expiredPaidSubscriptionHandlerMap.put(expiredPaidSubscriptionHandler.tariffType(), expiredPaidSubscriptionHandler);
+        }
+
+        return expiredPaidSubscriptionHandlerMap;
     }
 }
