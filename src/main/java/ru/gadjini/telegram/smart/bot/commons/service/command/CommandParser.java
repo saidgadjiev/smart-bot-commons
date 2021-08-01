@@ -53,7 +53,10 @@ public class CommandParser {
     }
 
     private CommandParseResult parseBotCommand(String text) {
-        String[] commandSplit = text.split(BOT_COMMAND_ARG_SEPARATOR);
+        String[] commandSplit = text.split(COMMAND_ARG_SEPARATOR);
+        if (commandSplit.length < 2) {
+            commandSplit = text.split(BOT_COMMAND_ARG_SEPARATOR);
+        }
         String[] parameters = Arrays.copyOfRange(commandSplit, 1, commandSplit.length);
 
         return new CommandParseResult(commandSplit[0].substring(1), parameters);
