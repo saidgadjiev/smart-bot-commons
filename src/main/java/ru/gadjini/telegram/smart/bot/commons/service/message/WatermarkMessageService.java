@@ -116,7 +116,7 @@ public class WatermarkMessageService implements MediaMessageService {
         try {
             PaidSubscription subscription = fixedTariffPaidSubscriptionService.getSubscription(botProperties.getName(),
                     Long.parseLong(chatId));
-            if (subscription != null) {
+            if (subscription != null && !subscription.isTrial()) {
                 PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(subscription.getPlanId());
                 if (paidSubscriptionServices.get(tariff).isExistsPaidSubscription(botProperties.getName(), Long.parseLong(chatId))) {
                     return text;
