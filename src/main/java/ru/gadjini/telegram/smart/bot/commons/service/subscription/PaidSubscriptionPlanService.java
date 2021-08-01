@@ -8,9 +8,12 @@ import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscriptionPlan;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 
 import java.util.List;
+import java.util.Objects;
 
 @Service
 public class PaidSubscriptionPlanService {
+
+    private static final Integer TRIAL_PLAN_ID = null;
 
     private PaidSubscriptionPlanDao paidSubscriptionPlanDao;
 
@@ -19,7 +22,11 @@ public class PaidSubscriptionPlanService {
         this.paidSubscriptionPlanDao = paidSubscriptionPlanDao;
     }
 
-    public PaidSubscriptionTariffType getTariff(int planId) {
+    public PaidSubscriptionTariffType getTariff(Integer planId) {
+        if (Objects.equals(planId, TRIAL_PLAN_ID)) {
+            return PaidSubscriptionTariffType.FIXED;
+        }
+
         return paidSubscriptionPlanDao.getTariff(planId);
     }
 

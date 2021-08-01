@@ -1,6 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import org.joda.time.Period;
+import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
 import java.time.LocalDate;
@@ -95,6 +96,14 @@ public class PaidSubscription {
             return false;
         }
         LocalDate now = LocalDate.now(TimeUtils.UTC);
+
         return now.isBefore(endDate) || now.isEqual(endDate);
+    }
+
+    public boolean isSubscriptionIntervalActive() {
+        if (subscriptionInterval == null) {
+            return false;
+        }
+         return JodaTimeUtils.toDays(subscriptionInterval) > 0;
     }
 }

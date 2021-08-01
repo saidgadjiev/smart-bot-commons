@@ -19,6 +19,9 @@ public class JodaTimeUtils {
     }
 
     public static int toDays(Period period) {
+        if (period == null) {
+            return 0;
+        }
         return period.getYears() * 365 + period.getMonths() * 30 + period.getWeeks() * 7 + period.getDays();
     }
 

@@ -60,7 +60,8 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     @Override
     public void create(PaidSubscription paidSubscription) {
         jdbcTemplate.update(
-                "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id, subscription_interval) VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
+                "INSERT INTO paid_subscription(user_id, bot_name, end_date, plan_id, subscription_interval) " +
+                        "VALUES (?, ?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
                 ps -> setPaidSubscriptionCreateValues(ps, paidSubscription)
         );
         paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));

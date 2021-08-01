@@ -21,6 +21,13 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
     }
 
     @Override
+    public boolean isExistsPaidSubscription(String botName, long userId) {
+        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+
+        return subscription != null && subscription.getPlanId() != null && (subscription.isActive() || subscription.isSubscriptionIntervalActive());
+    }
+
+    @Override
     public PaidSubscription renewSubscription(String botName, long userId, int planId, Period period) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);

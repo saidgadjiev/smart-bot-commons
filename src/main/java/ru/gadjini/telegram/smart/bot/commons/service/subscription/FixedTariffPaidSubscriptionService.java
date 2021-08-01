@@ -34,6 +34,7 @@ public class FixedTariffPaidSubscriptionService implements PaidSubscriptionServi
         this.subscriptionProperties = subscriptionProperties;
     }
 
+    @Override
     public boolean isExistsPaidSubscription(String botName, long userId) {
         PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
 

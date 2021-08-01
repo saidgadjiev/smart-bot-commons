@@ -20,9 +20,10 @@ import ru.gadjini.telegram.smart.bot.commons.service.keyboard.DummyReplyKeyboard
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.keyboard.SmartReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.CheckPaidSubscriptionMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.DefaultCheckPaidSubscriptionMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.*;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
+
+import java.util.Map;
 
 @Configuration
 public class DummyConfiguration {
@@ -56,15 +57,23 @@ public class DummyConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean(CheckPaidSubscriptionMessageBuilder.class)
-    public DefaultCheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder(
+    @ConditionalOnMissingBean(FatherCheckPaidSubscriptionMessageBuilder.class)
+    public FatherCheckPaidSubscriptionMessageBuilder checkFixedPaidSubscriptionMessageBuilder(
             PaidSubscriptionPlanService paidSubscriptionPlanService,
             LocalisationService localisationService,
             SubscriptionProperties subscriptionProperties,
             SubscriptionTimeDeclensionProvider subscriptionTimeDeclensionProvider
     ) {
-        return new DefaultCheckPaidSubscriptionMessageBuilder(paidSubscriptionPlanService,
-                localisationService, subscriptionProperties, subscriptionTimeDeclensionProvider);
+        return new FatherCheckPaidSubscriptionMessageBuilder(
+                new DefaultCommonCheckPaidSubscriptionMessageBuilder(
+                        paidSubscriptionPlanService, localisationService, subscriptionProperties
+                ), paidSubscriptionPlanService,
+                Map.of(PaidSubscriptionTariffType.FIXED,
+                        new DefaultCheckFixedTariffPaidSubscriptionMessageBuilder(paidSubscriptionPlanService,
+                                localisationService, subscriptionProperties, subscriptionTimeDeclensionProvider),
+                        PaidSubscriptionTariffType.FLEXIBLE,
+                        new DefaultCheckFlexibleTariffPaidSubscriptionMessageBuilder(localisationService,
+                                subscriptionProperties, paidSubscriptionPlanService)));
     }
 
     @Bean

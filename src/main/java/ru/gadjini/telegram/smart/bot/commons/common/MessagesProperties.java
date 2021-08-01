@@ -93,9 +93,13 @@ public class MessagesProperties {
 
     public static final String MESSAGE_MAIN_MENU = "message.main.menu";
 
-    public static final String MESSAGE_ACTIVE_SUBSCRIPTION = "message.active.subscription";
+    public static final String MESSAGE_ACTIVE_FIXED_SUBSCRIPTION = "message.active.fixed.subscription";
 
-    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "message.subscription.expired";
+    public static final String MESSAGE_ACTIVE_FLEXIBLE_SUBSCRIPTION = "message.active.flexible.subscription";
+
+    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "message.fixed.subscription.expired";
+
+    public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_EXPIRED = "message.flexible.subscription.expired";
 
     public static final String MESSAGE_SUBSCRIPTION_NOT_FOUND = "message.subscription.not.found";
 
