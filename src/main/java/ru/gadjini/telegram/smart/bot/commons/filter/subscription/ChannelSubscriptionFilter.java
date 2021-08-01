@@ -55,12 +55,16 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
 
     private BotProperties botProperties;
 
+    private CommonPaidSubscriptionHandler commonPaidSubscriptionHandler;
+
     @Autowired
     public ChannelSubscriptionFilter(@TgMessageLimitsControl MessageService messageService,
                                      LocalisationService localisationService, UserService userService,
                                      ChannelSubscriptionService subscriptionService, CommandParser commandParser,
                                      CommandNavigator commandNavigator, CommandsContainer commandsContainer,
-                                     SubscriptionProperties subscriptionProperties, FixedTariffPaidSubscriptionService paidSubscriptionService, BotProperties botProperties) {
+                                     SubscriptionProperties subscriptionProperties,
+                                     FixedTariffPaidSubscriptionService paidSubscriptionService, BotProperties botProperties,
+                                     CommonPaidSubscriptionHandler commonPaidSubscriptionHandler) {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
@@ -71,6 +75,7 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
         this.subscriptionProperties = subscriptionProperties;
         this.paidSubscriptionService = paidSubscriptionService;
         this.botProperties = botProperties;
+        this.commonPaidSubscriptionHandler = commonPaidSubscriptionHandler;
     }
 
     @Override
@@ -98,8 +103,7 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
         long userId = TgMessage.getUserId(update);
         PaidSubscription subscription = paidSubscriptionService.getSubscription(botProperties.getName(), userId);
 
-        if (subscription != null && !subscription.isTrial()
-                && (subscription.isActive() || subscription.isSubscriptionIntervalActive())) {
+        if (commonPaidSubscriptionHandler.isActiveSubscription(subscription)) {
             return false;
         }
         if (update.hasMessage()) {
