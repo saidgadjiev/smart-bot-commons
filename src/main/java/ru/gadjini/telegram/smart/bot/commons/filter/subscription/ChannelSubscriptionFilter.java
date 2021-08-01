@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.filter.subscription;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
@@ -30,6 +32,8 @@ import java.util.Locale;
 
 @Component
 public class ChannelSubscriptionFilter extends BaseBotFilter {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(ChannelSubscriptionFilter.class);
 
     private MessageService messageService;
 
@@ -83,6 +87,7 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
     }
 
     private void sendNeedSubscription(User user) {
+        LOGGER.debug("Channel subscription required({})", user.getId());
         Locale locale = userService.getLocaleOrDefault(user.getId());
         String msg = localisationService.getMessage(MessagesProperties.MESSAGE_CHANNEL_SUBSCRIPTION_REQUIRED, locale);
         messageService.sendMessage(SendMessage.builder().chatId(String.valueOf(user.getId())).text(msg)
@@ -93,7 +98,8 @@ public class ChannelSubscriptionFilter extends BaseBotFilter {
         long userId = TgMessage.getUserId(update);
         PaidSubscription subscription = paidSubscriptionService.getSubscription(botProperties.getName(), userId);
 
-        if (subscription != null && (subscription.isActive() || subscription.isSubscriptionIntervalActive())) {
+        if (subscription != null && !subscription.isTrial()
+                && (subscription.isActive() || subscription.isSubscriptionIntervalActive())) {
             return false;
         }
         if (update.hasMessage()) {
