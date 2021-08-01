@@ -1,6 +1,8 @@
 package ru.gadjini.telegram.smart.bot.commons.service.message;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
@@ -19,6 +21,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramMediaServi
 @Qualifier("media")
 @SuppressWarnings("PMD")
 public class MediaMessageServiceImpl implements MediaMessageService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(MediaMessageServiceImpl.class);
 
     private MessageMediaService fileService;
 
@@ -45,6 +49,11 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     public SendFileResult sendDocument(SendDocument sendDocument, Progress progress) {
         if (StringUtils.isNotBlank(sendDocument.getCaption())) {
             sendDocument.setParseMode(ParseMode.HTML);
+        }
+        if (sendDocument.getThumb() != null && sendDocument.getThumb().getNewMediaFile() != null
+                && !sendDocument.getThumb().getNewMediaFile().exists()) {
+            LOGGER.debug("Missed thumb({})", sendDocument.getThumb().getNewMediaFile().getAbsolutePath());
+            sendDocument.setThumb(null);
         }
 
         sendDocument.setAllowSendingWithoutReply(true);
@@ -99,6 +108,11 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         if (StringUtils.isNotBlank(sendVideo.getCaption())) {
             sendVideo.setParseMode(ParseMode.HTML);
         }
+        if (sendVideo.getThumb() != null && sendVideo.getThumb().getNewMediaFile() != null
+                && !sendVideo.getThumb().getNewMediaFile().exists()) {
+            LOGGER.debug("Missed thumb({})", sendVideo.getThumb().getNewMediaFile().getAbsolutePath());
+            sendVideo.setThumb(null);
+        }
         sendVideo.setAllowSendingWithoutReply(true);
         Message message = telegramMediaService.sendVideo(sendVideo, progress);
 
@@ -107,6 +121,11 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     @Override
     public SendFileResult sendVideoNote(SendVideoNote sendVideoNote, Progress progress) {
+        if (sendVideoNote.getThumb() != null && sendVideoNote.getThumb().getNewMediaFile() != null
+                && !sendVideoNote.getThumb().getNewMediaFile().exists()) {
+            LOGGER.debug("Missed thumb({})", sendVideoNote.getThumb().getNewMediaFile().getAbsolutePath());
+            sendVideoNote.setThumb(null);
+        }
         sendVideoNote.setAllowSendingWithoutReply(true);
         Message message = telegramMediaService.sendVideoNote(sendVideoNote, progress);
 
@@ -118,7 +137,11 @@ public class MediaMessageServiceImpl implements MediaMessageService {
         if (StringUtils.isNotBlank(sendAudio.getCaption())) {
             sendAudio.setParseMode(ParseMode.HTML);
         }
-
+        if (sendAudio.getThumb() != null && sendAudio.getThumb().getNewMediaFile() != null
+                && !sendAudio.getThumb().getNewMediaFile().exists()) {
+            LOGGER.debug("Missed thumb({})", sendAudio.getThumb().getNewMediaFile().getAbsolutePath());
+            sendAudio.setThumb(null);
+        }
         sendAudio.setAllowSendingWithoutReply(true);
         Message message = telegramMediaService.sendAudio(sendAudio, progress);
 
