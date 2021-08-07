@@ -36,19 +36,18 @@ public class FixedTariffPaidSubscriptionService implements PaidSubscriptionServi
 
     @Override
     public boolean isExistsPaidSubscription(String botName, long userId) {
-        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(userId);
 
         return subscription != null && subscription.getPlanId() != null && subscription.isActive();
     }
 
-    public PaidSubscription getSubscription(String botName, long userId) {
-        return paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+    public PaidSubscription getSubscription(long userId) {
+        return paidSubscriptionDao.getByBotNameAndUserId(userId);
     }
 
-    public PaidSubscription createTrialSubscription(String botName, long userId) {
+    public PaidSubscription createTrialSubscription(long userId) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
-        paidSubscription.setBotName(botName);
         paidSubscription.setEndDate(getTrialPeriodEndDate());
 
         paidSubscriptionDao.create(paidSubscription);
@@ -57,10 +56,9 @@ public class FixedTariffPaidSubscriptionService implements PaidSubscriptionServi
     }
 
     @Override
-    public PaidSubscription renewSubscription(String botName, long userId, int planId, Period period) {
+    public PaidSubscription renewSubscription(long userId, int planId, Period period) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
-        paidSubscription.setBotName(botName);
         paidSubscription.setPlanId(planId);
         //Если у пользователя еще нет никакой подписки, то добавляем еще пробный период
         paidSubscription.setEndDate(JodaTimeUtils.plus(LocalDate.now(TimeUtils.UTC)

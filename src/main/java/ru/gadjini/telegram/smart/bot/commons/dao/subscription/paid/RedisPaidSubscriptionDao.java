@@ -43,9 +43,9 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription activateSubscriptionDay(String botName, long userId) {
-        PaidSubscription paidSubscription = paidSubscriptionDao.activateSubscriptionDay(botName, userId);
-        updateEndDateSubscriptionInterval(botName, userId, paidSubscription.getEndDate(), paidSubscription.getSubscriptionInterval());
+    public PaidSubscription activateSubscriptionDay(long userId) {
+        PaidSubscription paidSubscription = paidSubscriptionDao.activateSubscriptionDay(userId);
+        updateEndDateSubscriptionInterval(userId, paidSubscription.getEndDate(), paidSubscription.getSubscriptionInterval());
 
         return paidSubscription;
     }
@@ -57,13 +57,13 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getByBotNameAndUserId(String botName, long userId) {
-        PaidSubscription fromRedis = getFromRedis(botName, userId);
+    public PaidSubscription getByBotNameAndUserId(long userId) {
+        PaidSubscription fromRedis = getFromRedis(userId);
 
         if (fromRedis != null) {
             return fromRedis;
         }
-        PaidSubscription fromDb = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+        PaidSubscription fromDb = paidSubscriptionDao.getByBotNameAndUserId(userId);
 
         if (fromDb != null) {
             storeToRedis(fromDb);
@@ -79,30 +79,30 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public int remove(String botName, long userId) {
-        int remove = paidSubscriptionDao.remove(botName, userId);
-        String key = getKey(botName, userId);
+    public int remove(long userId) {
+        int remove = paidSubscriptionDao.remove(userId);
+        String key = getKey(userId);
         redisTemplate.delete(key);
 
         return remove;
     }
 
     @Override
-    public void refresh(String botName, long userId) {
-        String key = getKey(botName, userId);
+    public void refresh(long userId) {
+        String key = getKey(userId);
         redisTemplate.delete(key);
     }
 
     @Override
-    public void refreshAll(String botName) {
+    public void refreshAll() {
         Set<String> keys = redisTemplate.keys(KEY + "*");
         if (keys != null) {
             redisTemplate.delete(keys);
         }
     }
 
-    private PaidSubscription getFromRedis(String botName, long userId) {
-        String key = getKey(botName, userId);
+    private PaidSubscription getFromRedis(long userId) {
+        String key = getKey(userId);
 
         if (redisTemplate.hasKey(key)) {
             List<Object> objects = stringRedisTemplate.opsForHash()
@@ -116,7 +116,6 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
             subscription.setPurchaseDate(json.readValue((String) objects.get(2), ZonedDateTime.class));
             subscription.setSubscriptionInterval(StringUtils.isBlank((String) objects.get(3)) ? null : json.readValue((String) objects.get(3), Period.class));
 
-            subscription.setBotName(botName);
             subscription.setUserId(userId);
 
             return subscription;
@@ -125,15 +124,15 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         return null;
     }
 
-    private void updateEndDateSubscriptionInterval(String botName, long userId, LocalDate endDate, Period subscriptionInterval) {
-        String key = getKey(botName, userId);
+    private void updateEndDateSubscriptionInterval(long userId, LocalDate endDate, Period subscriptionInterval) {
+        String key = getKey(userId);
 
         redisTemplate.opsForHash().put(key, PaidSubscription.END_DATE, endDate);
         redisTemplate.opsForHash().put(key, PaidSubscription.SUBSCRIPTION_INTERVAL, subscriptionInterval);
     }
 
     private void storeToRedis(PaidSubscription subscription) {
-        String key = getKey(subscription.getBotName(), subscription.getUserId());
+        String key = getKey(subscription.getUserId());
 
         Map<String, Object> values = new HashMap<>();
         if (subscription.getPlanId() != null) {
@@ -147,7 +146,7 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         redisTemplate.expire(key, 1, TimeUnit.DAYS);
     }
 
-    private String getKey(String botName, long userId) {
-        return KEY + ":" + botName + userId;
+    private String getKey(long userId) {
+        return KEY + ":" + userId;
     }
 }

@@ -10,7 +10,6 @@ import ru.gadjini.telegram.smart.bot.commons.command.api.CallbackBotCommand;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -31,23 +30,20 @@ public class ActivateFlexibleSubscriptionCommand implements CallbackBotCommand {
 
     private UserService userService;
 
-    private BotProperties botProperties;
-
     @Autowired
     public ActivateFlexibleSubscriptionCommand(FlexibleTariffPaidSubscriptionService flexibleTariffPaidSubscriptionService,
                                                @TgMessageLimitsControl MessageService messageService, LocalisationService localisationService,
-                                               UserService userService, BotProperties botProperties) {
+                                               UserService userService) {
         this.flexibleTariffPaidSubscriptionService = flexibleTariffPaidSubscriptionService;
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
-        this.botProperties = botProperties;
     }
 
     @Override
     public void processCallbackQuery(CallbackQuery callbackQuery, RequestParams requestParams) {
         PaidSubscription paidSubscription = flexibleTariffPaidSubscriptionService.activateSubscriptionDay(
-                botProperties.getName(), callbackQuery.getFrom().getId()
+                callbackQuery.getFrom().getId()
         );
         Locale locale = userService.getLocaleOrDefault(callbackQuery.getFrom().getId());
         messageService.sendMessage(

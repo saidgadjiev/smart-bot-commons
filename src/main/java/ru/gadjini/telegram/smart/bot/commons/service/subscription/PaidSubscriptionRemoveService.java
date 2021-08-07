@@ -4,30 +4,26 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
-import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 
 @Service
 public class PaidSubscriptionRemoveService {
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
-    private SubscriptionProperties subscriptionProperties;
-
     @Autowired
-    public PaidSubscriptionRemoveService(@Redis PaidSubscriptionDao paidSubscriptionDao, SubscriptionProperties subscriptionProperties) {
+    public PaidSubscriptionRemoveService(@Redis PaidSubscriptionDao paidSubscriptionDao) {
         this.paidSubscriptionDao = paidSubscriptionDao;
-        this.subscriptionProperties = subscriptionProperties;
     }
 
     public int removePaidSubscription(long userId) {
-        return paidSubscriptionDao.remove(subscriptionProperties.getPaidBotName(), userId);
+        return paidSubscriptionDao.remove(userId);
     }
 
     public void refreshPaidSubscription(long userId) {
-        paidSubscriptionDao.refresh(subscriptionProperties.getPaidBotName(), userId);
+        paidSubscriptionDao.refresh(userId);
     }
 
     public void refreshAllPaidSubscriptions() {
-        paidSubscriptionDao.refreshAll(subscriptionProperties.getPaidBotName());
+        paidSubscriptionDao.refreshAll();
     }
 }

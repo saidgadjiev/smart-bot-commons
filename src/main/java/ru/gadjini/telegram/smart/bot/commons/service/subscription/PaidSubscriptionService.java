@@ -8,7 +8,7 @@ public interface PaidSubscriptionService {
 
     boolean isExistsPaidSubscription(String botName, long userId);
 
-    PaidSubscription renewSubscription(String botName, long userId, int planId, Period period);
+    PaidSubscription renewSubscription(long userId, int planId, Period period);
 
     PaidSubscriptionTariffType tariffType();
 }

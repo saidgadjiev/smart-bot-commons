@@ -15,8 +15,6 @@ public class PaidSubscription {
 
     public static final String END_DATE = "end_date";
 
-    public static final String BOT_NAME = "bot_name";
-
     public static final String PURCHASE_DATE = "purchase_date";
 
     public static final String PLAN_ID = "plan_id";
@@ -30,8 +28,6 @@ public class PaidSubscription {
     private Period subscriptionInterval;
 
     private ZonedDateTime purchaseDate;
-
-    private String botName;
 
     private Integer planId;
 
@@ -53,14 +49,6 @@ public class PaidSubscription {
 
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-    }
-
-    public String getBotName() {
-        return botName;
-    }
-
-    public void setBotName(String botName) {
-        this.botName = botName;
     }
 
     public Integer getPlanId() {
@@ -104,6 +92,6 @@ public class PaidSubscription {
         if (subscriptionInterval == null) {
             return false;
         }
-         return JodaTimeUtils.toDays(subscriptionInterval) > 0;
+        return JodaTimeUtils.toDays(subscriptionInterval) > 0;
     }
 }

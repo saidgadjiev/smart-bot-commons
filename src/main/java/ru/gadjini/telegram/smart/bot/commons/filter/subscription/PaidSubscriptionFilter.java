@@ -93,11 +93,11 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     }
 
     private boolean checkSubscriptionOrStartTrial(User user) {
-        PaidSubscription subscription = paidSubscriptionService.getSubscription(subscriptionProperties.getPaidBotName(), user.getId());
+        PaidSubscription subscription = paidSubscriptionService.getSubscription(user.getId());
 
         if (subscription == null) {
             LOGGER.debug("Trial subscription started({})", user.getId());
-            PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(subscriptionProperties.getPaidBotName(), user.getId());
+            PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(user.getId());
             sendTrialSubscriptionStarted(user, trialSubscription);
 
             return false;

@@ -106,7 +106,7 @@ public class WatermarkMessageService implements MediaMessageService {
             return text;
         }
         try {
-            PaidSubscription subscription = fixedTariffPaidSubscriptionService.getSubscription(botProperties.getName(),
+            PaidSubscription subscription = fixedTariffPaidSubscriptionService.getSubscription(
                     Long.parseLong(chatId));
             if (commonPaidSubscriptionHandler.isActiveSubscription(subscription)) {
                 return text;

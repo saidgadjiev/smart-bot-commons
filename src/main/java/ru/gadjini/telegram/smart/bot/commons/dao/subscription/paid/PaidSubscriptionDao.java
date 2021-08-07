@@ -5,21 +5,21 @@ import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 
 public interface PaidSubscriptionDao {
 
-    PaidSubscription activateSubscriptionDay(String botName, long userId);
+    PaidSubscription activateSubscriptionDay(long userId);
 
     void create(PaidSubscription paidSubscription);
 
-    PaidSubscription getByBotNameAndUserId(String botName, long userId);
+    PaidSubscription getByBotNameAndUserId(long userId);
 
     void createOrRenew(PaidSubscription paidSubscription, Period period);
 
-    int remove(String botName, long userId);
+    int remove(long userId);
 
-    default void refresh(String botName, long userId) {
+    default void refresh(long userId) {
 
     }
 
-    default void refreshAll(String botName) {
+    default void refreshAll() {
 
     }
 }

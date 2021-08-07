@@ -22,16 +22,15 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
 
     @Override
     public boolean isExistsPaidSubscription(String botName, long userId) {
-        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(botName, userId);
+        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(userId);
 
         return subscription != null && subscription.getPlanId() != null && (subscription.isActive() || subscription.isSubscriptionIntervalActive());
     }
 
     @Override
-    public PaidSubscription renewSubscription(String botName, long userId, int planId, Period period) {
+    public PaidSubscription renewSubscription(long userId, int planId, Period period) {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
-        paidSubscription.setBotName(botName);
         paidSubscription.setPlanId(planId);
 
         paidSubscription.setSubscriptionInterval(period);
@@ -41,8 +40,8 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
         return paidSubscription;
     }
 
-    public PaidSubscription activateSubscriptionDay(String botName, long userId) {
-        return paidSubscriptionDao.activateSubscriptionDay(botName, userId);
+    public PaidSubscription activateSubscriptionDay(long userId) {
+        return paidSubscriptionDao.activateSubscriptionDay(userId);
     }
 
     @Override
