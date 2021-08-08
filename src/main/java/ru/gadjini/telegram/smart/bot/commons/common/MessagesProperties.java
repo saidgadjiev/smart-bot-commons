@@ -97,7 +97,7 @@ public class MessagesProperties {
 
     public static final String MESSAGE_ACTIVE_FLEXIBLE_SUBSCRIPTION = "message.active.flexible.subscription";
 
-    public static final String MESSAGE_SUBSCRIPTION_EXPIRED = "message.fixed.subscription.expired";
+    public static final String MESSAGE_FIXED_SUBSCRIPTION_EXPIRED = "message.fixed.subscription.expired";
 
     public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_EXPIRED = "message.flexible.subscription.expired";
 
@@ -144,4 +144,16 @@ public class MessagesProperties {
     public static final String FLEXIBLE_SUBSCRIPTION_REQUIRED_COMMAND_DESCRIPTION = "flexible.subscription.required.command.description";
 
     public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_DAY_ACTIVATED = "message.flexible.subscription.day.activated";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_INSTRUCTION = "message.paid.subscription.instruction";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_UTC_TIME = "message.paid.subscription.utc.time";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_FOR = "message.paid.subscription.for";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_PURCHASE_DATE = "message.paid.subscription.purchase.date";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_CHECK_COMMAND = "message.paid.subscription.check.command";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_RENEW = "message.paid.subscription.renew";
 }

@@ -24,13 +24,11 @@ import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 import ru.gadjini.telegram.smart.bot.commons.utils.MessageUtils;
-import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
-import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
-import java.time.ZonedDateTime;
 import java.util.Locale;
 import java.util.Map;
 
@@ -40,6 +38,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private static final Logger LOGGER = LoggerFactory.getLogger(PaidSubscriptionFilter.class);
 
     private SubscriptionProperties subscriptionProperties;
+
+    private PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder;
 
     private CommandParser commandParser;
 
@@ -60,7 +60,9 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     private Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap;
 
     @Autowired
-    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties, CommandParser commandParser,
+    public PaidSubscriptionFilter(SubscriptionProperties subscriptionProperties,
+                                  PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder,
+                                  CommandParser commandParser,
                                   CommandsContainer commandsContainer, CommandNavigator commandNavigator,
                                   @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
@@ -68,6 +70,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                   PaidSubscriptionPlanService paidSubscriptionPlanService,
                                   Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap) {
         this.subscriptionProperties = subscriptionProperties;
+        this.paidSubscriptionMessageBuilder = paidSubscriptionMessageBuilder;
         this.commandParser = commandParser;
         this.commandsContainer = commandsContainer;
         this.commandNavigator = commandNavigator;
@@ -118,16 +121,19 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         double minPrice = paidSubscriptionPlanService.getMinPrice();
 
         long userId = user.getId();
+        String message = paidSubscriptionMessageBuilder.builder(localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
+                new Object[]{
+                        FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate())
+                }, locale)
+        )
+                .withSubscriptionFor()
+                .withUtcTime()
+                .withCheckSubscriptionCommand()
+                .withSubscriptionInstructions(minPrice)
+                .buildMessage(locale);
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(
-                                localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
-                                        new Object[]{
-                                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate()),
-                                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
-                                                subscriptionProperties.getPaymentBotName(),
-                                                NumberUtils.toString(minPrice, 2)
-                                        }, locale))
+                        .text(message)
                         .parseMode(ParseMode.HTML)
                         .build()
         );

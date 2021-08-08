@@ -2,12 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
-import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
-import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
-import java.time.ZonedDateTime;
 import java.util.Locale;
 
 public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonCheckPaidSubscriptionMessageBuilder {
@@ -16,14 +12,14 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
 
     private LocalisationService localisationService;
 
-    private SubscriptionProperties paidSubscriptionProperties;
+    private PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder;
 
     public DefaultCommonCheckPaidSubscriptionMessageBuilder(PaidSubscriptionPlanService paidSubscriptionPlanService,
                                                             LocalisationService localisationService,
-                                                            SubscriptionProperties paidSubscriptionProperties) {
+                                                            PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder) {
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.localisationService = localisationService;
-        this.paidSubscriptionProperties = paidSubscriptionProperties;
+        this.paidSubscriptionMessageBuilder = paidSubscriptionMessageBuilder;
     }
 
     @Override
@@ -31,34 +27,37 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
         double minPrice = paidSubscriptionPlanService.getMinPrice();
 
         if (paidSubscription == null) {
-            return localisationService.getMessage(
+            return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                     MessagesProperties.MESSAGE_SUBSCRIPTION_NOT_FOUND,
-                    new Object[]{
-                            paidSubscriptionProperties.getPaymentBotName(),
-                            NumberUtils.toString(minPrice, 2)},
                     locale
-            );
+            ))
+                    .withSubscriptionInstructions(minPrice)
+                    .buildMessage(locale);
         } else if (paidSubscription.isTrial()) {
             if (paidSubscription.isActive()) {
-                return localisationService.getMessage(
+                return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
                         new Object[]{
-                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
-                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
-                                paidSubscriptionProperties.getPaymentBotName(),
-                                NumberUtils.toString(minPrice, 2)
+                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate())
                         },
-                        locale);
+                        locale)
+                )
+                        .withSubscriptionFor()
+                        .withUtcTime()
+                        .withSubscriptionInstructions(minPrice)
+                        .buildMessage(locale);
             } else {
-                return localisationService.getMessage(
+                return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED,
                         new Object[]{
-                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
-                                TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC)),
-                                paidSubscriptionProperties.getPaymentBotName(),
-                                NumberUtils.toString(minPrice, 2)
+                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate())
                         },
-                        locale);
+                        locale)
+                )
+                        .withSubscriptionFor()
+                        .withUtcTime()
+                        .withSubscriptionInstructions(minPrice)
+                        .buildMessage(locale);
             }
         } else {
             return null;

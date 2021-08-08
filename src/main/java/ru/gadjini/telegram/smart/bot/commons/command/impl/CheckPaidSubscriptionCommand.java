@@ -58,8 +58,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand, PaidSubscriptio
 
     @Override
     public void processMessage(Message message, String[] params) {
-        PaidSubscription paidSubscription = paidSubscriptionService.getSubscription(
-                message.getFrom().getId());
+        PaidSubscription paidSubscription = paidSubscriptionService.getSubscriptionWithoutCache(message.getFrom().getId());
         Locale locale = userService.getLocaleOrDefault(message.getFrom().getId());
         messageService.sendMessage(
                 SendMessage.builder()

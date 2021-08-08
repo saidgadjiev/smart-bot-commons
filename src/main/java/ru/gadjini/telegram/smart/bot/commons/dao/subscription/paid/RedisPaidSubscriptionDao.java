@@ -57,13 +57,13 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getByBotNameAndUserId(long userId) {
+    public PaidSubscription getByUserId(long userId) {
         PaidSubscription fromRedis = getFromRedis(userId);
 
         if (fromRedis != null) {
             return fromRedis;
         }
-        PaidSubscription fromDb = paidSubscriptionDao.getByBotNameAndUserId(userId);
+        PaidSubscription fromDb = paidSubscriptionDao.getByUserId(userId);
 
         if (fromDb != null) {
             storeToRedis(fromDb);

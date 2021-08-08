@@ -4,6 +4,7 @@ import org.joda.time.Period;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
+import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
@@ -25,24 +26,32 @@ public class FixedTariffPaidSubscriptionService implements PaidSubscriptionServi
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
+    private PaidSubscriptionDao dbPaidSubscriptionDao;
+
     private SubscriptionProperties subscriptionProperties;
 
     @Autowired
     public FixedTariffPaidSubscriptionService(@Redis PaidSubscriptionDao paidSubscriptionDao,
+                                              @DB PaidSubscriptionDao dbPaidSubscriptionDao,
                                               SubscriptionProperties subscriptionProperties) {
         this.paidSubscriptionDao = paidSubscriptionDao;
         this.subscriptionProperties = subscriptionProperties;
+        this.dbPaidSubscriptionDao = dbPaidSubscriptionDao;
     }
 
     @Override
     public boolean isExistsPaidSubscription(String botName, long userId) {
-        PaidSubscription subscription = paidSubscriptionDao.getByBotNameAndUserId(userId);
+        PaidSubscription subscription = paidSubscriptionDao.getByUserId(userId);
 
         return subscription != null && subscription.getPlanId() != null && subscription.isActive();
     }
 
+    public PaidSubscription getSubscriptionWithoutCache(long userId) {
+        return dbPaidSubscriptionDao.getByUserId(userId);
+    }
+
     public PaidSubscription getSubscription(long userId) {
-        return paidSubscriptionDao.getByBotNameAndUserId(userId);
+        return paidSubscriptionDao.getByUserId(userId);
     }
 
     public PaidSubscription createTrialSubscription(long userId) {

@@ -9,7 +9,7 @@ public interface PaidSubscriptionDao {
 
     void create(PaidSubscription paidSubscription);
 
-    PaidSubscription getByBotNameAndUserId(long userId);
+    PaidSubscription getByUserId(long userId);
 
     void createOrRenew(PaidSubscription paidSubscription, Period period);
 

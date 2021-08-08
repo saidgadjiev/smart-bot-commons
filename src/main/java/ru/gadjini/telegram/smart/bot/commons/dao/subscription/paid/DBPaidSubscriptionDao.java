@@ -66,7 +66,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     }
 
     @Override
-    public PaidSubscription getByBotNameAndUserId(long userId) {
+    public PaidSubscription getByUserId(long userId) {
         return jdbcTemplate.query(
                 "SELECT * FROM paid_subscription WHERE user_id = ?",
                 ps -> ps.setLong(1, userId),
@@ -83,7 +83,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
                     PreparedStatement ps = con.prepareStatement("INSERT INTO paid_subscription(user_id, end_date, plan_id, subscription_interval) " +
                             "VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE " +
                             "SET purchase_date = now(), end_date = GREATEST(paid_subscription.end_date, now()) + ?, plan_id = ?, " +
-                            " subscription_interval = paid_subscription.subscription_interval + ? RETURNING end_date, subscription_interval", Statement.RETURN_GENERATED_KEYS);
+                            " subscription_interval = GREATEST(paid_subscription.subscription_interval, interval '0 days') + ? RETURNING end_date, subscription_interval", Statement.RETURN_GENERATED_KEYS);
 
                     setPaidSubscriptionCreateValues(ps, paidSubscription);
                     if (paidSubscription.getEndDate() == null) {

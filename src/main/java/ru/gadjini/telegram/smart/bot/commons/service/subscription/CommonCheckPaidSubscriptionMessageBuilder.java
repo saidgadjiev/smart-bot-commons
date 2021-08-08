@@ -7,4 +7,5 @@ import java.util.Locale;
 public interface CommonCheckPaidSubscriptionMessageBuilder {
 
     String getMessage(PaidSubscription paidSubscription, Locale locale);
+
 }
