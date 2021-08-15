@@ -32,6 +32,7 @@ public class PaidSubscriptionController {
         if (tokenValidator.isInvalid(token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
+        LOGGER.debug("Refresh subscription({})", userId);
         try {
             paidSubscriptionRemoveService.refreshPaidSubscription(userId);
         } catch (Throwable e) {
