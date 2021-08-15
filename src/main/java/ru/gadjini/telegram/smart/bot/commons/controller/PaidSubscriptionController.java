@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.controller;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscripti
 @RestController
 @RequestMapping("/subscription/paid")
 public class PaidSubscriptionController {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PaidSubscriptionController.class);
 
     private TokenValidator tokenValidator;
 
@@ -28,7 +32,13 @@ public class PaidSubscriptionController {
         if (tokenValidator.isInvalid(token)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
-        paidSubscriptionRemoveService.refreshPaidSubscription(userId);
+        try {
+            paidSubscriptionRemoveService.refreshPaidSubscription(userId);
+        } catch (Throwable e) {
+            LOGGER.error(e.getMessage(), e);
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(e.getMessage());
+        }
 
         return ResponseEntity.ok().build();
     }
