@@ -23,6 +23,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.command.CommandParser;
 import ru.gadjini.telegram.smart.bot.commons.service.command.CommandsContainer;
 import ru.gadjini.telegram.smart.bot.commons.service.command.navigator.CommandNavigator;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.FatherPaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionMessageBuilder;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionPlanService;
@@ -53,7 +54,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
 
     private MessageService messageService;
 
-    private FixedTariffPaidSubscriptionService paidSubscriptionService;
+    private FatherPaidSubscriptionService fatherPaidSubscriptionService;
 
     private PaidSubscriptionPlanService paidSubscriptionPlanService;
 
@@ -66,8 +67,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                                   CommandsContainer commandsContainer, CommandNavigator commandNavigator,
                                   @TgMessageLimitsControl MessageService messageService,
                                   LocalisationService localisationService, UserService userService,
-                                  FixedTariffPaidSubscriptionService paidSubscriptionService,
-                                  PaidSubscriptionPlanService paidSubscriptionPlanService,
+                                  FatherPaidSubscriptionService fatherPaidSubscriptionService, PaidSubscriptionPlanService paidSubscriptionPlanService,
                                   Map<PaidSubscriptionTariffType, ExpiredPaidSubscriptionHandler> expiredPaidSubscriptionHandlerMap) {
         this.subscriptionProperties = subscriptionProperties;
         this.paidSubscriptionMessageBuilder = paidSubscriptionMessageBuilder;
@@ -77,7 +77,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;
-        this.paidSubscriptionService = paidSubscriptionService;
+        this.fatherPaidSubscriptionService = fatherPaidSubscriptionService;
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.expiredPaidSubscriptionHandlerMap = expiredPaidSubscriptionHandlerMap;
     }
@@ -96,16 +96,16 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
     }
 
     private boolean checkSubscriptionOrStartTrial(User user) {
-        PaidSubscription subscription = paidSubscriptionService.getSubscription(user.getId());
+        PaidSubscription subscription = fatherPaidSubscriptionService.getSubscription(user.getId());
 
         if (subscription == null) {
             LOGGER.debug("Trial subscription started({})", user.getId());
-            PaidSubscription trialSubscription = paidSubscriptionService.createTrialSubscription(user.getId());
+            PaidSubscription trialSubscription = fatherPaidSubscriptionService.createTrialSubscription(user.getId());
             sendTrialSubscriptionStarted(user, trialSubscription);
 
             return false;
         }
-        if (!subscription.isActive()) {
+        if (!fatherPaidSubscriptionService.isSubscriptionPeriodActive(subscription)) {
             LOGGER.debug("Paid subscription required({})", user.getId());
             PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(subscription.getPlanId());
             expiredPaidSubscriptionHandlerMap.get(tariff).handle(user.getId(), subscription);
@@ -123,7 +123,7 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
         long userId = user.getId();
         String message = paidSubscriptionMessageBuilder.builder(localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_PERIOD_STARTED,
                 new Object[]{
-                        FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getZonedEndDate())
+                        FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getEndAt())
                 }, locale)
         )
                 .withSubscriptionFor()

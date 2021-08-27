@@ -11,7 +11,6 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.service.Jackson;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,10 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
     @Override
     public PaidSubscription activateSubscriptionDay(long userId) {
         PaidSubscription paidSubscription = paidSubscriptionDao.activateSubscriptionDay(userId);
-        updateEndDateSubscriptionInterval(userId, paidSubscription.getEndDate(), paidSubscription.getSubscriptionInterval());
+
+        if (paidSubscription != null) {
+            updateEndDateSubscriptionInterval(userId, paidSubscription.getEndAt(), paidSubscription.getSubscriptionInterval());
+        }
 
         return paidSubscription;
     }
@@ -106,14 +108,14 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
 
         if (redisTemplate.hasKey(key)) {
             List<Object> objects = stringRedisTemplate.opsForHash()
-                    .multiGet(key, List.of(PaidSubscription.PLAN_ID, PaidSubscription.END_DATE, PaidSubscription.PURCHASE_DATE,
+                    .multiGet(key, List.of(PaidSubscription.PLAN_ID, PaidSubscription.END_AT, PaidSubscription.PURCHASED_AT,
                             PaidSubscription.SUBSCRIPTION_INTERVAL));
 
             PaidSubscription subscription = new PaidSubscription();
 
             subscription.setPlanId(objects.get(0) == null ? null : json.readValue((String) objects.get(0), Integer.class));
-            subscription.setEndDate(StringUtils.isBlank((String) objects.get(1)) ? null : json.readValue((String) objects.get(1), LocalDate.class));
-            subscription.setPurchaseDate(json.readValue((String) objects.get(2), ZonedDateTime.class));
+            subscription.setEndAt(StringUtils.isBlank((String) objects.get(1)) ? null : json.readValue((String) objects.get(1), ZonedDateTime.class));
+            subscription.setPurchasedAt(json.readValue((String) objects.get(2), ZonedDateTime.class));
             subscription.setSubscriptionInterval(StringUtils.isBlank((String) objects.get(3)) ? null : json.readValue((String) objects.get(3), Period.class));
 
             subscription.setUserId(userId);
@@ -124,10 +126,10 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         return null;
     }
 
-    private void updateEndDateSubscriptionInterval(long userId, LocalDate endDate, Period subscriptionInterval) {
+    private void updateEndDateSubscriptionInterval(long userId, ZonedDateTime endAt, Period subscriptionInterval) {
         String key = getKey(userId);
 
-        redisTemplate.opsForHash().put(key, PaidSubscription.END_DATE, endDate);
+        redisTemplate.opsForHash().put(key, PaidSubscription.END_AT, endAt);
         redisTemplate.opsForHash().put(key, PaidSubscription.SUBSCRIPTION_INTERVAL, subscriptionInterval);
     }
 
@@ -138,8 +140,8 @@ public class RedisPaidSubscriptionDao implements PaidSubscriptionDao {
         if (subscription.getPlanId() != null) {
             values.put(PaidSubscription.PLAN_ID, subscription.getPlanId());
         }
-        values.put(PaidSubscription.END_DATE, subscription.getEndDate());
-        values.put(PaidSubscription.PURCHASE_DATE, subscription.getPurchaseDate());
+        values.put(PaidSubscription.END_AT, subscription.getEndAt());
+        values.put(PaidSubscription.PURCHASED_AT, subscription.getPurchasedAt());
         values.put(PaidSubscription.SUBSCRIPTION_INTERVAL, subscription.getSubscriptionInterval());
 
         redisTemplate.opsForHash().putAll(key, values);

@@ -46,11 +46,19 @@ public class ActivateFlexibleSubscriptionCommand implements CallbackBotCommand {
                 callbackQuery.getFrom().getId()
         );
         Locale locale = userService.getLocaleOrDefault(callbackQuery.getFrom().getId());
+
+        String message;
+        if (paidSubscription == null) {
+            message = localisationService.getMessage(MessagesProperties.MESSAGE_FLEXIBLE_SUBSCRIPTION_NO_ACTIVE_DAYS, locale);
+        } else {
+            message = localisationService.getMessage(MessagesProperties.MESSAGE_FLEXIBLE_SUBSCRIPTION_DAY_ACTIVATED,
+                    new Object[]{JodaTimeUtils.toDays(paidSubscription.getSubscriptionInterval())}, locale);
+        }
+
         messageService.sendMessage(
                 SendMessage.builder()
                         .chatId(String.valueOf(callbackQuery.getFrom().getId()))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_FLEXIBLE_SUBSCRIPTION_DAY_ACTIVATED,
-                                new Object[]{JodaTimeUtils.toDays(paidSubscription.getSubscriptionInterval())}, locale))
+                        .text(message)
                         .parseMode(ParseMode.HTML)
                         .build()
         );

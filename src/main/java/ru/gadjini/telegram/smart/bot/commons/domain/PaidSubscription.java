@@ -1,10 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.domain;
 
 import org.joda.time.Period;
-import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
-import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
-import java.time.LocalDate;
 import java.time.ZonedDateTime;
 
 public class PaidSubscription {
@@ -13,9 +10,9 @@ public class PaidSubscription {
 
     public static final String USER_ID = "user_id";
 
-    public static final String END_DATE = "end_date";
+    public static final String END_AT = "end_at";
 
-    public static final String PURCHASE_DATE = "purchase_date";
+    public static final String PURCHASED_AT = "purchased_at";
 
     public static final String PLAN_ID = "plan_id";
 
@@ -23,11 +20,11 @@ public class PaidSubscription {
 
     private long userId;
 
-    private LocalDate endDate;
+    private ZonedDateTime endAt;
 
     private Period subscriptionInterval;
 
-    private ZonedDateTime purchaseDate;
+    private ZonedDateTime purchasedAt;
 
     private Integer planId;
 
@@ -39,16 +36,12 @@ public class PaidSubscription {
         this.userId = userId;
     }
 
-    public LocalDate getEndDate() {
-        return endDate;
+    public ZonedDateTime getEndAt() {
+        return endAt;
     }
 
-    public ZonedDateTime getZonedEndDate() {
-        return TimeUtils.toZonedDateTime(endDate);
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
+    public void setEndAt(ZonedDateTime endAt) {
+        this.endAt = endAt;
     }
 
     public Integer getPlanId() {
@@ -59,12 +52,12 @@ public class PaidSubscription {
         this.planId = planId;
     }
 
-    public ZonedDateTime getPurchaseDate() {
-        return purchaseDate;
+    public ZonedDateTime getPurchasedAt() {
+        return purchasedAt;
     }
 
-    public void setPurchaseDate(ZonedDateTime purchaseDate) {
-        this.purchaseDate = purchaseDate;
+    public void setPurchasedAt(ZonedDateTime purchasedAt) {
+        this.purchasedAt = purchasedAt;
     }
 
     public Period getSubscriptionInterval() {
@@ -77,21 +70,5 @@ public class PaidSubscription {
 
     public boolean isTrial() {
         return planId == null;
-    }
-
-    public boolean isActive() {
-        if (endDate == null) {
-            return false;
-        }
-        LocalDate now = LocalDate.now(TimeUtils.UTC);
-
-        return now.isBefore(endDate) || now.isEqual(endDate);
-    }
-
-    public boolean isSubscriptionIntervalActive() {
-        if (subscriptionInterval == null) {
-            return false;
-        }
-        return JodaTimeUtils.toDays(subscriptionInterval) > 0;
     }
 }

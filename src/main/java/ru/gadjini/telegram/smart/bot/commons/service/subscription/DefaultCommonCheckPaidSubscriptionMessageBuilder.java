@@ -14,12 +14,16 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
 
     private PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder;
 
+    private FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService;
+
     public DefaultCommonCheckPaidSubscriptionMessageBuilder(PaidSubscriptionPlanService paidSubscriptionPlanService,
                                                             LocalisationService localisationService,
-                                                            PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder) {
+                                                            PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder,
+                                                            FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService) {
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.localisationService = localisationService;
         this.paidSubscriptionMessageBuilder = paidSubscriptionMessageBuilder;
+        this.fixedTariffPaidSubscriptionService = fixedTariffPaidSubscriptionService;
     }
 
     @Override
@@ -34,11 +38,11 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
                     .withSubscriptionInstructions(minPrice)
                     .buildMessage(locale);
         } else if (paidSubscription.isTrial()) {
-            if (paidSubscription.isActive()) {
+            if (fixedTariffPaidSubscriptionService.isSubscriptionPeriodActive(paidSubscription)) {
                 return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION,
                         new Object[]{
-                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate())
+                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndAt())
                         },
                         locale)
                 )
@@ -50,7 +54,7 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
                 return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                         MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_EXPIRED,
                         new Object[]{
-                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate())
+                                FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndAt())
                         },
                         locale)
                 )

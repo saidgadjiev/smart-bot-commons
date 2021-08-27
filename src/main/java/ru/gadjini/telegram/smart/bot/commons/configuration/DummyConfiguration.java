@@ -59,15 +59,16 @@ public class DummyConfiguration {
     public FatherCheckPaidSubscriptionMessageBuilder checkFixedPaidSubscriptionMessageBuilder(
             PaidSubscriptionPlanService paidSubscriptionPlanService,
             LocalisationService localisationService,
-            PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder
+            PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder,
+            FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService
     ) {
         return new FatherCheckPaidSubscriptionMessageBuilder(
                 new DefaultCommonCheckPaidSubscriptionMessageBuilder(
                         paidSubscriptionPlanService, localisationService,
-                        paidSubscriptionMessageBuilder), paidSubscriptionPlanService,
+                        paidSubscriptionMessageBuilder, fixedTariffPaidSubscriptionService), paidSubscriptionPlanService,
                 Map.of(PaidSubscriptionTariffType.FIXED,
                         new DefaultCheckFixedTariffPaidSubscriptionMessageBuilder(paidSubscriptionPlanService,
-                                localisationService, paidSubscriptionMessageBuilder),
+                                localisationService, paidSubscriptionMessageBuilder, fixedTariffPaidSubscriptionService),
                         PaidSubscriptionTariffType.FLEXIBLE,
                         new DefaultCheckFlexibleTariffPaidSubscriptionMessageBuilder(localisationService,
                                 paidSubscriptionPlanService, paidSubscriptionMessageBuilder)));

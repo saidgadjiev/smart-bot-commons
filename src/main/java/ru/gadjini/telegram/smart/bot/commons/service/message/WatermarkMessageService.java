@@ -10,13 +10,11 @@ import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.annotation.WatermarkMessages;
-import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
-import ru.gadjini.telegram.smart.bot.commons.filter.subscription.CommonPaidSubscriptionHandler;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.FatherPaidSubscriptionService;
 import ru.gadjini.telegram.smart.bot.commons.utils.TelegramLinkUtils;
 
 @Service
@@ -29,20 +27,16 @@ public class WatermarkMessageService implements MediaMessageService {
 
     private BotProperties botProperties;
 
-    private FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService;
-
-    private CommonPaidSubscriptionHandler commonPaidSubscriptionHandler;
+    private FatherPaidSubscriptionService commonPaidSubscriptionService;
 
     @Value("${enable.bot.name.watermark:true}")
     private boolean enableBotNameWatermark;
 
     @Autowired
     public WatermarkMessageService(BotProperties botProperties,
-                                   FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService,
-                                   CommonPaidSubscriptionHandler commonPaidSubscriptionHandler) {
+                                   FatherPaidSubscriptionService commonPaidSubscriptionService) {
         this.botProperties = botProperties;
-        this.fixedTariffPaidSubscriptionService = fixedTariffPaidSubscriptionService;
-        this.commonPaidSubscriptionHandler = commonPaidSubscriptionHandler;
+        this.commonPaidSubscriptionService = commonPaidSubscriptionService;
     }
 
     @Autowired
@@ -106,11 +100,10 @@ public class WatermarkMessageService implements MediaMessageService {
             return text;
         }
         try {
-            PaidSubscription subscription = fixedTariffPaidSubscriptionService.getSubscription(
-                    Long.parseLong(chatId));
-            if (commonPaidSubscriptionHandler.isActiveSubscription(subscription)) {
+            if (!commonPaidSubscriptionService.isSubscriptionExpired(Long.parseLong(chatId))) {
                 return text;
             }
+
             return StringUtils.isBlank(text) ? TelegramLinkUtils.mention(botProperties.getName()) : text + "\n\n"
                     + TelegramLinkUtils.mention(botProperties.getName());
         } catch (Throwable e) {

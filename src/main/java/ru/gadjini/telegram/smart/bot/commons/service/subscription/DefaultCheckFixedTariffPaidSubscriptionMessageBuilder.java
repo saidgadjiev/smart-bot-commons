@@ -15,27 +15,31 @@ public class DefaultCheckFixedTariffPaidSubscriptionMessageBuilder implements Ch
 
     private PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder;
 
+    private FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService;
+
     public DefaultCheckFixedTariffPaidSubscriptionMessageBuilder(PaidSubscriptionPlanService paidSubscriptionPlanService,
                                                                  LocalisationService localisationService,
-                                                                 PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder) {
+                                                                 PaidSubscriptionMessageBuilder paidSubscriptionMessageBuilder,
+                                                                 FixedTariffPaidSubscriptionService fixedTariffPaidSubscriptionService) {
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.localisationService = localisationService;
         this.paidSubscriptionMessageBuilder = paidSubscriptionMessageBuilder;
+        this.fixedTariffPaidSubscriptionService = fixedTariffPaidSubscriptionService;
     }
 
     @Override
     public String getMessage(PaidSubscription paidSubscription, Locale locale) {
         double minPrice = paidSubscriptionPlanService.getMinPrice();
 
-        if (paidSubscription.isActive()) {
+        if (fixedTariffPaidSubscriptionService.isSubscriptionPeriodActive(paidSubscription)) {
             return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                     MessagesProperties.MESSAGE_ACTIVE_FIXED_SUBSCRIPTION,
                     new Object[]{
-                            FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate()),
+                            FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndAt()),
                     }, locale)
             )
                     .withSubscriptionFor()
-                    .withPurchaseDate(paidSubscription.getPurchaseDate())
+                    .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withUtcTime()
                     .withSubscriptionInstructions(minPrice)
                     .buildMessage(locale);
@@ -43,12 +47,12 @@ public class DefaultCheckFixedTariffPaidSubscriptionMessageBuilder implements Ch
             return paidSubscriptionMessageBuilder.builder(localisationService.getMessage(
                     MessagesProperties.MESSAGE_FIXED_SUBSCRIPTION_EXPIRED,
                     new Object[]{
-                            FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getZonedEndDate())
+                            FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndAt())
                     },
                     locale)
             )
                     .withSubscriptionFor()
-                    .withPurchaseDate(paidSubscription.getPurchaseDate())
+                    .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withSubscriptionInstructions(minPrice)
                     .buildMessage(locale);
         }

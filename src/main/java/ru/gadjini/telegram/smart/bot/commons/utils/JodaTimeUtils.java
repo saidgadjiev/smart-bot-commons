@@ -3,15 +3,15 @@ package ru.gadjini.telegram.smart.bot.commons.utils;
 import org.joda.time.Period;
 import org.postgresql.util.PGInterval;
 
-import java.time.LocalDate;
+import java.time.ZonedDateTime;
 
 public class JodaTimeUtils {
 
     private JodaTimeUtils() {
     }
 
-    public static LocalDate plus(LocalDate localDate, Period period) {
-        return localDate
+    public static ZonedDateTime plus(ZonedDateTime dateTime, Period period) {
+        return dateTime
                 .plusYears(period.getYears())
                 .plusMonths(period.getMonths())
                 .plusWeeks(period.getWeeks())

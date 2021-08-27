@@ -33,9 +33,9 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         jdbcTemplate.update(
                 conn -> {
                     PreparedStatement ps = conn.prepareStatement("UPDATE paid_subscription " +
-                            "SET end_date = current_date, " +
+                            "SET end_at = now() + interval '1 days', " +
                             "subscription_interval = subscription_interval - interval '1 days' " +
-                            "WHERE user_id = ? RETURNING end_date, subscription_interval", PreparedStatement.RETURN_GENERATED_KEYS);
+                            "WHERE user_id = ? AND subscription_interval > interval '0 days' RETURNING end_at, subscription_interval", PreparedStatement.RETURN_GENERATED_KEYS);
                     ps.setLong(1, userId);
 
                     return ps;
@@ -43,11 +43,15 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
                 generatedKeyHolder
         );
 
-        Date endDate = (Date) generatedKeyHolder.getKeys().get("end_date");
+        if (generatedKeyHolder.getKeyList().isEmpty()) {
+            return null;
+        }
+
+        Timestamp endDate = (Timestamp) generatedKeyHolder.getKeys().get(PaidSubscription.END_AT);
 
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(userId);
-        paidSubscription.setEndDate(endDate.toLocalDate());
+        paidSubscription.setEndAt(ZonedDateTime.from(endDate.toLocalDateTime().atZone(TimeUtils.UTC)));
 
         PGInterval interval = (PGInterval) generatedKeyHolder.getKeys().get(PaidSubscription.SUBSCRIPTION_INTERVAL);
         paidSubscription.setSubscriptionInterval(JodaTimeUtils.toPeriod(interval));
@@ -58,11 +62,11 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
     @Override
     public void create(PaidSubscription paidSubscription) {
         jdbcTemplate.update(
-                "INSERT INTO paid_subscription(user_id, end_date, plan_id, subscription_interval) " +
+                "INSERT INTO paid_subscription(user_id, end_at, plan_id, subscription_interval) " +
                         "VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO NOTHING",
                 ps -> setPaidSubscriptionCreateValues(ps, paidSubscription)
         );
-        paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));
+        paidSubscription.setPurchasedAt(ZonedDateTime.now(TimeUtils.UTC));
     }
 
     @Override
@@ -80,13 +84,13 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("INSERT INTO paid_subscription(user_id, end_date, plan_id, subscription_interval) " +
+                    PreparedStatement ps = con.prepareStatement("INSERT INTO paid_subscription(user_id, end_at, plan_id, subscription_interval) " +
                             "VALUES (?, ?, ?, ?) ON CONFLICT(user_id) DO UPDATE " +
-                            "SET purchase_date = now(), end_date = GREATEST(paid_subscription.end_date, now()) + ?, plan_id = ?, " +
-                            " subscription_interval = GREATEST(paid_subscription.subscription_interval, interval '0 days') + ? RETURNING end_date, subscription_interval", Statement.RETURN_GENERATED_KEYS);
+                            "SET purchased_at = now(), end_at = GREATEST(paid_subscription.end_at, now()) + ?, plan_id = ?, " +
+                            " subscription_interval = GREATEST(paid_subscription.subscription_interval, interval '0 days') + ? RETURNING end_at, subscription_interval", Statement.RETURN_GENERATED_KEYS);
 
                     setPaidSubscriptionCreateValues(ps, paidSubscription);
-                    if (paidSubscription.getEndDate() == null) {
+                    if (paidSubscription.getEndAt() == null) {
                         ps.setNull(5, Types.OTHER);
                     } else {
                         ps.setObject(5, JodaTimeUtils.toPgInterval(period));
@@ -104,13 +108,13 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         );
 
         Map<String, Object> keys = generatedKeyHolder.getKeys();
-        Date endDate = (Date) keys.get(PaidSubscription.END_DATE);
+        Timestamp endAt = (Timestamp) keys.get(PaidSubscription.END_AT);
 
-        if (endDate != null) {
-            paidSubscription.setEndDate(endDate.toLocalDate());
+        if (endAt != null) {
+            paidSubscription.setEndAt(ZonedDateTime.from(endAt.toLocalDateTime().atZone(TimeUtils.UTC)));
         }
         paidSubscription.setSubscriptionInterval(JodaTimeUtils.toPeriod((PGInterval) keys.get(PaidSubscription.SUBSCRIPTION_INTERVAL)));
-        paidSubscription.setPurchaseDate(ZonedDateTime.now(TimeUtils.UTC));
+        paidSubscription.setPurchasedAt(ZonedDateTime.now(TimeUtils.UTC));
     }
 
     @Override
@@ -128,10 +132,10 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
     private void setPaidSubscriptionCreateValues(PreparedStatement ps, PaidSubscription paidSubscription) throws SQLException {
         ps.setLong(1, paidSubscription.getUserId());
-        if (paidSubscription.getEndDate() != null) {
-            ps.setDate(2, Date.valueOf(paidSubscription.getEndDate()));
+        if (paidSubscription.getEndAt() != null) {
+            ps.setTimestamp(2, Timestamp.valueOf(paidSubscription.getEndAt().toLocalDateTime()));
         } else {
-            ps.setNull(2, Types.DATE);
+            ps.setNull(2, Types.TIMESTAMP);
         }
         if (paidSubscription.getPlanId() == null) {
             ps.setNull(3, Types.INTEGER);
@@ -149,9 +153,9 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         PaidSubscription paidSubscription = new PaidSubscription();
         paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
 
-        Date endDate = rs.getDate(PaidSubscription.END_DATE);
-        if (endDate != null) {
-            paidSubscription.setEndDate(endDate.toLocalDate());
+        Timestamp endAt = rs.getTimestamp(PaidSubscription.END_AT);
+        if (endAt != null) {
+            paidSubscription.setEndAt(ZonedDateTime.from(endAt.toLocalDateTime().atZone(TimeUtils.UTC)));
         }
 
         paidSubscription.setSubscriptionInterval(JodaTimeUtils.toPeriod((PGInterval) rs.getObject(PaidSubscription.SUBSCRIPTION_INTERVAL)));
@@ -159,7 +163,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
         if (!rs.wasNull()) {
             paidSubscription.setPlanId(planId);
         }
-        paidSubscription.setPurchaseDate(ZonedDateTime.of(rs.getTimestamp(PaidSubscription.PURCHASE_DATE).toLocalDateTime(), TimeUtils.UTC));
+        paidSubscription.setPurchasedAt(ZonedDateTime.of(rs.getTimestamp(PaidSubscription.PURCHASED_AT).toLocalDateTime(), TimeUtils.UTC));
 
         return paidSubscription;
     }

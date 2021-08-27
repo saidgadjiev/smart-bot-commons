@@ -6,7 +6,9 @@ import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSub
 
 public interface PaidSubscriptionService {
 
-    boolean isExistsPaidSubscription(String botName, long userId);
+    boolean isExpired(PaidSubscription paidSubscription);
+
+    boolean isSubscriptionPeriodActive(PaidSubscription paidSubscription);
 
     PaidSubscription renewSubscription(long userId, int planId, Period period);
 

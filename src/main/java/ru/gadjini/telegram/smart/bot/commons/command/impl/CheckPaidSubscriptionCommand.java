@@ -15,7 +15,7 @@ import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.FatherCheckPaidSubscriptionMessageBuilder;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.FixedTariffPaidSubscriptionService;
+import ru.gadjini.telegram.smart.bot.commons.service.subscription.FatherPaidSubscriptionService;
 
 import java.util.Locale;
 import java.util.Objects;
@@ -27,7 +27,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand, PaidSubscriptio
 
     private UserService userService;
 
-    private FixedTariffPaidSubscriptionService paidSubscriptionService;
+    private FatherPaidSubscriptionService paidSubscriptionService;
 
     private SubscriptionProperties paidSubscriptionProperties;
 
@@ -38,7 +38,7 @@ public class CheckPaidSubscriptionCommand implements BotCommand, PaidSubscriptio
     @Autowired
     public CheckPaidSubscriptionCommand(@TgMessageLimitsControl MessageService messageService,
                                         UserService userService,
-                                        FixedTariffPaidSubscriptionService paidSubscriptionService,
+                                        FatherPaidSubscriptionService paidSubscriptionService,
                                         SubscriptionProperties paidSubscriptionProperties,
                                         FatherCheckPaidSubscriptionMessageBuilder checkPaidSubscriptionMessageBuilder,
                                         BotProperties botProperties) {

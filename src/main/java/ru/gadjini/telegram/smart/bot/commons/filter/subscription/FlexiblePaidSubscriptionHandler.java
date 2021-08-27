@@ -17,7 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 import java.util.Locale;
 
 @Component
-public class FlexiblePaidSubscriptionHandlerImpl implements ExpiredPaidSubscriptionHandler {
+public class FlexiblePaidSubscriptionHandler implements ExpiredPaidSubscriptionHandler {
 
     private MessageService messageService;
 
@@ -30,9 +30,9 @@ public class FlexiblePaidSubscriptionHandlerImpl implements ExpiredPaidSubscript
     private SmartInlineKeyboardService inlineKeyboardService;
 
     @Autowired
-    public FlexiblePaidSubscriptionHandlerImpl(@TgMessageLimitsControl MessageService messageService,
-                                               LocalisationService localisationService, UserService userService,
-                                               SmartInlineKeyboardService inlineKeyboardService) {
+    public FlexiblePaidSubscriptionHandler(@TgMessageLimitsControl MessageService messageService,
+                                           LocalisationService localisationService, UserService userService,
+                                           SmartInlineKeyboardService inlineKeyboardService) {
         this.messageService = messageService;
         this.localisationService = localisationService;
         this.userService = userService;

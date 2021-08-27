@@ -8,6 +8,10 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
+import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
+import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
+
+import java.time.ZonedDateTime;
 
 @Service
 @Qualifier("flexible")
@@ -21,10 +25,20 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
     }
 
     @Override
-    public boolean isExistsPaidSubscription(String botName, long userId) {
-        PaidSubscription subscription = paidSubscriptionDao.getByUserId(userId);
+    public boolean isExpired(PaidSubscription paidSubscription) {
+        return !isSubscriptionPeriodActive(paidSubscription) || JodaTimeUtils.toDays(paidSubscription.getSubscriptionInterval()) <= 0;
+    }
 
-        return subscription != null && subscription.getPlanId() != null && (subscription.isActive() || subscription.isSubscriptionIntervalActive());
+    @Override
+    public boolean isSubscriptionPeriodActive(PaidSubscription paidSubscription) {
+        if (paidSubscription.getSubscriptionInterval() == null
+                || paidSubscription.getEndAt() == null) {
+            return false;
+        }
+
+        ZonedDateTime now = ZonedDateTime.now(TimeUtils.UTC);
+
+        return now.isBefore(paidSubscription.getEndAt()) || now.isEqual(paidSubscription.getEndAt());
     }
 
     @Override

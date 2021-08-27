@@ -156,4 +156,6 @@ public class MessagesProperties {
     public static final String MESSAGE_PAID_SUBSCRIPTION_CHECK_COMMAND = "message.paid.subscription.check.command";
 
     public static final String MESSAGE_PAID_SUBSCRIPTION_RENEW = "message.paid.subscription.renew";
+
+    public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_NO_ACTIVE_DAYS = "message.flexible.subscription.no.active.days";
 }
