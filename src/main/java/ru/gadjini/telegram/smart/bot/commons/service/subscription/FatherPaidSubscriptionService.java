@@ -2,7 +2,6 @@ package ru.gadjini.telegram.smart.bot.commons.service.subscription;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
@@ -18,8 +17,6 @@ public class FatherPaidSubscriptionService {
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
-    private PaidSubscriptionDao dbPaidSubscriptionDao;
-
     private SubscriptionProperties subscriptionProperties;
 
     private PaidSubscriptionPlanService paidSubscriptionPlanService;
@@ -28,12 +25,10 @@ public class FatherPaidSubscriptionService {
 
     @Autowired
     public FatherPaidSubscriptionService(@Redis PaidSubscriptionDao paidSubscriptionDao,
-                                         @DB PaidSubscriptionDao dbPaidSubscriptionDao,
                                          SubscriptionProperties subscriptionProperties,
                                          PaidSubscriptionPlanService paidSubscriptionPlanService,
                                          Map<PaidSubscriptionTariffType, PaidSubscriptionService> paidSubscriptionServiceMap) {
         this.paidSubscriptionDao = paidSubscriptionDao;
-        this.dbPaidSubscriptionDao = dbPaidSubscriptionDao;
         this.subscriptionProperties = subscriptionProperties;
         this.paidSubscriptionPlanService = paidSubscriptionPlanService;
         this.paidSubscriptionServiceMap = paidSubscriptionServiceMap;
@@ -49,7 +44,7 @@ public class FatherPaidSubscriptionService {
 
         return paidSubscriptionServiceMap.get(tariff).isExpired(subscription);
     }
-    
+
     public boolean isSubscriptionPeriodActive(PaidSubscription paidSubscription) {
         if (paidSubscription == null) {
             return false;
@@ -58,10 +53,6 @@ public class FatherPaidSubscriptionService {
         PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(paidSubscription.getPlanId());
 
         return paidSubscriptionServiceMap.get(tariff).isSubscriptionPeriodActive(paidSubscription);
-    }
-
-    public PaidSubscription getSubscriptionWithoutCache(long userId) {
-        return dbPaidSubscriptionDao.getByUserId(userId);
     }
 
     public PaidSubscription getSubscription(long userId) {
