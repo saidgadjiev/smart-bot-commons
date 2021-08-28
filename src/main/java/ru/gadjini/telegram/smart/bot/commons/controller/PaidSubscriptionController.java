@@ -3,12 +3,14 @@ package ru.gadjini.telegram.smart.bot.commons.controller;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import ru.gadjini.telegram.smart.bot.commons.event.RefreshPaidSubscriptionEvent;
+import ru.gadjini.telegram.smart.bot.commons.model.RefreshPaidSubscriptionRequest;
 import ru.gadjini.telegram.smart.bot.commons.service.TokenValidator;
-import ru.gadjini.telegram.smart.bot.commons.service.subscription.PaidSubscriptionRemoveService;
 
 @RestController
 @RequestMapping("/subscription/paid")
@@ -18,24 +20,26 @@ public class PaidSubscriptionController {
 
     private TokenValidator tokenValidator;
 
-    private PaidSubscriptionRemoveService paidSubscriptionRemoveService;
+    private ApplicationEventPublisher applicationEventPublisher;
 
     @Autowired
     public PaidSubscriptionController(TokenValidator tokenValidator,
-                                      PaidSubscriptionRemoveService paidSubscriptionRemoveService) {
+                                      ApplicationEventPublisher applicationEventPublisher) {
         this.tokenValidator = tokenValidator;
-        this.paidSubscriptionRemoveService = paidSubscriptionRemoveService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @PostMapping("/{userId}/refresh")
-    public ResponseEntity<?> refresh(@PathVariable("userId") long userId, @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
+    public ResponseEntity<?> refresh(@PathVariable("userId") long userId,
+                                     @RequestBody RefreshPaidSubscriptionRequest request,
+                                     @RequestHeader(HttpHeaders.AUTHORIZATION) String token) {
         LOGGER.debug("Refresh subscription({})", userId);
 
         try {
             if (tokenValidator.isInvalid(token)) {
                 return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
             }
-            paidSubscriptionRemoveService.refreshPaidSubscription(userId);
+            applicationEventPublisher.publishEvent(new RefreshPaidSubscriptionEvent(userId, request.getSourceBotName()));
         } catch (Throwable e) {
             LOGGER.error(e.getMessage(), e);
 

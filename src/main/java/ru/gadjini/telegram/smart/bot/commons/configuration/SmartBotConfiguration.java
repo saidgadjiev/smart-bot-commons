@@ -50,6 +50,7 @@ public class SmartBotConfiguration {
         LOGGER.debug("Channel subscription({})", subscriptionProperties.isCheckChannelSubscription());
         LOGGER.debug("Paid subscription({})", subscriptionProperties.isCheckPaidSubscription());
         LOGGER.debug("Payment bot({})", subscriptionProperties.getPaymentBotName());
+        LOGGER.debug("Payment bot server({})", subscriptionProperties.getPaymentBotServer());
         LOGGER.debug("Trial period({})", subscriptionProperties.getTrialPeriod());
         LOGGER.debug("Http download request timeout({})", httpClientProperties.getDownloadRequestTimeout());
     }

@@ -5,8 +5,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
+import ru.gadjini.telegram.smart.bot.commons.controller.api.PaidSubscriptionApi;
 import ru.gadjini.telegram.smart.bot.commons.dao.subscription.paid.PaidSubscriptionDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.PaidSubscription;
+import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
+import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.subscription.tariff.PaidSubscriptionTariffType;
 import ru.gadjini.telegram.smart.bot.commons.utils.JodaTimeUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
@@ -19,9 +22,21 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
 
     private PaidSubscriptionDao paidSubscriptionDao;
 
+    private PaidSubscriptionApi paidSubscriptionApi;
+
+    private SubscriptionProperties subscriptionProperties;
+
+    private BotProperties botProperties;
+
     @Autowired
-    public FlexibleTariffPaidSubscriptionService(@Redis PaidSubscriptionDao paidSubscriptionDao) {
+    public FlexibleTariffPaidSubscriptionService(@Redis PaidSubscriptionDao paidSubscriptionDao,
+                                                 PaidSubscriptionApi paidSubscriptionApi,
+                                                 SubscriptionProperties subscriptionProperties,
+                                                 BotProperties botProperties) {
         this.paidSubscriptionDao = paidSubscriptionDao;
+        this.paidSubscriptionApi = paidSubscriptionApi;
+        this.subscriptionProperties = subscriptionProperties;
+        this.botProperties = botProperties;
     }
 
     @Override
@@ -55,7 +70,14 @@ public class FlexibleTariffPaidSubscriptionService implements PaidSubscriptionSe
     }
 
     public PaidSubscription activateSubscriptionDay(long userId) {
-        return paidSubscriptionDao.activateSubscriptionDay(userId);
+        PaidSubscription paidSubscription = paidSubscriptionDao.activateSubscriptionDay(userId);
+
+        if (paidSubscription != null) {
+            paidSubscriptionApi.refreshPaidSubscription(subscriptionProperties.getPaymentBotServer(),
+                    userId, botProperties.getName());
+        }
+
+        return paidSubscription;
     }
 
     @Override

@@ -21,6 +21,9 @@ public class UzSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         if (period.getMonths() != 0) {
             result.append(period.getMonths()).append(" oy");
         }
+        if (period.getDays() != 0) {
+            result.append(period.getDays()).append(" kun");
+        }
 
         return result.toString();
     }

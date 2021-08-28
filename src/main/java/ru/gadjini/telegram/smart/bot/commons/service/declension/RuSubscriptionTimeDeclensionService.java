@@ -12,17 +12,6 @@ public class RuSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         return LocalisationService.RU_LOCALE;
     }
 
-    public String day(int days) {
-        if (days == 1) {
-            return "1 день";
-        }
-        if (days >= 2 && days <= 4) {
-            return days + " дня";
-        }
-
-        return days + " дней";
-    }
-
     @Override
     public String localize(Period period) {
         StringBuilder result = new StringBuilder();
@@ -40,6 +29,13 @@ public class RuSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
             result.append(period.getMonths()).append(" месяца");
         } else if (period.getMonths() != 0) {
             result.append(period.getMonths()).append(" месяцев");
+        }
+        if (period.getDays() == 1) {
+            result.append("1 день");
+        } else if (period.getDays() >= 2 && period.getDays() <= 4) {
+            result.append(period.getDays()).append(" дня");
+        } else if (period.getDays() != 0) {
+            result.append(period.getDays()).append(" дней");
         }
 
         return result.toString();

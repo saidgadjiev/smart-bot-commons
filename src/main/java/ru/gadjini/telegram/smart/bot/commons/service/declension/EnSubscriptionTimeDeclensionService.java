@@ -12,14 +12,6 @@ public class EnSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         return LocalisationService.EN_LOCALE;
     }
 
-    public String day(int days) {
-        if (days == 1) {
-            return "1 day";
-        }
-
-        return days + " days";
-    }
-
     @Override
     public String localize(Period period) {
         StringBuilder result = new StringBuilder();
@@ -33,6 +25,11 @@ public class EnSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
             result.append("1 month");
         } else if (period.getMonths() > 0) {
             result.append(period.getMonths()).append(" months");
+        }
+        if (period.getDays() == 1) {
+            result.append("1 day");
+        } else if (period.getDays() > 0) {
+            result.append(period.getMonths()).append(" days");
         }
 
         return result.toString();
