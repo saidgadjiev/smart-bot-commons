@@ -55,7 +55,11 @@ public class RefreshSubscriptionCommand implements BotCommand, PaidSubscriptionO
 
     @Override
     public void processMessage(Message message, String[] params) {
-        paidSubscriptionRemoveService.refreshPaidSubscription(message.getFrom().getId());
+        if (params.length > 0 && userService.isAdmin(message.getFrom().getId())) {
+            paidSubscriptionRemoveService.refreshPaidSubscription(Long.parseLong(params[0]));
+        } else {
+            paidSubscriptionRemoveService.refreshPaidSubscription(message.getFrom().getId());
+        }
         messageService.sendMessage(SendMessage.builder()
                 .text(localisationService.getMessage(MessagesProperties.MESSAGE_SUBSCRIPTION_REFRESHED,
                         userService.getLocaleOrDefault(message.getFrom().getId())))

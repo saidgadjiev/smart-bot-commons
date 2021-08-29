@@ -33,7 +33,7 @@ public class JodaTimeUtils {
         return new PGInterval(
                 period.getYears(),
                 period.getMonths(),
-                period.getDays() + period.getWeeks() * 7,
+                period.getDays(),
                 period.getHours(),
                 period.getMinutes(), period.getSeconds()
         );
@@ -58,12 +58,12 @@ public class JodaTimeUtils {
         if (interval == null) {
             return null;
         }
-        int days = interval.getDays();
 
         return new Period(
                 interval.getYears(),
                 interval.getMonths(),
-                days / 7, days % 7,
+                0,
+                interval.getDays(),
                 interval.getHours(),
                 interval.getMinutes(),
                 0,

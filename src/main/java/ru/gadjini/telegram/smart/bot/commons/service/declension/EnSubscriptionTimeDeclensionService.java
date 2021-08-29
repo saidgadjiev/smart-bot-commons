@@ -29,7 +29,7 @@ public class EnSubscriptionTimeDeclensionService implements SubscriptionTimeDecl
         if (period.getDays() == 1) {
             result.append("1 day");
         } else if (period.getDays() > 0) {
-            result.append(period.getMonths()).append(" days");
+            result.append(period.getDays()).append(" days");
         }
 
         return result.toString();
