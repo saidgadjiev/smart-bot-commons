@@ -15,6 +15,8 @@ import ru.gadjini.telegram.smart.bot.commons.service.format.Format;
 import ru.gadjini.telegram.smart.bot.commons.service.format.FormatService;
 import ru.gadjini.telegram.smart.bot.commons.utils.UrlUtils;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Comparator;
 import java.util.Locale;
 
@@ -191,10 +193,11 @@ public class MessageMediaService {
 
             return messageMedia;
         } else if (message.hasText()) {
-            Format format = formatService.getFormat(message.getText());
+            String text = URLDecoder.decode(message.getText(), StandardCharsets.UTF_8);
+            Format format = formatService.getFormat(text);
 
             if (Format.URL.equals(format)) {
-                String url = UrlUtils.appendScheme(message.getText());
+                String url = UrlUtils.appendScheme(text);
                 return urlMediaExtractor.extractMedia(message.getFrom().getId(), url);
             }
         }
