@@ -54,4 +54,10 @@ public class CommandNames {
     public static final String POST = "post";
 
     public static final String ACTIVATE_FLEXIBLE_SUBSCRIPTION = "afs";
+
+    public static final String TUTORIALS_COMMAND = "tutorials";
+
+    public static final String ADD_TUTORIAL = "addtutorial";
+
+    public static final String GET_TUTORIAL = "tutorial";
 }

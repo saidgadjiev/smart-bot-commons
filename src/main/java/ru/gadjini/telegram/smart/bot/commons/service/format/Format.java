@@ -355,6 +355,17 @@ public enum Format {
             return true;
         }
     },
+    BASS_BOOST(FormatCategory.COMMON) {
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+    },
     AAC(FormatCategory.AUDIO) {
         @Override
         public boolean canBeSentAsAudio() {

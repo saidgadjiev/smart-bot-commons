@@ -158,4 +158,10 @@ public class MessagesProperties {
     public static final String MESSAGE_PAID_SUBSCRIPTION_RENEW = "message.paid.subscription.renew";
 
     public static final String MESSAGE_FLEXIBLE_SUBSCRIPTION_NO_ACTIVE_DAYS = "message.flexible.subscription.no.active.days";
+
+    public static final String MESSAGE_NO_TUTORIALS = "message.no.tutorials";
+
+    public static final String MESSAGE_TUTORIALS = "message.tutorials";
+
+    public static final String MESSAGE_ADD_TUTORIAL_WELCOME = "message.add.tutorial.welcome";
 }
