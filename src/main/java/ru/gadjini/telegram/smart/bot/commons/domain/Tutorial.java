@@ -18,6 +18,8 @@ public class Tutorial {
 
     private String fileId;
 
+    private String botName;
+
     public int getId() {
         return id;
     }
@@ -48,5 +50,13 @@ public class Tutorial {
 
     public void setFileId(String fileId) {
         this.fileId = fileId;
+    }
+
+    public String getBotName() {
+        return botName;
+    }
+
+    public void setBotName(String botName) {
+        this.botName = botName;
     }
 }

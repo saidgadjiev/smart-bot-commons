@@ -271,6 +271,38 @@ public enum Format {
             return false;
         }
     },
+    SAMPLE(FormatCategory.COMMON) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
+    SCREENSHOT(FormatCategory.COMMON) {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     MUTE(FormatCategory.COMMON) {
         @Override
         public boolean isDownloadable() {

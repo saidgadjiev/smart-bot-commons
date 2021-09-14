@@ -19,10 +19,25 @@ public class TutorialDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<Tutorial> getTutorials(String command) {
+    public void create(Tutorial tutorial) {
+        jdbcTemplate.update(
+                "INSERT tutorial(file_id, bot_name, cmd, description)",
+                ps -> {
+                    ps.setString(1, tutorial.getFileId());
+                    ps.setString(2, tutorial.getBotName());
+                    ps.setString(3, tutorial.getCommand());
+                    ps.setString(4, tutorial.getDescription());
+                }
+        );
+    }
+
+    public List<Tutorial> getTutorials(String command, String botName) {
         return jdbcTemplate.query(
-                "SELECT * FROM tutorial WHERE cmd = ? ORDER BY id",
-                ps -> ps.setString(1, command),
+                "SELECT * FROM tutorial WHERE cmd = ? and bot_name = ? ORDER BY id",
+                ps -> {
+                    ps.setString(1, command);
+                    ps.setString(2, botName);
+                },
                 (rs, num) -> map(rs)
         );
     }
@@ -35,9 +50,10 @@ public class TutorialDao {
         );
     }
 
-    public List<Tutorial> getTutorials() {
+    public List<Tutorial> getTutorials(String botName) {
         return jdbcTemplate.query(
-                "SELECT * FROM tutorial ORDER BY id",
+                "SELECT * FROM tutorial WHERE bot_name = ? ORDER BY id",
+                ps -> ps.setString(1, botName),
                 (rs, num) -> map(rs)
         );
     }
