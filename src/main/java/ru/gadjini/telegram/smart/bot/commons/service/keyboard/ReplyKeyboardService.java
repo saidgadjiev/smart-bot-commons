@@ -13,6 +13,8 @@ public interface ReplyKeyboardService {
 
     ReplyKeyboard mainMenuKeyboard(long chatId, Locale locale);
 
+    ReplyKeyboardMarkup goBackKeyboard(long chatId, Locale locale);
+
     ReplyKeyboardMarkup smartFileFeatureKeyboard(long chatId, Locale locale);
 
     ReplyKeyboardMarkup languageKeyboard(long chatId, Locale locale);

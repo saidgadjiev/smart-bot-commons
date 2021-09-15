@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
@@ -12,6 +13,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.tutorial.TutorialService;
 
@@ -26,13 +28,18 @@ public class AddTutorialCommand implements BotCommand, NavigableBotCommand {
 
     private MessageService messageService;
 
+    private ReplyKeyboardService replyKeyboardService;
+
     @Autowired
     public AddTutorialCommand(UserService userService, LocalisationService localisationService,
-                              TutorialService tutorialService, @TgMessageLimitsControl MessageService messageService) {
+                              TutorialService tutorialService,
+                              @TgMessageLimitsControl MessageService messageService,
+                              @KeyboardHolder ReplyKeyboardService replyKeyboardService) {
         this.userService = userService;
         this.localisationService = localisationService;
         this.tutorialService = tutorialService;
         this.messageService = messageService;
+        this.replyKeyboardService = replyKeyboardService;
     }
 
     @Override
@@ -42,7 +49,8 @@ public class AddTutorialCommand implements BotCommand, NavigableBotCommand {
                         .chatId(String.valueOf(message.getFrom().getId()))
                         .text(localisationService.getMessage(
                                 MessagesProperties.MESSAGE_ADD_TUTORIAL_WELCOME, userService.getLocaleOrDefault(message.getFrom().getId())
-                        )).build()
+                        )).replyMarkup(replyKeyboardService.goBackKeyboard(message.getFrom().getId(),
+                        userService.getLocaleOrDefault(message.getFrom().getId()))).build()
         );
     }
 
@@ -56,6 +64,12 @@ public class AddTutorialCommand implements BotCommand, NavigableBotCommand {
         tutorial.setCommand(args[0]);
 
         tutorialService.create(tutorial);
+
+        messageService.sendMessage(
+                SendMessage.builder()
+                        .chatId(String.valueOf(message.getFrom().getId()))
+                        .text("Tutorial added").build()
+        );
     }
 
     @Override

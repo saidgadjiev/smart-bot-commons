@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.command.impl;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
@@ -48,6 +49,7 @@ public class TutorialsCommand implements BotCommand {
                     SendMessage.builder()
                             .chatId(String.valueOf(message.getFrom().getId()))
                             .text(localisationService.getMessage(MessagesProperties.MESSAGE_NO_TUTORIALS, locale))
+                            .parseMode(ParseMode.HTML)
                             .build()
             );
         } else {
@@ -58,6 +60,7 @@ public class TutorialsCommand implements BotCommand {
                     SendMessage.builder()
                             .chatId(String.valueOf(message.getFrom().getId()))
                             .text(text)
+                            .parseMode(ParseMode.HTML)
                             .build()
             );
         }
@@ -76,7 +79,7 @@ public class TutorialsCommand implements BotCommand {
             tutorialsBuilder.append("For /").append(s).append(" command:\n");
             for (int i = 0; i < t.size(); i++) {
                 Tutorial tutorial = t.get(i);
-                tutorialsBuilder.append(i).append(") /tutorial_").append(tutorial.getId()).append(" - <i>")
+                tutorialsBuilder.append(i + 1).append(") /tutorial_").append(tutorial.getId()).append(" - <i>")
                         .append(tutorial.getDescription()).append("</i>").append("\n");
             }
             tutorialsBuilder.append("\n");

@@ -60,4 +60,6 @@ public class CommandNames {
     public static final String ADD_TUTORIAL = "addtutorial";
 
     public static final String GET_TUTORIAL = "tutorial";
+
+    public static final String REMOVE_TUTORIAL = "rmtutorial";
 }

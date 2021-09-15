@@ -2,7 +2,8 @@ package ru.gadjini.telegram.smart.bot.commons.service.tutorial;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import ru.gadjini.telegram.smart.bot.commons.dao.TutorialDao;
+import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
+import ru.gadjini.telegram.smart.bot.commons.dao.tutorial.TutorialDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 
@@ -16,9 +17,13 @@ public class TutorialService {
     private BotProperties botProperties;
 
     @Autowired
-    public TutorialService(TutorialDao tutorialDao, BotProperties botProperties) {
+    public TutorialService(@Redis TutorialDao tutorialDao, BotProperties botProperties) {
         this.tutorialDao = tutorialDao;
         this.botProperties = botProperties;
+    }
+
+    public void delete(int id) {
+        tutorialDao.delete(id);
     }
 
     public void create(Tutorial tutorial) {

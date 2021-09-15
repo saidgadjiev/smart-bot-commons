@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
@@ -11,6 +12,7 @@ import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.model.MessageMedia;
 import ru.gadjini.telegram.smart.bot.commons.service.MessageMediaService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
+import ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 
 import java.util.Locale;
@@ -24,12 +26,16 @@ public class GetFileIdCommand implements BotCommand, NavigableBotCommand {
 
     private MessageMediaService messageMediaService;
 
+    private ReplyKeyboardService replyKeyboardService;
+
     @Autowired
     public GetFileIdCommand(@TgMessageLimitsControl MessageService messageService,
-                            UserService userService, MessageMediaService messageMediaService) {
+                            UserService userService, MessageMediaService messageMediaService,
+                            @KeyboardHolder ReplyKeyboardService replyKeyboardService) {
         this.messageService = messageService;
         this.userService = userService;
         this.messageMediaService = messageMediaService;
+        this.replyKeyboardService = replyKeyboardService;
     }
 
     @Override
@@ -39,7 +45,12 @@ public class GetFileIdCommand implements BotCommand, NavigableBotCommand {
 
     @Override
     public void processMessage(Message message, String[] params) {
-        messageService.sendMessage(new SendMessage(String.valueOf(message.getChatId()), "Send me a file"));
+        messageService.sendMessage(SendMessage.builder()
+                .chatId(String.valueOf(message.getChatId()))
+                .text("Send me a file")
+                .replyMarkup(replyKeyboardService.goBackKeyboard(message.getFrom().getId(),
+                        userService.getLocaleOrDefault(message.getFrom().getId())))
+                .build());
     }
 
     @Override

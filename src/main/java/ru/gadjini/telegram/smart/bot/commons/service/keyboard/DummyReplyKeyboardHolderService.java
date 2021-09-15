@@ -24,6 +24,11 @@ public class DummyReplyKeyboardHolderService implements ReplyKeyboardHolderServi
     }
 
     @Override
+    public ReplyKeyboardMarkup goBackKeyboard(long chatId, Locale locale) {
+        return setCurrentKeyboard(chatId, smartReplyKeyboardService.goBackKeyboard(chatId, locale));
+    }
+
+    @Override
     public ReplyKeyboardMarkup smartFileFeatureKeyboard(long chatId, Locale locale) {
         return setCurrentKeyboard(chatId, smartReplyKeyboardService.smartFileFeatureKeyboard(locale));
     }

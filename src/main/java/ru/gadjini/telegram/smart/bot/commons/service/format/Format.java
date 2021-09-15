@@ -219,18 +219,6 @@ public enum Format {
         }
     },
     AVI(FormatCategory.VIDEO),
-    AVI_H263_PLUS(FormatCategory.VIDEO) {
-        @Override
-        public String getName() {
-            return "AVI_H263+";
-        }
-
-        @Override
-        public String getExt() {
-            return AVI.getExt();
-        }
-
-    },
     FLV(FormatCategory.VIDEO),
     M4V(FormatCategory.VIDEO) {
         @Override

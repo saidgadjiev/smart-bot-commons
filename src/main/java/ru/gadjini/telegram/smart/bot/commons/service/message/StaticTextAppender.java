@@ -27,7 +27,7 @@ public class StaticTextAppender {
                 if (tutorialsBuilder.length() > 0) {
                     tutorialsBuilder.append("\n");
                 }
-                tutorialsBuilder.append(i).append(") /tutorial_").append(tutorial.getId()).append(" - <i>")
+                tutorialsBuilder.append(i + 1).append(") /tutorial_").append(tutorial.getId()).append(" - <i>")
                         .append(tutorial.getDescription()).append("</i>");
             }
 

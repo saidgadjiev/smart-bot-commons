@@ -1,8 +1,9 @@
-package ru.gadjini.telegram.smart.bot.commons.dao;
+package ru.gadjini.telegram.smart.bot.commons.dao.tutorial;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
 
 import java.sql.ResultSet;
@@ -10,18 +11,28 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class TutorialDao {
+@DB
+public class DBTutorialDao implements TutorialDao {
 
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    public TutorialDao(JdbcTemplate jdbcTemplate) {
+    public DBTutorialDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
+    @Override
+    public void delete(int id) {
+        jdbcTemplate.update(
+                "DELETE FROM tutorial WHERE id = ?",
+                ps -> ps.setInt(1, id)
+        );
+    }
+
+    @Override
     public void create(Tutorial tutorial) {
         jdbcTemplate.update(
-                "INSERT tutorial(file_id, bot_name, cmd, description)",
+                "INSERT INTO tutorial(file_id, bot_name, cmd, description) VALUES (?, ?, ?, ?)",
                 ps -> {
                     ps.setString(1, tutorial.getFileId());
                     ps.setString(2, tutorial.getBotName());
@@ -31,6 +42,7 @@ public class TutorialDao {
         );
     }
 
+    @Override
     public List<Tutorial> getTutorials(String command, String botName) {
         return jdbcTemplate.query(
                 "SELECT * FROM tutorial WHERE cmd = ? and bot_name = ? ORDER BY id",
@@ -42,6 +54,7 @@ public class TutorialDao {
         );
     }
 
+    @Override
     public String getFileId(int id) {
         return jdbcTemplate.query(
                 "SELECT file_id FROM tutorial WHERE id = ?",
@@ -50,6 +63,7 @@ public class TutorialDao {
         );
     }
 
+    @Override
     public List<Tutorial> getTutorials(String botName) {
         return jdbcTemplate.query(
                 "SELECT * FROM tutorial WHERE bot_name = ? ORDER BY id",

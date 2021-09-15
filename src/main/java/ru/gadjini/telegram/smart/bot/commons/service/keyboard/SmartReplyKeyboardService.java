@@ -13,6 +13,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService.keyboardRow;
+import static ru.gadjini.telegram.smart.bot.commons.service.keyboard.ReplyKeyboardService.replyKeyboardMarkup;
+
 @Service
 public class SmartReplyKeyboardService {
 
@@ -24,7 +27,7 @@ public class SmartReplyKeyboardService {
     }
 
     public ReplyKeyboardMarkup languageKeyboard(Locale locale) {
-        ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardService.replyKeyboardMarkup();
+        ReplyKeyboardMarkup replyKeyboardMarkup = replyKeyboardMarkup();
 
         List<List<String>> languages = new ArrayList<>();
         List<List<Locale>> supportedLocalesParts = Lists.partition(localisationService.getSupportedLocales(), 2);
@@ -36,19 +39,27 @@ public class SmartReplyKeyboardService {
             languages.add(langs);
         }
         for (List<String> langs : languages) {
-            replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(langs.toArray(new String[0])));
+            replyKeyboardMarkup.getKeyboard().add(keyboardRow(langs.toArray(new String[0])));
         }
-        replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
+        replyKeyboardMarkup.getKeyboard().add(keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
+
+        return replyKeyboardMarkup;
+    }
+
+    public ReplyKeyboardMarkup goBackKeyboard(long chatId, Locale locale) {
+        ReplyKeyboardMarkup replyKeyboardMarkup = replyKeyboardMarkup();
+
+        replyKeyboardMarkup.getKeyboard().add(keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
 
         return replyKeyboardMarkup;
     }
 
     public ReplyKeyboardMarkup smartFileFeatureKeyboard(Locale locale) {
-        ReplyKeyboardMarkup replyKeyboardMarkup = ReplyKeyboardService.replyKeyboardMarkup();
+        ReplyKeyboardMarkup replyKeyboardMarkup = replyKeyboardMarkup();
         replyKeyboardMarkup.getKeyboard().add(
-                ReplyKeyboardService.keyboardRow(localisationService.getMessage(MessagesProperties.ENABLE_COMMAND_NAME, locale),
+                keyboardRow(localisationService.getMessage(MessagesProperties.ENABLE_COMMAND_NAME, locale),
                         localisationService.getMessage(MessagesProperties.DISABLE_COMMAND_NAME, locale)));
-        replyKeyboardMarkup.getKeyboard().add(ReplyKeyboardService.keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
+        replyKeyboardMarkup.getKeyboard().add(keyboardRow(localisationService.getMessage(MessagesProperties.GO_BACK_COMMAND_NAME, locale)));
 
         return replyKeyboardMarkup;
     }
