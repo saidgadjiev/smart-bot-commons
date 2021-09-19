@@ -36,6 +36,7 @@ public class RedisTutorialDao implements TutorialDao {
     @Override
     public void create(Tutorial tutorial) {
         tutorialDao.create(tutorial);
+        redisTemplate.delete(KEY);
     }
 
     @Override
