@@ -164,4 +164,6 @@ public class MessagesProperties {
     public static final String MESSAGE_TUTORIALS = "message.tutorials";
 
     public static final String MESSAGE_ADD_TUTORIAL_WELCOME = "message.add.tutorial.welcome";
+
+    public static final String TUTORIALS_COMMAND_DESCRIPTION = "tutorials.command.description";
 }
