@@ -28,7 +28,7 @@ public class DBTutorialDao implements TutorialDao {
         GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
                 con -> {
-                    PreparedStatement ps = con.prepareStatement("DELETE FROM tutorial WHERE id = ? RETURNING command, bot_name",
+                    PreparedStatement ps = con.prepareStatement("DELETE FROM tutorial WHERE id = ? RETURNING cmd, bot_name",
                             PreparedStatement.RETURN_GENERATED_KEYS);
 
                     ps.setInt(1, id);
