@@ -28,26 +28,33 @@ public class RedisTutorialDao implements TutorialDao {
     }
 
     @Override
-    public void delete(int id) {
-        tutorialDao.delete(id);
-        redisTemplate.delete(KEY);
+    public Tutorial delete(int id) {
+        Tutorial tutorial = tutorialDao.delete(id);
+        if (tutorial != null) {
+            String key = key(tutorial.getCommand(), tutorial.getBotName());
+            redisTemplate.delete(key);
+        }
+
+        return tutorial;
     }
 
     @Override
     public void create(Tutorial tutorial) {
         tutorialDao.create(tutorial);
-        redisTemplate.delete(KEY);
+        String key = key(tutorial.getCommand(), tutorial.getBotName());
+        redisTemplate.delete(key);
     }
 
     @Override
     public List<Tutorial> getTutorials(String command, String botName) {
-        if (redisTemplate.hasKey(KEY)) {
-            List<Object> list = redisTemplate.opsForList().range(KEY, 0, -1);
+        String key = key(command, botName);
+        if (redisTemplate.hasKey(key)) {
+            List<Object> list = redisTemplate.opsForList().range(key, 0, -1);
 
             return ((List<Object>) list.get(0)).stream().map(s -> map((Map<String, Object>) s)).collect(Collectors.toList());
         } else {
             List<Tutorial> tutorials = tutorialDao.getTutorials(command, botName);
-            redisTemplate.opsForList().rightPushAll(KEY, tutorials);
+            redisTemplate.opsForList().rightPushAll(key, tutorials);
 
             return tutorials;
         }
@@ -70,5 +77,9 @@ public class RedisTutorialDao implements TutorialDao {
         tutorial.setCommand((String) values.get(Tutorial.DESCRIPTION));
 
         return tutorial;
+    }
+
+    private String key(String cmd, String bot) {
+        return KEY + ":" + cmd + ":" + bot;
     }
 }

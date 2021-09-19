@@ -10,6 +10,8 @@ public class Tutorial {
 
     public static final String FILE_ID = "file_id";
 
+    public static final String BOT_NAME = "bot_name";
+
     private int id;
 
     private String description;

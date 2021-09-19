@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface TutorialDao {
 
-    void delete(int id);
+    Tutorial delete(int id);
 
     void create(Tutorial tutorial);
 

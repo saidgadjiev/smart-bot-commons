@@ -2,10 +2,12 @@ package ru.gadjini.telegram.smart.bot.commons.dao.tutorial;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
 import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
 
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
@@ -22,11 +24,30 @@ public class DBTutorialDao implements TutorialDao {
     }
 
     @Override
-    public void delete(int id) {
+    public Tutorial delete(int id) {
+        GeneratedKeyHolder generatedKeyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(
-                "DELETE FROM tutorial WHERE id = ?",
-                ps -> ps.setInt(1, id)
+                con -> {
+                    PreparedStatement ps = con.prepareStatement("DELETE FROM tutorial WHERE id = ? RETURNING command, bot_name",
+                            PreparedStatement.RETURN_GENERATED_KEYS);
+
+                    ps.setInt(1, id);
+
+                    return ps;
+                },
+                generatedKeyHolder
         );
+
+        if (generatedKeyHolder.getKeys() != null) {
+            Tutorial tutorial = new Tutorial();
+            tutorial.setId(id);
+            tutorial.setCommand((String) generatedKeyHolder.getKeys().get(Tutorial.COMMAND));
+            tutorial.setBotName((String) generatedKeyHolder.getKeys().get(Tutorial.BOT_NAME));
+
+            return tutorial;
+        }
+
+        return null;
     }
 
     @Override
