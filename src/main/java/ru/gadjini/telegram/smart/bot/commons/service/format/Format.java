@@ -376,6 +376,12 @@ public enum Format {
         }
     },
     BASS_BOOST(FormatCategory.COMMON) {
+
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
         @Override
         public boolean isDownloadable() {
             return false;
