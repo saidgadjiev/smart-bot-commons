@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
@@ -21,7 +22,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Component
-public class TutorialsCommand implements BotCommand {
+public class TutorialsCommand implements BotCommand, PaidSubscriptionOptional {
 
     private LocalisationService localisationService;
 

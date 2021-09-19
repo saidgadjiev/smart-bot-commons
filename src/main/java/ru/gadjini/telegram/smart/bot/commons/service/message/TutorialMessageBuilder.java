@@ -8,16 +8,16 @@ import ru.gadjini.telegram.smart.bot.commons.service.tutorial.TutorialService;
 import java.util.List;
 
 @Component
-public class StaticTextAppender {
+public class TutorialMessageBuilder {
 
     private TutorialService tutorialService;
 
     @Autowired
-    public StaticTextAppender(TutorialService tutorialService) {
+    public TutorialMessageBuilder(TutorialService tutorialService) {
         this.tutorialService = tutorialService;
     }
 
-    public String process(String command, String sourceText) {
+    public String buildTutorialsMessage(String command) {
         List<Tutorial> tutorials = tutorialService.getTutorials(command);
 
         if (!tutorials.isEmpty()) {
@@ -31,9 +31,9 @@ public class StaticTextAppender {
                         .append(tutorial.getDescription()).append("</i>");
             }
 
-            return sourceText + "\n\n<b>Tutorials:</b>\n" + tutorialsBuilder.toString();
+            return "<b>Tutorials:</b>\n" + tutorialsBuilder.toString();
         }
 
-        return sourceText;
+        return null;
     }
 }

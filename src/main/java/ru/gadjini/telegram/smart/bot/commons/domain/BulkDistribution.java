@@ -68,8 +68,7 @@ public class BulkDistribution {
 
     public String getMessage(Locale locale) {
         switch (locale.getLanguage()) {
-            case LocalisationService
-                    .RU_LOCALE:
+            case LocalisationService.RU_LOCALE:
                 return getMessageRu();
             case LocalisationService.UZ_LOCALE:
                 return getMessageUz();

@@ -10,6 +10,7 @@ import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class PostCommand implements BotCommand {
+public class PostCommand implements BotCommand, PaidSubscriptionOptional {
 
     private MediaMessageService messageService;
 

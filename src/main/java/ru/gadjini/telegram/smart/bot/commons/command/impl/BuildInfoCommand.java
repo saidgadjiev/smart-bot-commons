@@ -9,6 +9,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidChannelSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
@@ -16,7 +17,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import javax.annotation.PostConstruct;
 
 @Component
-public class BuildInfoCommand implements BotCommand {
+public class BuildInfoCommand implements BotCommand, PaidChannelSubscriptionOptional {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BuildInfoCommand.class);
 

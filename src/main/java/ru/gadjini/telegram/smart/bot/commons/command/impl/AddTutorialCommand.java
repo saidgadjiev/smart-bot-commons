@@ -8,6 +8,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.KeyboardHolder;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
 import ru.gadjini.telegram.smart.bot.commons.command.api.NavigableBotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
@@ -18,7 +19,7 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.tutorial.TutorialService;
 
 @Component
-public class AddTutorialCommand implements BotCommand, NavigableBotCommand {
+public class AddTutorialCommand implements BotCommand, NavigableBotCommand, PaidSubscriptionOptional {
 
     private UserService userService;
 

@@ -8,12 +8,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendVideo;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MediaMessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.tutorial.TutorialService;
 
 @Component
-public class GetTutorialCommand implements BotCommand {
+public class GetTutorialCommand implements BotCommand, PaidSubscriptionOptional {
 
     private MediaMessageService mediaMessageService;
 

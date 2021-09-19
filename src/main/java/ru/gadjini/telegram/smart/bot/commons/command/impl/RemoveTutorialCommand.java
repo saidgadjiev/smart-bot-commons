@@ -6,12 +6,13 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.command.api.BotCommand;
+import ru.gadjini.telegram.smart.bot.commons.command.api.PaidSubscriptionOptional;
 import ru.gadjini.telegram.smart.bot.commons.common.CommandNames;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.tutorial.TutorialService;
 
 @Component
-public class RemoveTutorialCommand implements BotCommand {
+public class RemoveTutorialCommand implements BotCommand, PaidSubscriptionOptional {
 
     private TutorialService tutorialService;
 

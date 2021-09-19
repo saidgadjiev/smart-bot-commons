@@ -1,20 +1,15 @@
 package ru.gadjini.telegram.smart.bot.commons.service;
 
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
-import org.springframework.context.support.AbstractMessageSource;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import ru.gadjini.telegram.smart.bot.commons.service.message.TutorialMessageBuilder;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.List;
 import java.util.Locale;
-import java.util.Properties;
 
-@Service
+@Component
 public class LocalisationService {
-
-    private static final String COMMON_MESSAGES = "common-messages.properties";
 
     public static final String RU_LOCALE = "ru";
 
@@ -22,37 +17,44 @@ public class LocalisationService {
 
     public static final String UZ_LOCALE = "uz";
 
-    private MessageSource messageSource;
+    private SmartMessageSource smartMessageSource;
+
+    private TutorialMessageBuilder tutorialMessageBuilder;
 
     @Autowired
-    public LocalisationService(MessageSource messageSource) {
-        this.messageSource = messageSource;
-        if (messageSource instanceof AbstractMessageSource) {
-            Properties properties = new Properties();
-            try (InputStream stream = LocalisationService.class.getClassLoader().getResourceAsStream(COMMON_MESSAGES)) {
-                properties.load(stream);
+    public LocalisationService(SmartMessageSource smartMessageSource, TutorialMessageBuilder tutorialMessageBuilder) {
+        this.smartMessageSource = smartMessageSource;
+        this.tutorialMessageBuilder = tutorialMessageBuilder;
+    }
 
-                ((AbstractMessageSource) messageSource).setCommonMessages(properties);
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+    public String getCommandWelcomeMessage(String command, String messageCode, Locale locale) {
+        return getCommandWelcomeMessage(command, messageCode, null, locale);
+    }
+
+    public String getCommandWelcomeMessage(String command, String messageCode, Object[] args, Locale locale) {
+        String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command);
+
+        if (StringUtils.isNotBlank(tutorialsMessage)) {
+            return smartMessageSource.getMessage(
+                    messageCode, args, locale
+            ) + "\n\n" + tutorialsMessage;
+        } else {
+            return smartMessageSource.getMessage(
+                    messageCode, args, locale
+            );
         }
     }
 
     public String getMessage(String messageCode, Locale locale) {
-        return getMessage(messageCode, null, locale);
+        return smartMessageSource.getMessage(messageCode, locale);
     }
 
     public String getMessage(String messageCode, Locale locale, String defaultMsg) {
-        try {
-            return getMessage(messageCode, null, locale);
-        } catch (Exception e) {
-            return defaultMsg;
-        }
+        return smartMessageSource.getMessage(messageCode, locale, defaultMsg);
     }
 
     public String getMessage(String messageCode, Object[] args, Locale locale) {
-        return messageSource.getMessage(messageCode, args, locale);
+        return smartMessageSource.getMessage(messageCode, args, locale);
     }
 
     public List<Locale> getSupportedLocales() {
