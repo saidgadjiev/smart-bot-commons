@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.TelegramBotApiBalancer;
 import ru.gadjini.telegram.smart.bot.commons.model.EditMediaResult;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
@@ -30,7 +31,7 @@ public class MediaMessageServiceImpl implements MediaMessageService {
 
     @Autowired
     public MediaMessageServiceImpl(MessageMediaService fileService,
-                                   TelegramMediaService telegramMediaService) {
+                                   @TelegramBotApiBalancer TelegramMediaService telegramMediaService) {
         this.fileService = fileService;
         this.telegramMediaService = telegramMediaService;
     }

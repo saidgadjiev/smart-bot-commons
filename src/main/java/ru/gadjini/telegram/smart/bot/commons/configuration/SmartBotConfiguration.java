@@ -1,11 +1,9 @@
 package ru.gadjini.telegram.smart.bot.commons.configuration;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.client.config.RequestConfig;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -19,6 +17,9 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.DownloadRequestConfig;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.LocalBotApi;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.TelegramBotApi;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.filter.subscription.ExpiredPaidSubscriptionHandler;
 import ru.gadjini.telegram.smart.bot.commons.property.*;
@@ -70,13 +71,12 @@ public class SmartBotConfiguration {
     }
 
     @Bean
+    @LocalBotApi
     @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
-    public DefaultBotOptions botOptions(BotApiProperties localBotApiProperties) {
+    public DefaultBotOptions localBotApiOptions(BotApiProperties localBotApiProperties) {
         DefaultBotOptions defaultBotOptions = new DefaultBotOptions();
 
-        if (StringUtils.isNotBlank(localBotApiProperties.getEndpoint())) {
-            defaultBotOptions.setBaseUrl(localBotApiProperties.getEndpoint());
-        }
+        defaultBotOptions.setBaseUrl(localBotApiProperties.getEndpoint());
         defaultBotOptions.setRequestConfig(
                 RequestConfig.custom()
                         //TODO: infinite
@@ -88,8 +88,23 @@ public class SmartBotConfiguration {
     }
 
     @Bean
-    @Scope
-    @Qualifier("downloadRequestConfig")
+    @TelegramBotApi
+    @Scope(ConfigurableBeanFactory.SCOPE_SINGLETON)
+    public DefaultBotOptions telegramBotApiOptions() {
+        DefaultBotOptions defaultBotOptions = new DefaultBotOptions();
+
+        defaultBotOptions.setRequestConfig(
+                RequestConfig.custom()
+                        //TODO: infinite
+                        .setSocketTimeout(0)
+                        .setConnectTimeout(Constants.SOCKET_TIMEOUT)
+                        .setConnectionRequestTimeout(Constants.SOCKET_TIMEOUT).build());
+
+        return defaultBotOptions;
+    }
+
+    @Bean
+    @DownloadRequestConfig
     public RequestConfig downloadRequestConfig(HttpClientProperties httpClientProperties) {
         return RequestConfig.custom()
                 .setSocketTimeout(httpClientProperties.getDownloadRequestTimeout())
@@ -108,10 +123,20 @@ public class SmartBotConfiguration {
     }
 
     @Bean
-    @ConditionalOnMissingBean
-    public TelegramMediaService telegramMediaService(BotProperties botProperties,
-                                                     DefaultBotOptions options, BotApiProperties botApiProperties,
-                                                     TelegramBotApiMethodExecutor exceptionHandler) {
+    @LocalBotApi
+    @ConditionalOnMissingBean(annotation = LocalBotApi.class)
+    public TelegramMediaService localTelegramBotApiMediaService(BotProperties botProperties,
+                                                                @LocalBotApi DefaultBotOptions options, BotApiProperties botApiProperties,
+                                                                TelegramBotApiMethodExecutor exceptionHandler) {
+        return new TelegramBotApiMediaService(botProperties, options, botApiProperties, exceptionHandler);
+    }
+
+    @Bean
+    @TelegramBotApi
+    @ConditionalOnMissingBean(annotation = TelegramBotApi.class)
+    public TelegramMediaService telegramBotApiMediaService(BotProperties botProperties,
+                                                           @TelegramBotApi DefaultBotOptions options, BotApiProperties botApiProperties,
+                                                           TelegramBotApiMethodExecutor exceptionHandler) {
         return new TelegramBotApiMediaService(botProperties, options, botApiProperties, exceptionHandler);
     }
 

@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.DefaultAbsSender;
 import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.ApiConstants;
 import org.telegram.telegrambots.meta.api.methods.GetFile;
 import org.telegram.telegrambots.meta.api.methods.ParseMode;
 import org.telegram.telegrambots.meta.api.methods.send.*;
@@ -99,7 +100,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
         stopWatch.start();
         AtomicLong resultFileSize = new AtomicLong(fileSize);
         try {
-            LOGGER.debug("Start downloadFileByFileId({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+            LOGGER.debug("Start downloadFileByFileId({}, {}, {})", isLocal(), fileId, MemoryUtils.humanReadableByteCount(fileSize));
 
             return exceptionHandler.executeWithResult(fileId, () -> {
                 updateProgressBeforeStart(progress);
@@ -107,37 +108,43 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
                 gf.setFileId(fileId);
                 org.telegram.telegrambots.meta.api.objects.File file = execute(gf);
                 resultFileSize.set(file.getFileSize());
-                String filePath = getLocalFilePath(file.getFilePath());
+                String filePath;
+                if (isLocal()) {
+                    filePath = getLocalFilePath(file.getFilePath());
 
-                if (outputFile != null) {
-                    try {
-                        if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
-                            LOGGER.debug("Error mkdirs({}, {})", outputFile.getParentFile().getAbsolutePath(), fileId);
+                    if (outputFile != null) {
+                        try {
+                            if (!outputFile.getParentFile().exists() && !outputFile.getParentFile().mkdirs()) {
+                                LOGGER.debug("Error mkdirs({}, {})", outputFile.getParentFile().getAbsolutePath(), fileId);
+                            }
+                            Files.move(Path.of(filePath), outputFile.toPath(), REPLACE_EXISTING);
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
                         }
-                        Files.move(Path.of(filePath), outputFile.toPath(), REPLACE_EXISTING);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
 
-                    filePath = outputFile.getAbsolutePath();
+                        filePath = outputFile.getAbsolutePath();
+                    } else {
+                        LOGGER.debug("Directly downloaded file may be deleted!({}, {})", filePath, fileId);
+                    }
                 } else {
-                    LOGGER.debug("Directly downloaded file may be deleted!({}, {})", filePath, fileId);
+                    downloadFile(file, outputFile.getFile());
+                    filePath = outputFile.getAbsolutePath();
                 }
 
                 updateProgressAfterComplete(progress);
 
-                LOGGER.debug("Finished successfully downloadFileByFileId({}, {})", fileId,
+                LOGGER.debug("Finished successfully downloadFileByFileId({}, {}, {})", isLocal(), fileId,
                         MemoryUtils.humanReadableByteCount(resultFileSize.get()));
 
                 return filePath;
             });
         } catch (TelegramApiException | FloodWaitException e) {
-            LOGGER.error(e.getMessage() + "({}, {})", fileId, MemoryUtils.humanReadableByteCount(fileSize));
+            LOGGER.error(e.getMessage() + "({}, {}, {})", isLocal(), fileId, MemoryUtils.humanReadableByteCount(fileSize));
             throw e;
         } finally {
             stopWatch.stop();
             long time = stopWatch.getTime(TimeUnit.SECONDS);
-            LOGGER.debug("Finish downloadFileByFileId({}, {}, {}, {})", fileId,
+            LOGGER.debug("Finish downloadFileByFileId({}, {}, {}, {}, {})", isLocal(), fileId,
                     MemoryUtils.humanReadableByteCount(resultFileSize.get()), time,
                     NetSpeedUtils.toSpeed(resultFileSize.get() / Math.max(1, time)));
         }
@@ -195,5 +202,9 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
             execute(editMessageText);
         } catch (Exception ignore) {
         }
+    }
+
+    final boolean isLocal() {
+        return !getOptions().getBaseUrl().equals(ApiConstants.BASE_URL);
     }
 }

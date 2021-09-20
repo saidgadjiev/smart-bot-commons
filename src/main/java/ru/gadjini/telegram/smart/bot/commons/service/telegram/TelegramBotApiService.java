@@ -16,6 +16,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
 import org.telegram.telegrambots.meta.api.objects.chatmember.ChatMember;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.TelegramBotApi;
 import ru.gadjini.telegram.smart.bot.commons.property.BotProperties;
 
 import java.util.Set;
@@ -29,7 +30,7 @@ public class TelegramBotApiService extends DefaultAbsSender {
 
     @Autowired
     public TelegramBotApiService(BotProperties botProperties,
-                                 DefaultBotOptions botOptions,
+                                 @TelegramBotApi DefaultBotOptions botOptions,
                                  TelegramBotApiMethodExecutor exceptionHandler) {
         super(botOptions);
         this.botProperties = botProperties;

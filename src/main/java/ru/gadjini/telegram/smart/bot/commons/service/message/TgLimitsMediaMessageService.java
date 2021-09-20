@@ -4,12 +4,12 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.*;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageMedia;
 import org.telegram.telegrambots.meta.api.objects.InputFile;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import ru.gadjini.telegram.smart.bot.commons.annotation.TelegramMediaLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import ru.gadjini.telegram.smart.bot.commons.annotation.WatermarkMessages;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
@@ -26,7 +26,7 @@ import java.io.File;
 import java.util.Arrays;
 
 @Component
-@Qualifier("mediaLimits")
+@TelegramMediaLimitsControl
 public class TgLimitsMediaMessageService implements MediaMessageService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TgLimitsMediaMessageService.class);

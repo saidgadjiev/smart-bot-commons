@@ -26,4 +26,16 @@ public interface TelegramMediaService {
     String downloadFileByFileId(String fileId, long fileSize, SmartTempFile outputFile);
 
     String downloadFileByFileId(String fileId, long fileSize, Progress progress, SmartTempFile outputFile);
+
+    default void cancelUploading(String filePath) {
+
+    }
+
+    default void cancelDownloading(String fileId) {
+
+    }
+
+    default void cancelDownloads() {
+
+    }
 }
