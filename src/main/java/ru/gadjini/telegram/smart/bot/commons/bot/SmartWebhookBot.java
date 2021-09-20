@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updates.SetWebhook;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.starter.SpringWebhookBot;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.LocalBotApi;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
@@ -41,7 +42,7 @@ public class SmartWebhookBot extends SpringWebhookBot {
     @Autowired
     public SmartWebhookBot(BotProperties botProperties, BotFilter botFilter,
                            @TgMessageLimitsControl MessageService messageService,
-                           UserService userService, DefaultBotOptions botOptions, SetWebhook setWebhook,
+                           UserService userService, @LocalBotApi DefaultBotOptions botOptions, SetWebhook setWebhook,
                            UserExceptionHandler userExceptionHandler) {
         super(botOptions, setWebhook);
         this.botProperties = botProperties;

@@ -9,7 +9,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
-import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.LocalBotApi;
+import ru.gadjini.telegram.smart.bot.commons.annotation.botapi.TelegramBotApi;
 import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.exception.InvalidMediaMessageException;
 import ru.gadjini.telegram.smart.bot.commons.exception.UserException;
@@ -41,7 +41,7 @@ public class SmartLongPollingBot extends TelegramLongPollingBot {
     public SmartLongPollingBot(BotProperties botProperties, BotFilter botFilter,
                                @TgMessageLimitsControl MessageService messageService,
                                UserService userService,
-                               @LocalBotApi DefaultBotOptions botOptions, UserExceptionHandler userExceptionHandler) {
+                               @TelegramBotApi DefaultBotOptions botOptions, UserExceptionHandler userExceptionHandler) {
         super(botOptions);
         this.botProperties = botProperties;
         this.botFilter = botFilter;
