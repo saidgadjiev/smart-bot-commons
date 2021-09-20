@@ -16,7 +16,7 @@ public class UserSettingsDao {
 
     public void createDefaultSettings(String botName, long userId) {
         jdbcTemplate.update(
-                "INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, true)",
+                "INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, false)",
                 ps -> {
                     ps.setString(1, botName);
                     ps.setLong(2, userId);
@@ -38,7 +38,7 @@ public class UserSettingsDao {
 
     public Boolean getSmartFileFeatureEnabledOrDefault(String botName, long userId) {
         return jdbcTemplate.query(
-                "WITH ins AS(INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, true) " +
+                "WITH ins AS(INSERT INTO user_settings(bot_name, user_id, smart_file) VALUES (?, ?, false) " +
                         " ON CONFLICT(user_id, bot_name) DO NOTHING) SELECT smart_file FROM user_settings WHERE bot_name = ? AND user_id = ?",
                 ps -> {
                     ps.setString(1, botName);
@@ -51,7 +51,7 @@ public class UserSettingsDao {
                         return rs.getBoolean("smart_file");
                     }
 
-                    return true;
+                    return false;
                 }
         );
     }
