@@ -29,12 +29,12 @@ public class FFmpegProgressReader {
         try {
             Long dur = progressCallback.duration();
             if (dur == null) {
-                LOGGER.debug("Duration null");
+                LOGGER.debug("Progress duration null");
                 return;
             }
             String line = getLastLine();
             if (StringUtils.isBlank(line)) {
-                LOGGER.debug("Empty line({})", file.getAbsolutePath());
+                LOGGER.debug("Progress empty line({})", file.getAbsolutePath());
                 return;
             }
 
