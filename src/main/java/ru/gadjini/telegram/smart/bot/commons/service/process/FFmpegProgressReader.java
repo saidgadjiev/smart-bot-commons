@@ -34,6 +34,7 @@ public class FFmpegProgressReader {
             }
             String line = getLastLine();
             if (StringUtils.isBlank(line)) {
+                LOGGER.debug("Empty line({})", file.getAbsolutePath());
                 return;
             }
 
