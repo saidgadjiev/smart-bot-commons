@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.gadjini.telegram.smart.bot.commons.model.BotHealth;
 import ru.gadjini.telegram.smart.bot.commons.property.ProfileProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.process.FFmpegProcessExecutor;
 
 import javax.annotation.PostConstruct;
 import javax.ws.rs.core.MediaType;
@@ -25,9 +26,12 @@ public class BotController {
 
     private ProfileProperties profileProperties;
 
+    private FFmpegProcessExecutor processExecutor;
+
     @Autowired
-    public BotController(ProfileProperties profileProperties) {
+    public BotController(ProfileProperties profileProperties, FFmpegProcessExecutor processExecutor) {
         this.profileProperties = profileProperties;
+        this.processExecutor = processExecutor;
     }
 
     @PostConstruct
@@ -37,6 +41,6 @@ public class BotController {
 
     @GetMapping(value = "/health", produces = MediaType.APPLICATION_JSON)
     public ResponseEntity<?> hello() {
-        return ResponseEntity.ok(new BotHealth("I'm alive", commitId, profileProperties.getActive()));
+        return ResponseEntity.ok(new BotHealth("I'm alive", commitId, profileProperties.getActive(), processExecutor.scannersCount()));
     }
 }

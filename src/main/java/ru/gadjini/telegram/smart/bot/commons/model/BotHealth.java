@@ -8,10 +8,13 @@ public class BotHealth {
 
     private String profile;
 
-    public BotHealth(String message, String commitId, String profile) {
+    private int ffmpegScannersCount;
+
+    public BotHealth(String message, String commitId, String profile, int ffmpegScannersCount) {
         this.message = message;
         this.commitId = commitId;
         this.profile = profile;
+        this.ffmpegScannersCount = ffmpegScannersCount;
     }
 
     public String getMessage() {
@@ -24,5 +27,9 @@ public class BotHealth {
 
     public String getProfile() {
         return profile;
+    }
+
+    public int getFfmpegScannersCount() {
+        return ffmpegScannersCount;
     }
 }
