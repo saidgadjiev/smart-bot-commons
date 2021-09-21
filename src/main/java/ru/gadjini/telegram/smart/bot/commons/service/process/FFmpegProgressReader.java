@@ -27,12 +27,12 @@ public class FFmpegProgressReader {
 
     public void readProgress() {
         try {
-            String line = getLastLine();
-            if (StringUtils.isBlank(line)) {
-                return;
-            }
             Long dur = progressCallback.duration();
             if (dur == null) {
+                return;
+            }
+            String line = getLastLine();
+            if (StringUtils.isBlank(line)) {
                 return;
             }
 
