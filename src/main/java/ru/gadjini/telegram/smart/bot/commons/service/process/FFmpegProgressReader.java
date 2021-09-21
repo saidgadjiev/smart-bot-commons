@@ -29,6 +29,7 @@ public class FFmpegProgressReader {
         try {
             Long dur = progressCallback.duration();
             if (dur == null) {
+                LOGGER.debug("Duration null");
                 return;
             }
             String line = getLastLine();
