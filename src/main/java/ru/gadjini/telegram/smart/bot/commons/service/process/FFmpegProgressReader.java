@@ -46,7 +46,7 @@ public class FFmpegProgressReader {
                 progressCallback.progress(progress);
             }
         } catch (Throwable e) {
-            LOGGER.error("Error update progress({})", e.getMessage());
+            LOGGER.error("Error update progress({}, {})", e.getMessage(), file.getAbsolutePath());
         }
     }
 
@@ -62,6 +62,7 @@ public class FFmpegProgressReader {
 
     private String getLastLine() {
         if (!file.exists()) {
+            LOGGER.debug("Progress file deleted({})", file.getAbsolutePath());
             return null;
         }
         try (ReversedLinesFileReader reversedLinesFileReader = new ReversedLinesFileReader(file, StandardCharsets.UTF_8)) {
