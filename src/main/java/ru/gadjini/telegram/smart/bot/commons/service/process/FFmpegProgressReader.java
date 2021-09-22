@@ -14,7 +14,11 @@ public class FFmpegProgressReader {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(FFmpegProgressReader.class);
 
-    private static final Pattern TIME_PATTERN = Pattern.compile("(?<=time=)[\\d:.]*");
+    private static final String TIME_GROUP = "time";
+
+    private static final String SPEED_GROUP = "speed";
+
+    private static final Pattern TIME_SPEED_PATTERN = Pattern.compile("(?<time>(?<=time=)[\\d:.]*).*(?<speed>(?<=speed=)[\\d:.]*)x");
 
     private File file;
 
@@ -38,24 +42,32 @@ public class FFmpegProgressReader {
                 return;
             }
 
-            Matcher matcher = TIME_PATTERN.matcher(line);
+            Matcher matcher = TIME_SPEED_PATTERN.matcher(line);
             if (matcher.find()) {
-                String match = line.substring(matcher.start(), matcher.end());
-                int progress = getProgressPercentage(match, dur.intValue());
+                String match = line.substring(matcher.start(TIME_GROUP), matcher.end(TIME_GROUP));
+                String[] matchSplit = match.split(":");
 
-                progressCallback.progress(progress);
+                double passedTime = Integer.parseInt(matchSplit[0]) * 3600 +
+                        Integer.parseInt(matchSplit[1]) * 60 +
+                        Double.parseDouble(matchSplit[2]);
+
+                int progress = getProgressPercentage(passedTime, dur.intValue());
+
+                Double speed = null;
+                try {
+                    speed = Double.parseDouble(line.substring(matcher.start(SPEED_GROUP), matcher.end(SPEED_GROUP)));
+                } catch (Throwable e) {
+                    LOGGER.error("Failed parse speed({})", e.getMessage());
+                }
+                progressCallback.progress(dur.intValue() - (int) passedTime, progress, speed);
             }
         } catch (Throwable e) {
             LOGGER.error("Error update progress({}, {})", e.getMessage(), file.getAbsolutePath());
         }
     }
 
-    private int getProgressPercentage(String match, int dur) {
-        String[] matchSplit = match.split(":");
-
-        double progress = (Integer.parseInt(matchSplit[0]) * 3600 +
-                Integer.parseInt(matchSplit[1]) * 60 +
-                Double.parseDouble(matchSplit[2])) / dur;
+    private int getProgressPercentage(double passedTime, int dur) {
+        double progress = passedTime / dur;
 
         return (int) (progress * 100);
     }

@@ -8,6 +8,7 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessException;
 import ru.gadjini.telegram.smart.bot.commons.exception.ProcessTimedOutException;
+import ru.gadjini.telegram.smart.bot.commons.property.ProgressProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.ProcessExecutor;
 
 import java.io.File;
@@ -27,9 +28,12 @@ public class FFmpegProcessExecutor {
 
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+    private ProgressProperties progressProperties;
+
     @Autowired
-    public FFmpegProcessExecutor(ProcessExecutor processExecutor) {
+    public FFmpegProcessExecutor(ProcessExecutor processExecutor, ProgressProperties progressProperties) {
         this.processExecutor = processExecutor;
+        this.progressProperties = progressProperties;
     }
 
     public int scannersCount() {
@@ -38,6 +42,9 @@ public class FFmpegProcessExecutor {
 
     @Scheduled(fixedDelay = 2 * 1000)
     public void progressReader() {
+        if (progressProperties.isDisabled()) {
+            return;
+        }
         executorService.submit(() -> {
             for (FFmpegProgressReader scanner : new ArrayList<>(scanners)) {
                 scanner.readProgress();
@@ -55,8 +62,11 @@ public class FFmpegProcessExecutor {
             processBuilder.redirectError(ProcessBuilder.Redirect.appendTo(errorFile));
 
             Process process = processBuilder.start();
-            FFmpegProgressReader consoleReader = new FFmpegProgressReader(errorFile, progressCallback);
-            scanners.add(consoleReader);
+            FFmpegProgressReader consoleReader = null;
+            if (!progressProperties.isDisabled()) {
+                consoleReader = new FFmpegProgressReader(errorFile, progressCallback);
+                scanners.add(consoleReader);
+            }
             try {
                 int exitValue = process.waitFor();
 
@@ -67,7 +77,9 @@ public class FFmpegProcessExecutor {
                 }
             } finally {
                 process.destroy();
-                scanners.remove(consoleReader);
+                if (consoleReader != null) {
+                    scanners.remove(consoleReader);
+                }
             }
 
             FileUtils.deleteQuietly(errorFile);

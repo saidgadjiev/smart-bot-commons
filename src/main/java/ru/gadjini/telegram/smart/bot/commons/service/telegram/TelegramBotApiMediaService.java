@@ -164,7 +164,11 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     private <V> V uploadFile(String chatId, TelegramBotApiMethodExecutor.Callable<V> executable, Progress progress) {
         updateProgressBeforeStart(progress);
 
-        return exceptionHandler.executeWithResult(chatId, executable);
+        V result = exceptionHandler.executeWithResult(chatId, executable);
+
+        updateProgressAfterComplete(progress);
+
+        return result;
     }
 
     @SuppressWarnings("PMD")
