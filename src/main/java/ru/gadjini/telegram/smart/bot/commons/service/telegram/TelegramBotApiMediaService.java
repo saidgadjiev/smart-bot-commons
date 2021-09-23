@@ -109,7 +109,7 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
                 org.telegram.telegrambots.meta.api.objects.File file = execute(gf);
                 resultFileSize.set(file.getFileSize());
                 String filePath;
-                if (isLocal()) {
+                if (!isLocal()) {
                     filePath = getLocalFilePath(file.getFilePath());
 
                     if (outputFile != null) {
@@ -209,6 +209,6 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     final boolean isLocal() {
-        return !getOptions().getBaseUrl().equals(ApiConstants.BASE_URL);
+        return getOptions().getBaseUrl().equals(ApiConstants.BASE_URL);
     }
 }
