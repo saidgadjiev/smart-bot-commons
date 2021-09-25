@@ -11,6 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
+import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
 
 import java.util.Locale;
@@ -24,11 +25,15 @@ public class AsyncMessageService implements MessageService {
 
     private MessageService messageService;
 
+    private MessagesSenderJobProperties messagesSenderJobProperties;
+
     @Autowired
     public AsyncMessageService(MessagesQueue messagesQueue,
-                               @Qualifier("message") MessageService messageService) {
+                               @Qualifier("message") MessageService messageService,
+                               MessagesSenderJobProperties messagesSenderJobProperties) {
         this.messagesQueue = messagesQueue;
         this.messageService = messageService;
+        this.messagesSenderJobProperties = messagesSenderJobProperties;
     }
 
     @Override
@@ -48,7 +53,11 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void sendMessage(SendMessage sendMessage) {
-        messagesQueue.add(sendMessage);
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messageService.sendMessage(sendMessage);
+        } else {
+            messagesQueue.add(sendMessage);
+        }
     }
 
     @Override
@@ -62,23 +71,39 @@ public class AsyncMessageService implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
-        messageService.editMessage(editMessageText, ignoreException);
+    public void editMessage(EditMessageText editMessageText) {
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messageService.editMessage(editMessageText);
+        } else {
+            messagesQueue.add(editMessageText);
+        }
     }
 
     @Override
-    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
-        messageService.editKeyboard(editMessageReplyMarkup, ignoreException);
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup) {
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messageService.editKeyboard(editMessageReplyMarkup);
+        } else {
+            messagesQueue.add(editMessageReplyMarkup);
+        }
     }
 
     @Override
-    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
-        messageService.sendInvoice(sendInvoice, callback);
+    public void sendInvoice(SendInvoice sendInvoice) {
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messageService.sendInvoice(sendInvoice);
+        } else {
+            messagesQueue.add(sendInvoice);
+        }
     }
 
     @Override
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
-        messageService.editMessageCaption(editMessageCaption);
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messageService.editMessageCaption(editMessageCaption);
+        } else {
+            messagesQueue.add(editMessageCaption);
+        }
     }
 
     @Override

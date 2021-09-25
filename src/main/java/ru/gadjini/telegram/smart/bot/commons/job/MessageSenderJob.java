@@ -7,13 +7,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessageItem;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -63,11 +69,18 @@ public class MessageSenderJob {
                 if (message == null) {
                     return;
                 }
+                long between = ChronoUnit.SECONDS.between(message.getCreatedAt(), LocalDateTime.now());
+
+                if (between > 1) {
+                    LOGGER.debug("Send message latency({}, {})", between, message.getMessage());
+                }
                 try {
                     sendMessage(message);
                     messagesQueue.popMessage(recipient);
                 } catch (FloodWaitException e) {
                     LOGGER.error(e.getMessage());
+                } catch (Throwable e) {
+                    LOGGER.error(e.getMessage(), e);
                 }
 
                 MessageItem nextMessage = getNextMessage(recipient);
@@ -83,14 +96,35 @@ public class MessageSenderJob {
     }
 
     private long getFloodProtectingTimeInMillis(MessageItem messageItem) {
-        return messageItem.getPath().equals(SendMessage.PATH) ? 1000 : 0;
+        switch (messageItem.getPath()) {
+            case SendMessage.PATH:
+            case SendInvoice.PATH:
+                return 1000;
+            case EditMessageText.PATH:
+            case EditMessageReplyMarkup.PATH:
+            case EditMessageCaption.PATH:
+                return 500;
+            default:
+                return 0;
+        }
     }
 
     private void sendMessage(MessageItem messageItem) {
         switch (messageItem.getPath()) {
-            case SendMessage
-                    .PATH:
+            case SendMessage.PATH:
                 messageService.sendMessage((SendMessage) messageItem.getMessage());
+                break;
+            case EditMessageText.PATH:
+                messageService.editMessage((EditMessageText) messageItem.getMessage());
+                break;
+            case EditMessageReplyMarkup.PATH:
+                messageService.editKeyboard((EditMessageReplyMarkup) messageItem.getMessage());
+                break;
+            case EditMessageCaption.PATH:
+                messageService.editMessageCaption((EditMessageCaption) messageItem.getMessage());
+                break;
+            case SendInvoice.PATH:
+                messageService.sendInvoice((SendInvoice) messageItem.getMessage());
                 break;
         }
     }

@@ -29,7 +29,7 @@ public interface MessageService {
 
     void removeInlineKeyboard(long chatId, int messageId);
 
-    void editMessage(EditMessageText messageContext, boolean ignoreException);
+    void editMessage(EditMessageText editMessageText);
 
     default void editMessage(String text, InlineKeyboardMarkup inlineKeyboardMarkup,
                              EditMessageText messageContext, boolean ignoreException) {
@@ -37,11 +37,7 @@ public interface MessageService {
                 && Objects.equals(inlineKeyboardMarkup, messageContext.getReplyMarkup())) {
             return;
         }
-        editMessage(messageContext, ignoreException);
-    }
-
-    default void editMessage(EditMessageText messageContext) {
-        editMessage(messageContext, true);
+        editMessage(messageContext);
     }
 
     default void editMessage(String text, InlineKeyboardMarkup inlineKeyboardMarkup, EditMessageText messageContext) {
@@ -49,16 +45,16 @@ public interface MessageService {
                 && Objects.equals(inlineKeyboardMarkup, messageContext.getReplyMarkup())) {
             return;
         }
-        editMessage(messageContext, true);
+        editMessage(messageContext);
     }
 
-    void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException);
+    void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup);
 
-    default void editKeyboard(InlineKeyboardMarkup currentKeyboard, EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
+    default void editKeyboard(InlineKeyboardMarkup currentKeyboard, EditMessageReplyMarkup editMessageReplyMarkup) {
         if (Objects.equals(currentKeyboard, editMessageReplyMarkup.getReplyMarkup())) {
             return;
         }
-        editKeyboard(editMessageReplyMarkup, ignoreException);
+        editKeyboard(editMessageReplyMarkup);
     }
 
     void editMessageCaption(EditMessageCaption context);
@@ -67,9 +63,5 @@ public interface MessageService {
 
     void sendErrorMessage(long chatId, Locale locale);
 
-    void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback);
-
-    default void sendInvoice(SendInvoice sendInvoice) {
-        sendInvoice(sendInvoice, null);
-    }
+    void sendInvoice(SendInvoice sendInvoice);
 }

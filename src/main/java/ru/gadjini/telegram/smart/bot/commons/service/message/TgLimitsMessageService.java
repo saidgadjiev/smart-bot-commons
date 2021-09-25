@@ -89,18 +89,18 @@ public class TgLimitsMessageService implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText messageContext, boolean ignoreException) {
-        messageService.editMessage(messageContext, ignoreException);
+    public void editMessage(EditMessageText editMessageText) {
+        messageService.editMessage(editMessageText);
     }
 
     @Override
-    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
-        messageService.editKeyboard(editMessageReplyMarkup, ignoreException);
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup) {
+        messageService.editKeyboard(editMessageReplyMarkup);
     }
 
     @Override
-    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
-        messageService.sendInvoice(sendInvoice, callback);
+    public void sendInvoice(SendInvoice sendInvoice) {
+        messageService.sendInvoice(sendInvoice);
     }
 
     @Override

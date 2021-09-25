@@ -8,7 +8,11 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
+import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 
 import java.util.List;
 import java.util.Map;
@@ -65,6 +69,9 @@ public class MessagesQueue {
     }
 
     public void createFloodProtectingKey(String chatId, long expireInMillis) {
+        if (expireInMillis == 0) {
+            return;
+        }
         String key = getFprotectKey(chatId);
         redisTemplate.opsForValue().set(key, true);
         redisTemplate.expire(key, expireInMillis, TimeUnit.MILLISECONDS);
@@ -95,6 +102,38 @@ public class MessagesQueue {
         });
     }
 
+    public void add(EditMessageText editMessageText) {
+        messagesQueueXSync.execute(editMessageText.getChatId(), () -> {
+            String messagesKey = getMessagesKey(editMessageText.getChatId());
+            redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(EditMessageText.PATH, editMessageText));
+            pushRecipient(editMessageText.getChatId());
+        });
+    }
+
+    public void add(EditMessageReplyMarkup editMessageReplyMarkup) {
+        messagesQueueXSync.execute(editMessageReplyMarkup.getChatId(), () -> {
+            String messagesKey = getMessagesKey(editMessageReplyMarkup.getChatId());
+            redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(EditMessageReplyMarkup.PATH, editMessageReplyMarkup));
+            pushRecipient(editMessageReplyMarkup.getChatId());
+        });
+    }
+
+    public void add(EditMessageCaption editMessageCaption) {
+        messagesQueueXSync.execute(editMessageCaption.getChatId(), () -> {
+            String messagesKey = getMessagesKey(editMessageCaption.getChatId());
+            redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(EditMessageCaption.PATH, editMessageCaption));
+            pushRecipient(editMessageCaption.getChatId());
+        });
+    }
+
+    public void add(SendInvoice sendInvoice) {
+        messagesQueueXSync.execute(sendInvoice.getChatId(), () -> {
+            String messagesKey = getMessagesKey(sendInvoice.getChatId());
+            redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(SendInvoice.PATH, sendInvoice));
+            pushRecipient(sendInvoice.getChatId());
+        });
+    }
+
     private void pushRecipient(String chatId) {
         Long aLong = stringRedisTemplate.opsForList().indexOf(RECIPIENTS_KEY, chatId);
         if (aLong == null) {
@@ -117,6 +156,19 @@ public class MessagesQueue {
         switch (messageItem.getPath()) {
             case SendMessage.PATH:
                 messageItem.setMessage(objectMapper.convertValue(values.get("message"), SendMessage.class));
+                break;
+            case EditMessageText.PATH:
+                messageItem.setMessage(objectMapper.convertValue(values.get("message"), EditMessageText.class));
+                break;
+            case EditMessageReplyMarkup.PATH:
+                messageItem.setMessage(objectMapper.convertValue(values.get("message"), EditMessageReplyMarkup.class));
+                break;
+            case EditMessageCaption.PATH:
+                messageItem.setMessage(objectMapper.convertValue(values.get("message"), EditMessageCaption.class));
+                break;
+            case SendInvoice.PATH:
+                messageItem.setMessage(objectMapper.convertValue(values.get("message"), SendInvoice.class));
+                break;
         }
 
         return messageItem;

@@ -91,30 +91,18 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
+    public void editMessage(EditMessageText editMessageText) {
         editMessageText.setParseMode(ParseMode.HTML);
         if (editMessageText.getDisableWebPagePreview() == null) {
             editMessageText.setDisableWebPagePreview(true);
         }
 
-        try {
-            telegramService.editMessageText(editMessageText);
-        } catch (Exception ex) {
-            if (!ignoreException) {
-                throw ex;
-            }
-        }
+        telegramService.editMessageText(editMessageText);
     }
 
     @Override
-    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
-        try {
-            telegramService.editReplyMarkup(editMessageReplyMarkup);
-        } catch (Exception ex) {
-            if (!ignoreException) {
-                throw ex;
-            }
-        }
+    public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup) {
+        telegramService.editReplyMarkup(editMessageReplyMarkup);
     }
 
     @Override
@@ -140,12 +128,8 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
-        Message message = telegramService.sendInvoice(sendInvoice);
-
-        if (callback != null) {
-            callback.accept(message);
-        }
+    public void sendInvoice(SendInvoice sendInvoice) {
+        telegramService.sendInvoice(sendInvoice);
     }
 
     private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {
