@@ -7,6 +7,7 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.DB;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.domain.Tutorial;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -47,17 +48,21 @@ public class RedisTutorialDao implements TutorialDao {
 
     @Override
     public List<Tutorial> getTutorials(String command, String botName) {
+        List<Tutorial> tutorials = new ArrayList<>();
         String key = key(command, botName);
         if (redisTemplate.hasKey(key)) {
             List<Object> list = redisTemplate.opsForList().range(key, 0, -1);
 
-            return ((List<Object>) list.get(0)).stream().map(s -> map((Map<String, Object>) s)).collect(Collectors.toList());
-        } else {
-            List<Tutorial> tutorials = tutorialDao.getTutorials(command, botName);
-            redisTemplate.opsForList().rightPushAll(key, tutorials);
+            tutorials = list.isEmpty() ? List.of() : ((List<Object>) list.get(0)).stream().map(s -> map((Map<String, Object>) s)).collect(Collectors.toList());
+        }
 
+        if (!tutorials.isEmpty()) {
             return tutorials;
         }
+        tutorials = tutorialDao.getTutorials(command, botName);
+        redisTemplate.opsForList().rightPushAll(key, tutorials);
+
+        return tutorials;
     }
 
     @Override

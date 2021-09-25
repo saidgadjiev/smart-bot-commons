@@ -11,7 +11,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCa
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Message;
-import ru.gadjini.telegram.smart.bot.commons.job.TgMethodExecutor;
+import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
 
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -20,14 +20,14 @@ import java.util.function.Consumer;
 @Qualifier("asyncMessage")
 public class AsyncMessageService implements MessageService {
 
-    private TgMethodExecutor messageSenderJob;
+    private MessagesQueue messagesQueue;
 
     private MessageService messageService;
 
     @Autowired
-    public AsyncMessageService(TgMethodExecutor messageSenderJob,
+    public AsyncMessageService(MessagesQueue messagesQueue,
                                @Qualifier("message") MessageService messageService) {
-        this.messageSenderJob = messageSenderJob;
+        this.messagesQueue = messagesQueue;
         this.messageService = messageService;
     }
 
@@ -48,42 +48,42 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void sendMessage(SendMessage sendMessage) {
-        sendMessage(sendMessage, null);
+        messagesQueue.add(sendMessage);
     }
 
     @Override
     public void sendMessage(SendMessage sendMessage, Consumer<Message> callback) {
-        messageSenderJob.push(() -> messageService.sendMessage(sendMessage, callback));
+        messageService.sendMessage(sendMessage, callback);
     }
 
     @Override
     public void removeInlineKeyboard(long chatId, int messageId) {
-        messageSenderJob.push(() -> messageService.removeInlineKeyboard(chatId, messageId));
+        messageService.removeInlineKeyboard(chatId, messageId);
     }
 
     @Override
     public void editMessage(EditMessageText editMessageText, boolean ignoreException) {
-        messageSenderJob.push(() -> messageService.editMessage(editMessageText, ignoreException));
+        messageService.editMessage(editMessageText, ignoreException);
     }
 
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup, boolean ignoreException) {
-        messageSenderJob.push(() -> messageService.editKeyboard(editMessageReplyMarkup, ignoreException));
+        messageService.editKeyboard(editMessageReplyMarkup, ignoreException);
     }
 
     @Override
     public void sendInvoice(SendInvoice sendInvoice, Consumer<Message> callback) {
-        messageSenderJob.push(() -> messageService.sendInvoice(sendInvoice, callback));
+        messageService.sendInvoice(sendInvoice, callback);
     }
 
     @Override
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
-        messageSenderJob.push(() -> messageService.editMessageCaption(editMessageCaption));
+        messageService.editMessageCaption(editMessageCaption);
     }
 
     @Override
     public void deleteMessage(long chatId, int messageId) {
-        messageSenderJob.push(() -> messageService.deleteMessage(chatId, messageId));
+        messageService.deleteMessage(chatId, messageId);
     }
 
     @Override
