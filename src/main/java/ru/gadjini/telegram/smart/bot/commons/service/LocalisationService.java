@@ -32,7 +32,7 @@ public class LocalisationService {
     }
 
     public String getCommandWelcomeMessage(String command, String messageCode, Object[] args, Locale locale) {
-        String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command);
+        String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command, locale);
 
         if (StringUtils.isNotBlank(tutorialsMessage)) {
             return smartMessageSource.getMessage(
