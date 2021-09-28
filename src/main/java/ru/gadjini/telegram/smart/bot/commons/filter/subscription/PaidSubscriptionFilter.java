@@ -126,6 +126,8 @@ public class PaidSubscriptionFilter extends BaseBotFilter {
                         FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(trialSubscription.getEndAt())
                 }, locale)
         )
+                .withTrialSubscriptionAccesses()
+                .withPaidSubscriptionFeatures()
                 .withSubscriptionFor()
                 .withUtcTime()
                 .withCheckSubscriptionCommand()

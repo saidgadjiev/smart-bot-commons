@@ -5,6 +5,7 @@ import org.springframework.stereotype.Component;
 import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.property.SubscriptionProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
+import ru.gadjini.telegram.smart.bot.commons.utils.MemoryUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.NumberUtils;
 import ru.gadjini.telegram.smart.bot.commons.utils.TimeUtils;
 
@@ -45,16 +46,40 @@ public class PaidSubscriptionMessageBuilder {
 
         private boolean withRenewInstructions;
 
+        private boolean withPaidSubscriptionFeatures;
+
+        private boolean withPaidSubscriptionAccesses;
+
+        private boolean withTrialSubscriptionAccesses;
+
         private ZonedDateTime purchaseDate;
 
         private double minPrice;
 
-        public Builder(String rootMessage) {
+        Builder(String rootMessage) {
             this.rootMessage = rootMessage;
         }
 
         public Builder withUtcTime() {
             this.withUtcTime = true;
+
+            return this;
+        }
+
+        public Builder withPaidSubscriptionFeatures() {
+            this.withPaidSubscriptionFeatures = true;
+
+            return this;
+        }
+
+        public Builder withTrialSubscriptionAccesses() {
+            this.withTrialSubscriptionAccesses = true;
+
+            return this;
+        }
+
+        public Builder withPaidSubscriptionAccesses() {
+            this.withPaidSubscriptionAccesses = true;
 
             return this;
         }
@@ -95,7 +120,7 @@ public class PaidSubscriptionMessageBuilder {
             message.append(rootMessage);
 
             if (withSubscriptionFor || withUtcTime || withSubscriptionInstructions || withPurchaseDate
-            || withCheckSubscriptionCommand || withRenewInstructions) {
+                    || withCheckSubscriptionCommand || withRenewInstructions) {
                 message.append("\n\n");
             }
 
@@ -105,6 +130,7 @@ public class PaidSubscriptionMessageBuilder {
                 }
                 message.append(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FOR, locale));
             }
+
             if (withPurchaseDate) {
                 if (!message.toString().endsWith("\n\n")) {
                     message.append("\n");
@@ -118,6 +144,7 @@ public class PaidSubscriptionMessageBuilder {
                         locale
                 ));
             }
+
             if (withUtcTime) {
                 if (!message.toString().endsWith("\n\n")) {
                     message.append("\n");
@@ -126,6 +153,30 @@ public class PaidSubscriptionMessageBuilder {
                 message.append(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_UTC_TIME,
                         new Object[]{TimeUtils.TIME_FORMATTER.format(ZonedDateTime.now(TimeUtils.UTC))}, locale));
             }
+
+            if (withPaidSubscriptionAccesses) {
+                if (!message.toString().endsWith("\n\n")) {
+                    message.append("\n\n");
+                }
+                message.append(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_ACCESSES,
+                        new Object[] {
+                                localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FEATURES, locale)
+                        },
+                        locale));
+            }
+
+            if (withTrialSubscriptionAccesses) {
+                if (!message.toString().endsWith("\n\n")) {
+                    message.append("\n\n");
+                }
+                message.append(localisationService.getMessage(MessagesProperties.MESSAGE_TRIAL_SUBSCRIPTION_ACCESSES,
+                        new Object[] {
+                                MemoryUtils.humanReadableByteCount(paidSubscriptionProperties.getTrialMaxFileSize()),
+                                paidSubscriptionProperties.getTrialMaxActionsCount()
+                        },
+                        locale));
+            }
+
             if (withCheckSubscriptionCommand) {
                 if (!message.toString().endsWith("\n\n")) {
                     message.append("\n\n");
@@ -134,16 +185,17 @@ public class PaidSubscriptionMessageBuilder {
                         localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_CHECK_COMMAND, locale)
                 );
             }
+
             if (withSubscriptionInstructions) {
                 if (!message.toString().endsWith("\n\n")) {
                     message.append("\n\n");
                 }
                 message.append(
                         localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_INSTRUCTION,
-                                new Object[]{paidSubscriptionProperties.getPaymentBotName(),
-                                        NumberUtils.toString(minPrice, 2)}, locale)
+                                new Object[]{paidSubscriptionProperties.getPaymentBotName()}, locale)
                 );
             }
+
             if (withRenewInstructions) {
                 if (!message.toString().endsWith("\n\n")) {
                     message.append("\n\n");
@@ -151,6 +203,18 @@ public class PaidSubscriptionMessageBuilder {
                 message.append(
                         localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_RENEW, locale)
                 );
+            }
+
+            if (withPaidSubscriptionFeatures) {
+                if (!message.toString().endsWith("\n\n")) {
+                    message.append("\n\n");
+                }
+                message.append(localisationService.getMessage(MessagesProperties.MESSAGE_BUY_SUBSCRIPTION_RIGHT_NOW,
+                        new Object[]{
+                                NumberUtils.toString(minPrice, 2)
+                        }, locale)).append("\n");
+                message.append(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FEATURES,
+                        locale));
             }
 
             return message.toString();

@@ -35,6 +35,7 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
                     MessagesProperties.MESSAGE_SUBSCRIPTION_NOT_FOUND,
                     locale
             ))
+                    .withPaidSubscriptionFeatures()
                     .withSubscriptionInstructions(minPrice)
                     .buildMessage(locale);
         } else if (paidSubscription.isTrial()) {
@@ -46,6 +47,8 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
                         },
                         locale)
                 )
+                        .withTrialSubscriptionAccesses()
+                        .withPaidSubscriptionFeatures()
                         .withSubscriptionFor()
                         .withUtcTime()
                         .withSubscriptionInstructions(minPrice)
@@ -58,6 +61,7 @@ public class DefaultCommonCheckPaidSubscriptionMessageBuilder implements CommonC
                         },
                         locale)
                 )
+                        .withPaidSubscriptionFeatures()
                         .withSubscriptionFor()
                         .withUtcTime()
                         .withSubscriptionInstructions(minPrice)

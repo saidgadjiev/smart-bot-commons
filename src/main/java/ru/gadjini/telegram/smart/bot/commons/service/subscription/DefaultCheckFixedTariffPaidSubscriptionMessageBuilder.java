@@ -38,6 +38,7 @@ public class DefaultCheckFixedTariffPaidSubscriptionMessageBuilder implements Ch
                             FixedTariffPaidSubscriptionService.HTML_PAID_SUBSCRIPTION_END_DATE_FORMATTER.format(paidSubscription.getEndAt()),
                     }, locale)
             )
+                    .withPaidSubscriptionAccesses()
                     .withSubscriptionFor()
                     .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withUtcTime()
@@ -51,6 +52,7 @@ public class DefaultCheckFixedTariffPaidSubscriptionMessageBuilder implements Ch
                     },
                     locale)
             )
+                    .withPaidSubscriptionFeatures()
                     .withSubscriptionFor()
                     .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withSubscriptionInstructions(minPrice)

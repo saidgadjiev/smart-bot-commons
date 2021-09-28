@@ -21,6 +21,12 @@ public class SubscriptionProperties {
     @Value("${payment.bot.server}")
     private String paymentBotServer;
 
+    @Value("${trial.max.file.size:104857600}")
+    private long trialMaxFileSize;
+
+    @Value("${trial.max.actions.count:5}")
+    private int trialMaxActionsCount;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -55,5 +61,21 @@ public class SubscriptionProperties {
 
     public String getPaymentBotServer() {
         return paymentBotServer;
+    }
+
+    public long getTrialMaxFileSize() {
+        return trialMaxFileSize;
+    }
+
+    public void setTrialMaxFileSize(long trialMaxFileSize) {
+        this.trialMaxFileSize = trialMaxFileSize;
+    }
+
+    public int getTrialMaxActionsCount() {
+        return trialMaxActionsCount;
+    }
+
+    public void setTrialMaxActionsCount(int trialMaxActionsCount) {
+        this.trialMaxActionsCount = trialMaxActionsCount;
     }
 }

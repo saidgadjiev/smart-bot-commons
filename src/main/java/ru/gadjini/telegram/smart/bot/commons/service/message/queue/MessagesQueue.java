@@ -150,8 +150,7 @@ public class MessagesQueue {
     }
 
     public MessageItem map(Map<String, Object> values) {
-        MessageItem messageItem = new MessageItem();
-        messageItem.setPath((String) values.get("path"));
+        MessageItem messageItem = objectMapper.convertValue(values, MessageItem.class);
 
         switch (messageItem.getPath()) {
             case SendMessage.PATH:

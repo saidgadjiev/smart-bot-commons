@@ -36,6 +36,7 @@ public class DefaultCheckFlexibleTariffPaidSubscriptionMessageBuilder implements
                     },
                     locale)
             )
+                    .withPaidSubscriptionAccesses()
                     .withSubscriptionFor()
                     .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withSubscriptionInstructions(minPrice)
@@ -48,6 +49,7 @@ public class DefaultCheckFlexibleTariffPaidSubscriptionMessageBuilder implements
                     },
                     locale)
             )
+                    .withPaidSubscriptionFeatures()
                     .withSubscriptionFor()
                     .withPurchaseDate(paidSubscription.getPurchasedAt())
                     .withSubscriptionInstructions(minPrice)

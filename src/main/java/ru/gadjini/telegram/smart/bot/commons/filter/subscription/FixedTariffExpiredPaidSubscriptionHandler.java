@@ -59,14 +59,20 @@ public class FixedTariffExpiredPaidSubscriptionHandler implements ExpiredPaidSub
 
     public void sendSubscriptionRequired(long userId) {
         Locale locale = userService.getLocaleOrDefault(userId);
-        double minPrice = paidSubscriptionPlanService.getMinPrice();
         messageService.sendMessage(
                 SendMessage.builder().chatId(String.valueOf(userId))
-                        .text(localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED,
-                                new Object[] {NumberUtils.toString(minPrice, 2)}, locale))
+                        .text(getSubscriptionRequiredMessage(locale))
                         .replyMarkup(inlineKeyboardService.getPaymentKeyboard(subscriptionProperties.getPaymentBotName(), locale))
                         .parseMode(ParseMode.HTML)
                         .build()
         );
+    }
+
+    private String getSubscriptionRequiredMessage(Locale locale) {
+        double minPrice = paidSubscriptionPlanService.getMinPrice();
+        return localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED, locale) + "\n\n"
+                + localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FEATURES,
+                new Object[]{NumberUtils.toString(minPrice, 2)},
+                locale);
     }
 }

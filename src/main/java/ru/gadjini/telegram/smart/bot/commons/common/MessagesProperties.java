@@ -166,4 +166,12 @@ public class MessagesProperties {
     public static final String MESSAGE_ADD_TUTORIAL_WELCOME = "message.add.tutorial.welcome";
 
     public static final String TUTORIALS_COMMAND_DESCRIPTION = "tutorials.command.description";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_FEATURES = "message.paid.subscription.features";
+
+    public static final String MESSAGE_BUY_SUBSCRIPTION_RIGHT_NOW = "message.buy.subscription.right.now";
+
+    public static final String MESSAGE_PAID_SUBSCRIPTION_ACCESSES = "message.paid.subscription.accesses";
+
+    public static final String MESSAGE_TRIAL_SUBSCRIPTION_ACCESSES = "message.trial.subscription.accesses";
 }
