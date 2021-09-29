@@ -62,4 +62,6 @@ public class CommandNames {
     public static final String GET_TUTORIAL = "tutorial";
 
     public static final String REMOVE_TUTORIAL = "rmtutorial";
+
+    public static final String USER_LINK = "ulink";
 }
