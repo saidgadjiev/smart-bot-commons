@@ -4,6 +4,8 @@ public enum FileSource {
 
     DOCUMENT,
 
+    ANIMATION,
+
     PHOTO,
 
     VIDEO,

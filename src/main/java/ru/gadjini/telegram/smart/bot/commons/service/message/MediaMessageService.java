@@ -7,6 +7,9 @@ import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 import ru.gadjini.telegram.smart.bot.commons.model.SendFileResult;
 
 public interface MediaMessageService {
+
+    SendFileResult sendAnimation(SendAnimation sendAnimation, Progress progress);
+
     EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia);
 
     default SendFileResult sendSticker(SendSticker sendSticker) {

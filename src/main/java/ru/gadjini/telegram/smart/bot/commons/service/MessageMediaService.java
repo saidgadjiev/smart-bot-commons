@@ -66,7 +66,21 @@ public class MessageMediaService {
     public MessageMedia getMedia(Message message, Locale locale) {
         MessageMedia messageMedia = new MessageMedia();
 
-        if (message.hasDocument()) {
+        if (message.hasAnimation()) {
+            messageMedia.setFileName(MessageMedia.getFixedFileName(message.getAnimation().getFileName()));
+            messageMedia.setFileId(message.getAnimation().getFileId());
+            messageMedia.setMimeType(message.getAnimation().getMimetype());
+            messageMedia.setFileSize(message.getAnimation().getFileSize());
+            messageMedia.setSource(FileSource.ANIMATION);
+            PhotoSize thumb = message.getAnimation().getThumb();
+            if (thumb != null) {
+                messageMedia.setThumb(thumb.getFileId());
+                messageMedia.setThumbFileSize(thumb.getFileSize());
+            }
+            messageMedia.setFormat(formatService.getFormat(messageMedia.getFileName(), messageMedia.getMimeType()));
+
+            return messageMedia;
+        } else if (message.hasDocument()) {
             messageMedia.setFileName(MessageMedia.getFixedFileName(message.getDocument().getFileName()));
             messageMedia.setFileId(message.getDocument().getFileId());
             messageMedia.setMimeType(message.getDocument().getMimeType());

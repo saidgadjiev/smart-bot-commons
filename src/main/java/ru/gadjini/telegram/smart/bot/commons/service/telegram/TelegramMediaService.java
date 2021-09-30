@@ -7,6 +7,9 @@ import ru.gadjini.telegram.smart.bot.commons.io.SmartTempFile;
 import ru.gadjini.telegram.smart.bot.commons.model.Progress;
 
 public interface TelegramMediaService {
+
+    Message sendAnimation(SendAnimation sendAnimation, Progress progress);
+
     Message editMessageMedia(EditMessageMedia editMessageMedia);
 
     Message sendSticker(SendSticker sendSticker, Progress progress);

@@ -32,6 +32,15 @@ public class TelegramBotApiMediaServiceBalancer implements TelegramMediaService 
     }
 
     @Override
+    public Message sendAnimation(SendAnimation sendAnimation, Progress progress) {
+        if (sendAnimation.getAnimation().isNew()) {
+            return getUploadingService(sendAnimation.getAnimation().getNewMediaFile().length()).sendAnimation(sendAnimation, progress);
+        }
+
+        return localBotApiService.sendAnimation(sendAnimation, progress);
+    }
+
+    @Override
     public Message editMessageMedia(EditMessageMedia editMessageMedia) {
         if (editMessageMedia.getMedia().isNewMedia()) {
             return getUploadingService(editMessageMedia.getMedia().getNewMediaFile().length()).editMessageMedia(editMessageMedia);

@@ -56,6 +56,11 @@ public class TgLimitsMediaMessageService implements MediaMessageService {
     }
 
     @Override
+    public SendFileResult sendAnimation(SendAnimation sendAnimation, Progress progress) {
+        return mediaMessageService.sendAnimation(sendAnimation, progress);
+    }
+
+    @Override
     public EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia) {
         return mediaMessageService.editMessageMedia(editMessageMedia);
     }

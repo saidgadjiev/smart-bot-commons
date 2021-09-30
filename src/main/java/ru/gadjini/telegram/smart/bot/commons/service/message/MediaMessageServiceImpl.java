@@ -37,6 +37,13 @@ public class MediaMessageServiceImpl implements MediaMessageService {
     }
 
     @Override
+    public SendFileResult sendAnimation(SendAnimation sendAnimation, Progress progress) {
+        Message message = telegramMediaService.sendAnimation(sendAnimation, progress);
+
+        return new SendFileResult(message.getMessageId(), fileService.getFileId(message));
+    }
+
+    @Override
     public EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia) {
         if (StringUtils.isNotBlank(editMessageMedia.getMedia().getCaption())) {
             editMessageMedia.getMedia().setParseMode(ParseMode.HTML);

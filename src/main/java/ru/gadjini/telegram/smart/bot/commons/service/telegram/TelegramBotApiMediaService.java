@@ -50,6 +50,11 @@ public class TelegramBotApiMediaService extends DefaultAbsSender implements Tele
     }
 
     @Override
+    public Message sendAnimation(SendAnimation sendAnimation, Progress progress) {
+        return uploadFile(sendAnimation.getChatId(), () -> execute(sendAnimation), progress);
+    }
+
+    @Override
     public Message editMessageMedia(EditMessageMedia editMessageMedia) {
         return exceptionHandler.executeWithResult(editMessageMedia.getChatId(), () -> (Message) execute(editMessageMedia));
     }

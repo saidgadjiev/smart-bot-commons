@@ -45,6 +45,13 @@ public class WatermarkMessageService implements MediaMessageService {
     }
 
     @Override
+    public SendFileResult sendAnimation(SendAnimation sendAnimation, Progress progress) {
+        sendAnimation.setCaption(appendWatermark(sendAnimation.getChatId(), sendAnimation.getCaption()));
+
+        return mediaMessageService.sendAnimation(sendAnimation, progress);
+    }
+
+    @Override
     public EditMediaResult editMessageMedia(EditMessageMedia editMessageMedia) {
         return mediaMessageService.editMessageMedia(editMessageMedia);
     }
