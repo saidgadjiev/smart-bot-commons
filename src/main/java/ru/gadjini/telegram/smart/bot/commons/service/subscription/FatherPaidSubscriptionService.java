@@ -42,6 +42,10 @@ public class FatherPaidSubscriptionService {
         }
         PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(subscription.getPlanId());
 
+        if (tariff == null) {
+            return true;
+        }
+
         return paidSubscriptionServiceMap.get(tariff).isExpired(subscription);
     }
 
@@ -51,6 +55,10 @@ public class FatherPaidSubscriptionService {
         }
 
         PaidSubscriptionTariffType tariff = paidSubscriptionPlanService.getTariff(paidSubscription.getPlanId());
+
+        if (tariff == null) {
+            return false;
+        }
 
         return paidSubscriptionServiceMap.get(tariff).isSubscriptionPeriodActive(paidSubscription);
     }

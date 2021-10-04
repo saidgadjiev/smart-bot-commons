@@ -71,8 +71,8 @@ public class FixedTariffExpiredPaidSubscriptionHandler implements ExpiredPaidSub
     private String getSubscriptionRequiredMessage(Locale locale) {
         double minPrice = paidSubscriptionPlanService.getMinPrice();
         return localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_REQUIRED, locale) + "\n\n"
-                + localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FEATURES,
-                new Object[]{NumberUtils.toString(minPrice, 2)},
-                locale);
+                + localisationService.getMessage(MessagesProperties.MESSAGE_BUY_SUBSCRIPTION_RIGHT_NOW,
+                new Object[]{NumberUtils.toString(minPrice, 2)}, locale) + "\n"
+                + localisationService.getMessage(MessagesProperties.MESSAGE_PAID_SUBSCRIPTION_FEATURES, locale);
     }
 }

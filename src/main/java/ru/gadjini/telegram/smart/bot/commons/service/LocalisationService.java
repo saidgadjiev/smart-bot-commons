@@ -3,6 +3,7 @@ package ru.gadjini.telegram.smart.bot.commons.service;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import ru.gadjini.telegram.smart.bot.commons.common.MessagesProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.message.TutorialMessageBuilder;
 
 import java.util.List;
@@ -32,10 +33,11 @@ public class LocalisationService {
     }
 
     public String getCommandWelcomeMessage(String command, String messageCode, Object[] args, Locale locale) {
-        String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command, locale);
+        String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command);
 
         if (StringUtils.isNotBlank(tutorialsMessage)) {
-            return smartMessageSource.getMessage(
+            return getMessage(MessagesProperties.MESSAGE_TUTORIALS_LABEL, locale)
+                    + "\n" + tutorialsMessage + "\n" + smartMessageSource.getMessage(
                     messageCode, args, locale
             ) + "\n\n" + tutorialsMessage;
         } else {
