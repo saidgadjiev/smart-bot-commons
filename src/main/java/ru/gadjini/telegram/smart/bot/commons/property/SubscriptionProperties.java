@@ -27,6 +27,9 @@ public class SubscriptionProperties {
     @Value("${trial.max.actions.count:5}")
     private int trialMaxActionsCount;
 
+    @Value("${activate.trial.limits:true}")
+    private boolean activateTrialLimits;
+
     public boolean isCheckChannelSubscription() {
         return checkChannelSubscription;
     }
@@ -59,6 +62,10 @@ public class SubscriptionProperties {
         this.paymentBotName = paymentBotName;
     }
 
+    public void setPaymentBotServer(String paymentBotServer) {
+        this.paymentBotServer = paymentBotServer;
+    }
+
     public String getPaymentBotServer() {
         return paymentBotServer;
     }
@@ -77,5 +84,13 @@ public class SubscriptionProperties {
 
     public void setTrialMaxActionsCount(int trialMaxActionsCount) {
         this.trialMaxActionsCount = trialMaxActionsCount;
+    }
+
+    public boolean isActivateTrialLimits() {
+        return activateTrialLimits;
+    }
+
+    public void setActivateTrialLimits(boolean activateTrialLimits) {
+        this.activateTrialLimits = activateTrialLimits;
     }
 }
