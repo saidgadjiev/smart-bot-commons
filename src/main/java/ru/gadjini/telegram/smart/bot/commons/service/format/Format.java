@@ -275,6 +275,22 @@ public enum Format {
             return false;
         }
     },
+    PREPARE_VIDEO_EDITING(FormatCategory.COMMON)  {
+        @Override
+        public boolean isUserSelectable() {
+            return false;
+        }
+
+        @Override
+        public boolean isDummy() {
+            return true;
+        }
+
+        @Override
+        public boolean isDownloadable() {
+            return false;
+        }
+    },
     SCREENSHOT(FormatCategory.COMMON) {
         @Override
         public boolean isUserSelectable() {

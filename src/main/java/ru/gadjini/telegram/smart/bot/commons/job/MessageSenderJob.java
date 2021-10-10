@@ -18,8 +18,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessageItem;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
 
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -69,19 +67,15 @@ public class MessageSenderJob {
                 if (message == null) {
                     return;
                 }
-                long between = ChronoUnit.SECONDS.between(message.getCreatedAt(), LocalDateTime.now());
 
-                if (between > 1) {
-                    LOGGER.debug("Send message latency({}, {})", between, message.getMessage());
-                }
                 try {
                     sendMessage(message);
-                    messagesQueue.popMessage(recipient);
                 } catch (FloodWaitException e) {
                     LOGGER.error(e.getMessage());
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
                 }
+                messagesQueue.popMessage(recipient);
 
                 MessageItem nextMessage = getNextMessage(recipient);
                 if (nextMessage != null) {
@@ -89,7 +83,8 @@ public class MessageSenderJob {
                     messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
                     messagesQueue.pushRecipientToTheEndOfQueue(recipient);
                 } else {
-                    messagesQueue.createFloodProtectingKey(recipient, 1000);
+                    long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(message);
+                    messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
                 }
             });
         }

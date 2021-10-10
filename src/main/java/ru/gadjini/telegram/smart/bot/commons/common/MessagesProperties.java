@@ -176,4 +176,6 @@ public class MessagesProperties {
     public static final String MESSAGE_TRIAL_SUBSCRIPTION_ACCESSES = "message.trial.subscription.accesses";
 
     public static final String MESSAGE_TUTORIALS_LABEL = "message.tutorials.label";
+
+    public static final String LOCK_ICON = "lock.icon";
 }

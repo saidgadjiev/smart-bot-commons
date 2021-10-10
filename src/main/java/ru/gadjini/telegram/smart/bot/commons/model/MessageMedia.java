@@ -164,6 +164,23 @@ public class MessageMedia {
         return tgFile;
     }
 
+
+    public static MessageMedia fromTgFile(TgFile tgFile) {
+        MessageMedia messageMedia = new MessageMedia();
+        messageMedia.setFileId(tgFile.getFileId());
+        messageMedia.setFormat(tgFile.getFormat());
+        messageMedia.setFileName(tgFile.getFileName());
+        messageMedia.setMimeType(tgFile.getMimeType());
+        messageMedia.setFileSize(tgFile.getSize());
+        messageMedia.setThumb(tgFile.getThumb());
+        messageMedia.setSource(tgFile.getSource());
+        messageMedia.setAudioTitle(tgFile.getAudioTitle());
+        messageMedia.setAudioPerformer(tgFile.getAudioPerformer());
+        messageMedia.setThumbFileSize(tgFile.getThumbSize());
+
+        return messageMedia;
+    }
+
     public static String getFixedFileName(String fileName) {
         if (StringUtils.isBlank(fileName)) {
             return fileName;

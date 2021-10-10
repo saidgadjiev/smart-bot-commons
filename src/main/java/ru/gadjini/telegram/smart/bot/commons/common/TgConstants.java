@@ -9,6 +9,8 @@ public class TgConstants {
     //2000 MB
     public static final long LARGE_FILE_SIZE = 2000 * 1024 * 1024;
 
+    public static final long MAX_GIF_SIZE = 10 * 1024 * 1024;
+
     public static final long VIDEO_NOTE_MAX_FILE_SIZE = 8 * 1024 * 1024;
 
     public static final long VIDEO_NOTE_MAX_LENGTH = 60;
