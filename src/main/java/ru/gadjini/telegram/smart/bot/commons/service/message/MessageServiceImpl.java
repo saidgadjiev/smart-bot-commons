@@ -22,7 +22,6 @@ import ru.gadjini.telegram.smart.bot.commons.service.LocalisationService;
 import ru.gadjini.telegram.smart.bot.commons.service.telegram.TelegramBotApiService;
 
 import java.util.Locale;
-import java.util.function.Consumer;
 
 @Service
 @Qualifier("message")
@@ -69,17 +68,20 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage) {
-        sendMessage(sendMessage, null);
+    public Message sendMessage(SendMessage sendMessage) {
+        return sendMessage(sendMessage, null);
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage, Consumer<Message> callback) {
-        sendMessage0(sendMessage, callback);
+    public Message sendMessage(SendMessage sendMessage, Object event) {
+        return sendMessage0(sendMessage);
     }
 
     @Override
-    public void removeInlineKeyboard(long chatId, int messageId) {
+    public void removeInlineKeyboard(long chatId, Integer messageId) {
+        if (messageId == null) {
+            return;
+        }
         EditMessageReplyMarkup edit = new EditMessageReplyMarkup();
         edit.setChatId(String.valueOf(chatId));
         edit.setMessageId(messageId);
@@ -92,6 +94,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void editMessage(EditMessageText editMessageText) {
+        if (editMessageText.getMessageId() == null) {
+            return;
+        }
         editMessageText.setParseMode(ParseMode.HTML);
         if (editMessageText.getDisableWebPagePreview() == null) {
             editMessageText.setDisableWebPagePreview(true);
@@ -102,18 +107,27 @@ public class MessageServiceImpl implements MessageService {
 
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup) {
+        if (editMessageReplyMarkup.getMessageId() == null) {
+            return;
+        }
         telegramService.editReplyMarkup(editMessageReplyMarkup);
     }
 
     @Override
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
+        if (editMessageCaption.getMessageId() == null) {
+            return;
+        }
         editMessageCaption.setParseMode(ParseMode.HTML);
 
         telegramService.editMessageCaption(editMessageCaption);
     }
 
     @Override
-    public void deleteMessage(long chatId, int messageId) {
+    public void deleteMessage(long chatId, Integer messageId) {
+        if (messageId == null) {
+            return;
+        }
         try {
             telegramService.deleteMessage(new DeleteMessage(String.valueOf(chatId), messageId));
         } catch (Exception ignore) {
@@ -132,17 +146,14 @@ public class MessageServiceImpl implements MessageService {
         telegramService.sendInvoice(sendInvoice);
     }
 
-    private void sendMessage0(SendMessage sendMessage, Consumer<Message> callback) {
+    private Message sendMessage0(SendMessage sendMessage) {
         try {
             sendMessage.disableWebPagePreview();
             if (sendMessage.getDisableWebPagePreview() == null) {
                 sendMessage.setAllowSendingWithoutReply(true);
             }
-            Message message = telegramService.sendMessage(sendMessage);
 
-            if (callback != null) {
-                callback.accept(message);
-            }
+            return telegramService.sendMessage(sendMessage);
         } catch (Exception ex) {
             LOGGER.error("Error send message({})", sendMessage);
             throw ex;

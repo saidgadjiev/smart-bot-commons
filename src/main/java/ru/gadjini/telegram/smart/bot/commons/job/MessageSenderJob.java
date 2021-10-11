@@ -5,6 +5,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
@@ -14,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.message.MessageEvent;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessageItem;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
@@ -36,17 +38,21 @@ public class MessageSenderJob {
 
     private XSync<String> messagesQueueXSync;
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Autowired
     public MessageSenderJob(MessagesQueue messagesQueue,
                             @Qualifier("message") MessageService messageService,
                             MessagesSenderJobProperties messagesSenderJobProperties,
-                            @Qualifier("messagesQueue") XSync<String> messagesQueueXSync) {
+                            @Qualifier("messagesQueue") XSync<String> messagesQueueXSync,
+                            ApplicationEventPublisher applicationEventPublisher) {
         this.messagesQueue = messagesQueue;
         this.messageService = messageService;
         this.messagesSenderJobProperties = messagesSenderJobProperties;
         this.messagesQueueXSync = messagesQueueXSync;
+        this.applicationEventPublisher = applicationEventPublisher;
 
         LOGGER.debug("Message sender job initialized");
     }
@@ -69,13 +75,17 @@ public class MessageSenderJob {
                 }
 
                 try {
-                    sendMessage(message);
+                    Object sent = sendMessage(message);
+                    messagesQueue.popMessage(recipient);
+                    if (message.getEvent() != null) {
+                        applicationEventPublisher.publishEvent(new MessageEvent(message.getEvent(), sent));
+                    }
                 } catch (FloodWaitException e) {
                     LOGGER.error(e.getMessage());
                 } catch (Throwable e) {
                     LOGGER.error(e.getMessage(), e);
+                    messagesQueue.popMessage(recipient);
                 }
-                messagesQueue.popMessage(recipient);
 
                 MessageItem nextMessage = getNextMessage(recipient);
                 if (nextMessage != null) {
@@ -104,11 +114,10 @@ public class MessageSenderJob {
         }
     }
 
-    private void sendMessage(MessageItem messageItem) {
+    private Object sendMessage(MessageItem messageItem) {
         switch (messageItem.getPath()) {
             case SendMessage.PATH:
-                messageService.sendMessage((SendMessage) messageItem.getMessage());
-                break;
+                return messageService.sendMessage((SendMessage) messageItem.getMessage());
             case EditMessageText.PATH:
                 messageService.editMessage((EditMessageText) messageItem.getMessage());
                 break;
@@ -122,6 +131,8 @@ public class MessageSenderJob {
                 messageService.sendInvoice((SendInvoice) messageItem.getMessage());
                 break;
         }
+
+        return null;
     }
 
     private MessageItem getNextMessage(String recipient) {

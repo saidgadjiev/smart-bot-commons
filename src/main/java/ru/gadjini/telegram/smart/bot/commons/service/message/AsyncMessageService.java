@@ -2,6 +2,7 @@ package ru.gadjini.telegram.smart.bot.commons.service.message;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.AnswerPreCheckoutQuery;
@@ -15,7 +16,6 @@ import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobPropertie
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessagesQueue;
 
 import java.util.Locale;
-import java.util.function.Consumer;
 
 @Service
 @Qualifier("asyncMessage")
@@ -27,13 +27,17 @@ public class AsyncMessageService implements MessageService {
 
     private MessagesSenderJobProperties messagesSenderJobProperties;
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
     public AsyncMessageService(MessagesQueue messagesQueue,
                                @Qualifier("message") MessageService messageService,
-                               MessagesSenderJobProperties messagesSenderJobProperties) {
+                               MessagesSenderJobProperties messagesSenderJobProperties,
+                               ApplicationEventPublisher applicationEventPublisher) {
         this.messagesQueue = messagesQueue;
         this.messageService = messageService;
         this.messagesSenderJobProperties = messagesSenderJobProperties;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     @Override
@@ -52,21 +56,30 @@ public class AsyncMessageService implements MessageService {
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage) {
+    public Message sendMessage(SendMessage sendMessage) {
         if (messagesSenderJobProperties.isDisableAsync()) {
-            messageService.sendMessage(sendMessage);
+            return messageService.sendMessage(sendMessage);
         } else {
             messagesQueue.add(sendMessage);
+            return null;
         }
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage, Consumer<Message> callback) {
-        messageService.sendMessage(sendMessage, callback);
+    public Message sendMessage(SendMessage sendMessage, Object event) {
+        if (messagesSenderJobProperties.isDisableAsync()) {
+            messagesQueue.add(sendMessage, event);
+            return null;
+        } else {
+            Message message = messageService.sendMessage(sendMessage);
+            applicationEventPublisher.publishEvent(new MessageEvent(event, message));
+
+            return message;
+        }
     }
 
     @Override
-    public void removeInlineKeyboard(long chatId, int messageId) {
+    public void removeInlineKeyboard(long chatId, Integer messageId) {
         messageService.removeInlineKeyboard(chatId, messageId);
     }
 
@@ -107,7 +120,7 @@ public class AsyncMessageService implements MessageService {
     }
 
     @Override
-    public void deleteMessage(long chatId, int messageId) {
+    public void deleteMessage(long chatId, Integer messageId) {
         messageService.deleteMessage(chatId, messageId);
     }
 

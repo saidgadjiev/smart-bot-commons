@@ -13,7 +13,6 @@ import ru.gadjini.telegram.smart.bot.commons.utils.TextUtils;
 
 import java.util.Locale;
 import java.util.Objects;
-import java.util.function.Consumer;
 
 public interface MessageService {
 
@@ -23,11 +22,11 @@ public interface MessageService {
 
     boolean isChatMember(String chatId, long userId);
 
-    void sendMessage(SendMessage sendMessage);
+    Message sendMessage(SendMessage sendMessage);
 
-    void sendMessage(SendMessage sendMessage, Consumer<Message> callback);
+    Message sendMessage(SendMessage sendMessage, Object event);
 
-    void removeInlineKeyboard(long chatId, int messageId);
+    void removeInlineKeyboard(long chatId, Integer messageId);
 
     void editMessage(EditMessageText editMessageText);
 
@@ -59,7 +58,7 @@ public interface MessageService {
 
     void editMessageCaption(EditMessageCaption context);
 
-    void deleteMessage(long chatId, int messageId);
+    void deleteMessage(long chatId, Integer messageId);
 
     void sendErrorMessage(long chatId, Locale locale);
 

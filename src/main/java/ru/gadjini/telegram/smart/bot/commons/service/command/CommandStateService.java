@@ -65,7 +65,7 @@ public class CommandStateService {
             commandStateDao.expire(chatId, command, TTL_HOURS, TimeUnit.HOURS);
         }
         if (expiredCheck && state == null) {
-            LOGGER.warn("State not found({}, {})", chatId, command);
+            LOGGER.warn("State not found(" + chatId + ", " + command + ")", new Throwable());
             throw new UserException(localisationService.getMessage(MessagesProperties.MESSAGE_SESSION_EXPIRED, userService.getLocaleOrDefault((int) chatId)));
         }
 

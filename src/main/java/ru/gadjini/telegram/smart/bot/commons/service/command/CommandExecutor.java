@@ -24,9 +24,12 @@ public class CommandExecutor {
 
     private CommandsContainer commandsContainer;
 
+    private CommandStateService commandStateService;
+
     @Autowired
-    public CommandExecutor(CommandParser commandParser) {
+    public CommandExecutor(CommandParser commandParser, CommandStateService commandStateService) {
         this.commandParser = commandParser;
+        this.commandStateService = commandStateService;
     }
 
     @Autowired
@@ -70,6 +73,7 @@ public class CommandExecutor {
         if (botCommand != null) {
             LOGGER.debug("Bot({}, {})", message.getFrom().getId(), botCommand.getClass().getSimpleName());
             if (botCommand.accept(message)) {
+                commandStateService.deleteState(message.getFrom().getId(), botCommand.getCommandIdentifier());
                 botCommand.processMessage(message, commandParseResult.getParameters());
 
                 if (botCommand instanceof NavigableBotCommand) {

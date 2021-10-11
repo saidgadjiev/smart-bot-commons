@@ -8,6 +8,10 @@ public class MessageItem {
 
     private Object message;
 
+    private Object event;
+
+    private Class<?> eventClass;
+
     private LocalDateTime createdAt;
 
     public MessageItem() {
@@ -18,6 +22,12 @@ public class MessageItem {
         this.path = path;
         this.message = message;
         this.createdAt = LocalDateTime.now();
+    }
+
+    public MessageItem(String path, Object message, Object event, Class<?> eventClass) {
+        this(path, message);
+        this.event = event;
+        this.eventClass = eventClass;
     }
 
     public void setPath(String path) {
@@ -42,5 +52,17 @@ public class MessageItem {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Object getEvent() {
+        return event;
+    }
+
+    public Class<?> getEventClass() {
+        return eventClass;
+    }
+
+    public void setEvent(Object event) {
+        this.event = event;
     }
 }

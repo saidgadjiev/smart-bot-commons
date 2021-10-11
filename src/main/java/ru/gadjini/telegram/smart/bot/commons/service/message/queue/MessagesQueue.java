@@ -95,9 +95,17 @@ public class MessagesQueue {
     }
 
     public void add(SendMessage sendMessage) {
+        add(sendMessage, null);
+    }
+
+    public void add(SendMessage sendMessage, Object event) {
         messagesQueueXSync.execute(sendMessage.getChatId(), () -> {
             String messagesKey = getMessagesKey(sendMessage.getChatId());
-            redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(SendMessage.PATH, sendMessage));
+            if (event == null) {
+                redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(SendMessage.PATH, sendMessage));
+            } else {
+                redisTemplate.opsForList().leftPush(messagesKey, new MessageItem(SendMessage.PATH, sendMessage, event, event.getClass()));
+            }
             pushRecipient(sendMessage.getChatId());
         });
     }
@@ -168,6 +176,9 @@ public class MessagesQueue {
             case SendInvoice.PATH:
                 messageItem.setMessage(objectMapper.convertValue(values.get("message"), SendInvoice.class));
                 break;
+        }
+        if (messageItem.getEvent() != null) {
+            messageItem.setEvent(objectMapper.convertValue(messageItem.getEvent(), messageItem.getEventClass()));
         }
 
         return messageItem;

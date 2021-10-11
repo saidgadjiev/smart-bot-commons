@@ -17,7 +17,6 @@ import ru.gadjini.telegram.smart.bot.commons.annotation.TgMessageLimitsControl;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.function.Consumer;
 
 import static ru.gadjini.telegram.smart.bot.commons.common.TgConstants.TEXT_LENGTH_LIMIT;
 
@@ -48,14 +47,14 @@ public class TgLimitsMessageService implements MessageService {
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage) {
-        messageService.sendMessage(sendMessage);
+    public Message sendMessage(SendMessage sendMessage) {
+        return messageService.sendMessage(sendMessage);
     }
 
     @Override
-    public void sendMessage(SendMessage sendMessage, Consumer<Message> callback) {
+    public Message sendMessage(SendMessage sendMessage, Object event) {
         if (sendMessage.getText().length() < TEXT_LENGTH_LIMIT) {
-            messageService.sendMessage(sendMessage, callback);
+            return messageService.sendMessage(sendMessage, event);
         } else {
             List<String> parts = new ArrayList<>();
             Splitter.fixedLength(TEXT_LENGTH_LIMIT)
@@ -79,12 +78,12 @@ public class TgLimitsMessageService implements MessageService {
                     .disableWebPagePreview(sendMessage.getDisableWebPagePreview())
                     .parseMode(sendMessage.getParseMode())
                     .replyMarkup(sendMessage.getReplyMarkup()).build();
-            messageService.sendMessage(msg, callback);
+            return messageService.sendMessage(msg, event);
         }
     }
 
     @Override
-    public void removeInlineKeyboard(long chatId, int messageId) {
+    public void removeInlineKeyboard(long chatId, Integer messageId) {
         messageService.removeInlineKeyboard(chatId, messageId);
     }
 
@@ -109,7 +108,7 @@ public class TgLimitsMessageService implements MessageService {
     }
 
     @Override
-    public void deleteMessage(long chatId, int messageId) {
+    public void deleteMessage(long chatId, Integer messageId) {
         messageService.deleteMessage(chatId, messageId);
     }
 
