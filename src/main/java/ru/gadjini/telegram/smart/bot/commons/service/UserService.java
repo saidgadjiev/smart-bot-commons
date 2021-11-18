@@ -5,12 +5,14 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.objects.User;
 import ru.gadjini.telegram.smart.bot.commons.annotation.Redis;
 import ru.gadjini.telegram.smart.bot.commons.dao.UserDao;
 import ru.gadjini.telegram.smart.bot.commons.domain.CreateOrUpdateResult;
 import ru.gadjini.telegram.smart.bot.commons.domain.TgUser;
+import ru.gadjini.telegram.smart.bot.commons.event.UserBlockedEvent;
 import ru.gadjini.telegram.smart.bot.commons.exception.botapi.TelegramApiRequestException;
 import ru.gadjini.telegram.smart.bot.commons.service.settings.UserSettingsService;
 
@@ -27,12 +29,15 @@ public class UserService {
 
     private UserSettingsService userSettingsService;
 
+    private ApplicationEventPublisher applicationEventPublisher;
+
     @Autowired
     public UserService(@Redis UserDao userDao, LocalisationService localisationService,
-                       UserSettingsService userSettingsService) {
+                       UserSettingsService userSettingsService, ApplicationEventPublisher applicationEventPublisher) {
         this.userDao = userDao;
         this.localisationService = localisationService;
         this.userSettingsService = userSettingsService;
+        this.applicationEventPublisher = applicationEventPublisher;
     }
 
     public void createOrUpdate(User user, String startParameter) {
@@ -92,7 +97,9 @@ public class UserService {
         if (apiRequestExceptionIndexOf != -1) {
             TelegramApiRequestException exception = (TelegramApiRequestException) ExceptionUtils.getThrowableList(ex).get(apiRequestExceptionIndexOf);
             if (exception.getErrorCode() == 403) {
-                blockUser(Integer.parseInt(exception.getChatId()));
+                long userId = Long.parseLong(exception.getChatId());
+                blockUser(userId);
+                applicationEventPublisher.publishEvent(new UserBlockedEvent(userId));
 
                 return true;
             }

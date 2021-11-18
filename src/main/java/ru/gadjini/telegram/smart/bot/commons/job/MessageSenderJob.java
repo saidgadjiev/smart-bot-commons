@@ -15,6 +15,7 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageRe
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobProperties;
+import ru.gadjini.telegram.smart.bot.commons.service.UserService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageEvent;
 import ru.gadjini.telegram.smart.bot.commons.service.message.MessageService;
 import ru.gadjini.telegram.smart.bot.commons.service.message.queue.MessageItem;
@@ -40,6 +41,8 @@ public class MessageSenderJob {
 
     private ApplicationEventPublisher applicationEventPublisher;
 
+    private UserService userService;
+
     private ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     @Autowired
@@ -47,12 +50,13 @@ public class MessageSenderJob {
                             @Qualifier("message") MessageService messageService,
                             MessagesSenderJobProperties messagesSenderJobProperties,
                             @Qualifier("messagesQueue") XSync<String> messagesQueueXSync,
-                            ApplicationEventPublisher applicationEventPublisher) {
+                            ApplicationEventPublisher applicationEventPublisher, UserService userService) {
         this.messagesQueue = messagesQueue;
         this.messageService = messageService;
         this.messagesSenderJobProperties = messagesSenderJobProperties;
         this.messagesQueueXSync = messagesQueueXSync;
         this.applicationEventPublisher = applicationEventPublisher;
+        this.userService = userService;
 
         LOGGER.debug("Message sender job initialized");
     }
@@ -83,6 +87,7 @@ public class MessageSenderJob {
                 } catch (FloodWaitException e) {
                     LOGGER.error(e.getMessage());
                 } catch (Throwable e) {
+                    userService.handleBotBlockedByUser(e);
                     LOGGER.error(e.getMessage(), e);
                     messagesQueue.popMessage(recipient);
                 }
