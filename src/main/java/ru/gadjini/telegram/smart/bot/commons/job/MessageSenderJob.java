@@ -6,6 +6,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.annotation.Profile;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendInvoice;
@@ -13,6 +14,7 @@ import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageCaption;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
+import ru.gadjini.telegram.smart.bot.commons.common.Profiles;
 import ru.gadjini.telegram.smart.bot.commons.exception.FloodWaitException;
 import ru.gadjini.telegram.smart.bot.commons.property.MessagesSenderJobProperties;
 import ru.gadjini.telegram.smart.bot.commons.service.UserService;
@@ -27,6 +29,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Component
+@Profile({Profiles.PROFILE_DEV_PRIMARY, Profiles.PROFILE_PROD_PRIMARY})
 public class MessageSenderJob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(MessageSenderJob.class);
