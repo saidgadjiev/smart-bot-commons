@@ -85,24 +85,40 @@ public class MessageSenderJob {
                         applicationEventPublisher.publishEvent(new MessageEvent(message.getEvent(), sent));
                     }
                 } catch (FloodWaitException e) {
-                    LOGGER.error(e.getMessage());
-                } catch (Throwable e) {
-                    userService.handleBotBlockedByUser(e);
+                    handleFloodWait(recipient, message);
                     LOGGER.error(e.getMessage(), e);
-                    messagesQueue.popMessage(recipient);
+                    return;
+                } catch (Throwable e) {
+                    handleUserBlocked(e, recipient);
+                    LOGGER.error(e.getMessage(), e);
+                    return;
                 }
 
-                MessageItem nextMessage = getNextMessage(recipient);
-                if (nextMessage != null) {
-                    long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(nextMessage);
-                    messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
-                    messagesQueue.pushRecipientToTheEndOfQueue(recipient);
-                } else {
-                    long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(message);
-                    messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
-                }
+                handleMessageSent(recipient, message);
             });
         }
+    }
+
+    private void handleMessageSent(String recipient, MessageItem message) {
+        MessageItem nextMessage = getNextMessage(recipient);
+        if (nextMessage != null) {
+            long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(nextMessage);
+            messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
+            messagesQueue.pushRecipientToTheEndOfQueue(recipient);
+        } else {
+            long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(message);
+            messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
+        }
+    }
+
+    private void handleUserBlocked(Throwable e, String recipient) {
+        userService.handleBotBlockedByUser(e);
+        messagesQueue.removeRecipient(recipient);
+    }
+
+    private void handleFloodWait(String recipient, MessageItem message) {
+        long floodProtectingTimeInMillis = getFloodProtectingTimeInMillis(message);
+        messagesQueue.createFloodProtectingKey(recipient, floodProtectingTimeInMillis);
     }
 
     private long getFloodProtectingTimeInMillis(MessageItem messageItem) {

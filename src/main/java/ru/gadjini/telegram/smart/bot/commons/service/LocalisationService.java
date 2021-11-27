@@ -36,10 +36,9 @@ public class LocalisationService {
         String tutorialsMessage = tutorialMessageBuilder.buildTutorialsMessage(command);
 
         if (StringUtils.isNotBlank(tutorialsMessage)) {
-            return getMessage(MessagesProperties.MESSAGE_TUTORIALS_LABEL, locale)
-                    + "\n" + tutorialsMessage + "\n" + smartMessageSource.getMessage(
+            return smartMessageSource.getMessage(
                     messageCode, args, locale
-            ) + "\n\n" + tutorialsMessage;
+            ) + "\n\n" + getMessage(MessagesProperties.MESSAGE_TUTORIALS_LABEL, new Object[] {tutorialsMessage}, locale);
         } else {
             return smartMessageSource.getMessage(
                     messageCode, args, locale
