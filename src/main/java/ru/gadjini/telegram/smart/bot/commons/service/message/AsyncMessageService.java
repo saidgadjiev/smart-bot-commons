@@ -57,7 +57,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public Message sendMessage(SendMessage sendMessage) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             return messageService.sendMessage(sendMessage);
         } else {
             messagesQueue.add(sendMessage);
@@ -67,7 +67,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public Message sendMessage(SendMessage sendMessage, Object event) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             messagesQueue.add(sendMessage, event);
             return null;
         } else {
@@ -85,7 +85,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void editMessage(EditMessageText editMessageText) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             messageService.editMessage(editMessageText);
         } else {
             messagesQueue.add(editMessageText);
@@ -94,7 +94,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void editKeyboard(EditMessageReplyMarkup editMessageReplyMarkup) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             messageService.editKeyboard(editMessageReplyMarkup);
         } else {
             messagesQueue.add(editMessageReplyMarkup);
@@ -103,7 +103,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void sendInvoice(SendInvoice sendInvoice) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             messageService.sendInvoice(sendInvoice);
         } else {
             messagesQueue.add(sendInvoice);
@@ -112,7 +112,7 @@ public class AsyncMessageService implements MessageService {
 
     @Override
     public void editMessageCaption(EditMessageCaption editMessageCaption) {
-        if (messagesSenderJobProperties.isDisableAsync()) {
+        if (messagesSenderJobProperties.isDisable()) {
             messageService.editMessageCaption(editMessageCaption);
         } else {
             messagesQueue.add(editMessageCaption);

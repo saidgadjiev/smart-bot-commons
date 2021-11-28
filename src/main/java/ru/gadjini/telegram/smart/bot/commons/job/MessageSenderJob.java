@@ -61,7 +61,7 @@ public class MessageSenderJob {
         this.applicationEventPublisher = applicationEventPublisher;
         this.userService = userService;
 
-        LOGGER.debug("Message sender job initialized");
+        LOGGER.debug("Message sender job initialized({})", messagesSenderJobProperties.isDisable());
     }
 
     @Scheduled(fixedDelay = 30)
