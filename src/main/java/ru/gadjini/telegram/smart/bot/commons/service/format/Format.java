@@ -464,12 +464,12 @@ public enum Format {
     VOICE(FormatCategory.AUDIO) {
         @Override
         public String getExt() {
-            return OGG.getExt();
+            return VOICE.getExt();
         }
 
         @Override
         public Format getAssociatedFormat() {
-            return OGG;
+            return VOICE;
         }
 
         @Override
