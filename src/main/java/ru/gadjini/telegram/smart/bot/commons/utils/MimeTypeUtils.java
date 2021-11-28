@@ -36,11 +36,17 @@ public class MimeTypeUtils {
             return null;
         }
 
+        String result;
         if (StringUtils.isBlank(fileNameExtension)) {
-            return parsedMimeType.getExtension();
+            result = parsedMimeType.getExtension();
         } else {
             fileNameExtension = "." + fileNameExtension;
-            return parsedMimeType.getExtensions().contains(fileNameExtension) ? fileNameExtension : parsedMimeType.getExtension();
+            result = parsedMimeType.getExtensions().contains(fileNameExtension) ? fileNameExtension : parsedMimeType.getExtension();
         }
+        if (StringUtils.isNotBlank(result)) {
+            result = result.replaceFirst("\\.", "");
+        }
+
+        return result;
     }
 }
