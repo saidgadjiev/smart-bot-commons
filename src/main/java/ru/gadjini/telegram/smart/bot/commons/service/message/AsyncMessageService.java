@@ -68,13 +68,13 @@ public class AsyncMessageService implements MessageService {
     @Override
     public Message sendMessage(SendMessage sendMessage, Object event) {
         if (messagesSenderJobProperties.isDisable()) {
-            messagesQueue.add(sendMessage, event);
-            return null;
-        } else {
             Message message = messageService.sendMessage(sendMessage);
             applicationEventPublisher.publishEvent(new MessageEvent(event, message));
 
             return message;
+        } else {
+            messagesQueue.add(sendMessage, event);
+            return null;
         }
     }
 
