@@ -61,7 +61,7 @@ public class BulkDistributionDao {
         BulkDistribution bulkDistribution = new BulkDistribution();
 
         bulkDistribution.setId(rs.getInt(BulkDistribution.ID));
-        bulkDistribution.setUserId(rs.getInt(BulkDistribution.USER_ID));
+        bulkDistribution.setUserId(rs.getLong(BulkDistribution.USER_ID));
         bulkDistribution.setMessageRu(rs.getString(BulkDistribution.MESSAGE_RU));
         bulkDistribution.setMessageEn(rs.getString(BulkDistribution.MESSAGE_EN));
         bulkDistribution.setMessageUz(rs.getString(BulkDistribution.MESSAGE_UZ));

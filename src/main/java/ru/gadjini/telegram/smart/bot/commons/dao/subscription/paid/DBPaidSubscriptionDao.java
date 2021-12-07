@@ -151,7 +151,7 @@ public class DBPaidSubscriptionDao implements PaidSubscriptionDao {
 
     private PaidSubscription map(ResultSet rs) throws SQLException {
         PaidSubscription paidSubscription = new PaidSubscription();
-        paidSubscription.setUserId(rs.getInt(PaidSubscription.USER_ID));
+        paidSubscription.setUserId(rs.getLong(PaidSubscription.USER_ID));
 
         Timestamp endAt = rs.getTimestamp(PaidSubscription.END_AT);
         if (endAt != null) {
