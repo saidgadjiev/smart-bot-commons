@@ -1,5 +1,7 @@
 package ru.gadjini.telegram.smart.bot.commons.filter;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +16,12 @@ public class UpdateFilter extends BaseBotFilter {
 
     private UpdateFilterProperties updateFilterProperties;
 
+    private ObjectMapper objectMapper;
+
     @Autowired
-    public UpdateFilter(UpdateFilterProperties updateFilterProperties) {
+    public UpdateFilter(UpdateFilterProperties updateFilterProperties, ObjectMapper objectMapper) {
         this.updateFilterProperties = updateFilterProperties;
+        this.objectMapper = objectMapper;
     }
 
     @Override
@@ -28,7 +33,11 @@ public class UpdateFilter extends BaseBotFilter {
         ) {
             super.doFilter(update);
         } else {
-            LOGGER.debug("Request can'be accepted({})", update);
+            try {
+                LOGGER.debug("Request can'be accepted({})", objectMapper.writeValueAsString(update));
+            } catch (JsonProcessingException e) {
+                LOGGER.error(e.getMessage(), e);
+            }
         }
     }
 
