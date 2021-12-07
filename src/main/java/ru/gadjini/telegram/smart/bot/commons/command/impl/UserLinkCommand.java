@@ -26,7 +26,7 @@ public class UserLinkCommand implements BotCommand {
         messageService.sendMessage(
                 SendMessage.builder()
                         .chatId(String.valueOf(message.getFrom().getId()))
-                        .text(TelegramLinkUtils.userLink(message.getFrom().getId()))
+                        .text(TelegramLinkUtils.userLink(Long.parseLong(params[0])))
                         .parseMode(ParseMode.HTML)
                         .build()
         );

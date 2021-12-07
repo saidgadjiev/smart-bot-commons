@@ -74,14 +74,16 @@ public class TgMessage {
         return update.getMessage().getChatId();
     }
 
-    public static long getUserId(Update update) {
+    public static Long getUserId(Update update) {
         if (update.hasCallbackQuery()) {
             return update.getCallbackQuery().getFrom().getId();
         } else if (update.hasPreCheckoutQuery()) {
             return update.getPreCheckoutQuery().getFrom().getId();
+        } else if (update.hasMessage()) {
+            return update.getMessage().getFrom().getId();
         }
 
-        return update.getMessage().getFrom().getId();
+        return null;
     }
 
     public static User getUser(Update update) {
