@@ -178,4 +178,6 @@ public class MessagesProperties {
     public static final String MESSAGE_TUTORIALS_LABEL = "message.tutorials.label";
 
     public static final String LOCK_ICON = "lock.icon";
+
+    public static final String MESSAGE_CANT_ACCEPT_REQUEST = "message.cant.accept.request";
 }
