@@ -89,6 +89,11 @@ public class RedisUserDao implements UserDao {
     }
 
     @Override
+    public Long getId(String uname) {
+        return userDao.getId(uname);
+    }
+
+    @Override
     public Long countActiveUsers(int intervalInDays) {
         return userDao.countActiveUsers(intervalInDays);
     }

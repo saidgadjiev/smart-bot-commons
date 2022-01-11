@@ -64,4 +64,6 @@ public class CommandNames {
     public static final String REMOVE_TUTORIAL = "rmtutorial";
 
     public static final String USER_LINK = "ulink";
+
+    public static final String USER_ID = "uid";
 }

@@ -15,5 +15,7 @@ public interface UserDao {
 
     String getLocale(long userId);
 
+    Long getId(String uname);
+
     Long countActiveUsers(int intervalInDays);
 }

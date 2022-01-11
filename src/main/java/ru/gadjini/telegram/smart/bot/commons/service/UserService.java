@@ -60,6 +60,10 @@ public class UserService {
         }
     }
 
+    public long getId(String uname) {
+        return userDao.getId(uname);
+    }
+
     public Locale getLocaleOrDefault(long userId) {
         String locale = userDao.getLocale(userId);
 

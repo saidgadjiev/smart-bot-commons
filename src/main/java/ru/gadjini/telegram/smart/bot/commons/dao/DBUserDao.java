@@ -110,6 +110,21 @@ public class DBUserDao implements UserDao {
     }
 
     @Override
+    public Long getId(String uname) {
+        return jdbcTemplate.query(
+                "SELECT user_id FROM tg_user WHERE username = ?",
+                ps -> ps.setString(1, uname),
+                rs -> {
+                    if (rs.next()) {
+                        return rs.getLong(TgUser.USER_ID);
+                    }
+
+                    return null;
+                }
+        );
+    }
+
+    @Override
     public Long countActiveUsers(int intervalInDays) {
         return jdbcTemplate.query(
                 "SELECT count(user_id) as cnt FROM tg_user WHERE last_activity_at::date != created_at::date " +
